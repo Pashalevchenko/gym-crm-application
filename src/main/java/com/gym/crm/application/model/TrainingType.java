@@ -1,9 +1,10 @@
 package com.gym.crm.application.model;
 
-public enum TrainingType {
-    SWIM,
-    WALK,
-    RUN,
-    BOX,
-    YOGA
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+public class TrainingType {
+    private String trainingTypeName;
 }
