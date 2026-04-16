@@ -1,0 +1,70 @@
+{
+  "Trainee": [
+    {
+      "id": 1,
+      "firstName": "Oleg",
+      "lastName": "Vynnyk",
+      "username": "Oleg.Vynnyk",
+      "password": "hashed_password_1",
+      "active": true,
+      "dateOfBirth": "1995-05-20",
+      "address": "Kyiv, Ukraine"
+    },
+    {
+      "id": 2,
+      "firstName": "Mariya",
+      "lastName": "Petrenko",
+      "username": "Mariya.Petrenko",
+      "password": "hashed_password_2",
+      "active": true,
+      "dateOfBirth": "1998-11-12",
+      "address": "Lviv, Ukraine"
+    }
+  ],
+  "Trainer": [
+    {
+      "id": 10,
+      "firstName": "Stepan",
+      "lastName": "Giga",
+      "username": "Stepan.Giga",
+      "password": "trainer_pass_1",
+      "active": true,
+      "specialization": {
+        "trainingTypeName": "Cardio"
+      }
+    },
+    {
+      "id": 11,
+      "firstName": "Carlos",
+      "lastName": "Bron",
+      "username": "Carlos.Bron",
+      "password": "trainer_pass_2",
+      "active": true,
+      "specialization": {
+        "trainingTypeName": "Yoga"
+      }
+    }
+  ],
+  "Training": [
+    {
+      "traineeId": 1,
+      "trainerId": 10,
+      "trainingName": "Basic Cardio",
+      "trainingDate": "2026-05-01",
+      "trainingDuration": 60,
+      "trainingType": {
+        "trainingTypeName": "Cardio"
+      }
+    },
+    {
+      "traineeId": 2,
+      "trainerId": 11,
+      "trainingName": "Yoga Morning",
+      "trainingDate": "2026-05-02",
+      "trainingDuration": 45,
+      "trainingType": {
+        "trainingTypeName": "Yoga"
+      }
+    }
+  ]
+}
