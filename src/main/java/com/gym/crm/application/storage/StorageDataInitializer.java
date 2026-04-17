@@ -5,20 +5,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gym.crm.application.model.Trainee;
 import com.gym.crm.application.model.Trainer;
-import com.gym.crm.application.model.Training;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 @Component
 public class StorageDataInitializer implements BeanPostProcessor {
 
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
     @Value("${storage.data.path}")
     private String dataFilePath;
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
@@ -36,28 +39,36 @@ public class StorageDataInitializer implements BeanPostProcessor {
                     resource.getInputStream(), new TypeReference<>() {}
             );
 
-            if (data.containsKey("Trainee")) {
-                Map<Long, Trainee> traineeMap = (Map<Long, Trainee>) storage.get("Trainee");
-                List<Trainee> list = objectMapper.convertValue(data.get("Trainee"), new TypeReference<>() {});
-                list.forEach(t -> traineeMap.put(t.getId(), t));
-            }
+           fillNamespaceStore("Trainee", data, storage,
+                   new TypeReference<>() {}, Trainee::getId);
 
-            if (data.containsKey("Trainer")) {
-                Map<Long, Trainer> trainerMap = (Map<Long, Trainer>) storage.get("Trainer");
-                List<Trainer> list = objectMapper.convertValue(data.get("Trainer"), new TypeReference<>() {});
-                list.forEach(t -> trainerMap.put(t.getId(), t));
-            }
+           fillNamespaceStore("Trainer", data, storage,
+                   new TypeReference<>() {}, Trainer::getId);
 
-            if (data.containsKey("Training")) {
-                Map<Long, Training> trainingMap = (Map<Long, Training>) storage.get("Training");
-                List<Training> list = objectMapper.convertValue(data.get("Training"), new TypeReference<>() {});
+           fillNamespaceStore("Training", data, storage,
+                   new TypeReference<>() {}, createIdGenerator());
 
-                for (int i = 0; i < list.size(); i++) {
-                    trainingMap.put((long) i + 1, list.get(i));
-                }
-            }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new BeanInitializationException(e.getMessage());
         }
+    }
+
+    private <T> void fillNamespaceStore (
+            String key,
+            Map<String, List<Object>> data,
+            Map<String, Map<Long, ?>> storage,
+            TypeReference<List<T>> typeRef,
+            Function<T, Long> idExtractor
+    ) {
+        if (data.containsKey(key)) {
+            Map<Long, T> targetMap = (Map<Long, T>) storage.get(key);
+            List<T> list = objectMapper.convertValue(data.get(key), typeRef);
+            list.forEach(item -> targetMap.put(idExtractor.apply(item), item));
+        }
+    }
+
+    private <T> Function<T, Long> createIdGenerator() {
+        AtomicLong counter = new AtomicLong(1);
+        return t -> counter.getAndIncrement();
     }
 }
