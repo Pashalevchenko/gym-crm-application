@@ -29,6 +29,7 @@ public class StorageDataInitializer implements BeanPostProcessor {
             Map<String, Map<Long, ?>> storage = (Map<String, Map<Long, ?>>) bean;
             loadJsonToStorage(storage);
         }
+
         return bean;
     }
 
@@ -63,12 +64,14 @@ public class StorageDataInitializer implements BeanPostProcessor {
         if (data.containsKey(key)) {
             Map<Long, T> targetMap = (Map<Long, T>) storage.get(key);
             List<T> list = objectMapper.convertValue(data.get(key), typeRef);
+
             list.forEach(item -> targetMap.put(idExtractor.apply(item), item));
         }
     }
 
     private <T> Function<T, Long> createIdGenerator() {
         AtomicLong counter = new AtomicLong(1);
+
         return t -> counter.getAndIncrement();
     }
 }
