@@ -30,7 +30,7 @@ public class TrainerDaoImpl implements TrainerDao {
         Long id = trainer.getId();
 
         if (!storage.containsKey(id)) {
-            throw new RuntimeException("Cannot update Trainer: ID " + id + " not found in storage.");
+            throw new RuntimeException(String.format("Cannot update Trainer: ID %d not found in storage", id));
         }
 
         storage.put(id, trainer);

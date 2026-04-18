@@ -19,19 +19,13 @@ public class TrainingDaoImpl implements TrainingDao {
     @Autowired
     public TrainingDaoImpl(Map<Long, Training> trainingStorage) {
         this.storage = trainingStorage;
+        syncStorageId();
     }
 
     @Override
     public Training create(Training training) {
-        if (!storage.isEmpty()) {
-            long maxId = storage.keySet().stream()
-                    .max(Long::compare)
-                    .orElse(0L);
-
-            idGenerator.set(maxId);
-        }
-
         storage.put(idGenerator.incrementAndGet(), training);
+
         return training;
     }
 
@@ -43,5 +37,15 @@ public class TrainingDaoImpl implements TrainingDao {
     @Override
     public List<Training> findAll() {
         return new ArrayList<>(storage.values());
+    }
+
+    private void syncStorageId(){
+        if (!storage.isEmpty()) {
+            long maxId = storage.keySet().stream()
+                    .max(Long::compare)
+                    .orElse(0L);
+
+            idGenerator.set(maxId);
+        }
     }
 }

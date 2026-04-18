@@ -30,7 +30,7 @@ public class TraineeDaoImpl implements TraineeDao {
         Long id = trainee.getId();
 
         if (!storage.containsKey(id)) {
-            throw new RuntimeException("Cannot update Trainee: ID " + id + " not found in storage.");
+            throw new RuntimeException(String.format("Cannot update Trainee: ID %d not found in storage", id));
         }
 
         storage.put(id, trainee);
