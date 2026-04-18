@@ -27,17 +27,14 @@ public class TrainerDaoImpl implements TrainerDao {
 
     @Override
     public Trainer update(Trainer trainer) {
-
         Long id = trainer.getId();
 
-        if (storage.containsKey(id)) {
-
-            storage.put(id, trainer);
-
-            return trainer;
-        } else {
+        if (!storage.containsKey(id)) {
             throw new RuntimeException("Cannot update Trainer: ID " + id + " not found in storage.");
         }
+
+        storage.put(id, trainer);
+        return trainer;
     }
 
     @Override
@@ -48,10 +45,5 @@ public class TrainerDaoImpl implements TrainerDao {
     @Override
     public List<Trainer> findAll() {
         return new ArrayList<>(storage.values());
-    }
-
-    @Override
-    public void delete(Long id) {
-        storage.remove(id);
     }
 }

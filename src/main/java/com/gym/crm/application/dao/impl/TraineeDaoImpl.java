@@ -29,14 +29,12 @@ public class TraineeDaoImpl implements TraineeDao {
     public Trainee update(Trainee trainee) {
         Long id = trainee.getId();
 
-        if (storage.containsKey(id)) {
-
-            storage.put(id, trainee);
-
-            return trainee;
-        } else {
+        if (!storage.containsKey(id)) {
             throw new RuntimeException("Cannot update Trainee: ID " + id + " not found in storage.");
         }
+
+        storage.put(id, trainee);
+        return trainee;
     }
 
     @Override

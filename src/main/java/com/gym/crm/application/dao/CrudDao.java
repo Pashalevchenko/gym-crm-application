@@ -10,8 +10,4 @@ public interface CrudDao <T, ID>{
     List<T> findAll();
 
     T create(T entity);
-
-    T update(T entity);
-
-    void delete(ID id);
 }

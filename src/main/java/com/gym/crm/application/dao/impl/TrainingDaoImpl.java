@@ -23,27 +23,15 @@ public class TrainingDaoImpl implements TrainingDao {
 
     @Override
     public Training create(Training training) {
-
         if (!storage.isEmpty()) {
-
             long maxId = storage.keySet().stream()
                     .max(Long::compare)
                     .orElse(0L);
+
             idGenerator.set(maxId);
         }
 
         storage.put(idGenerator.incrementAndGet(), training);
-
-        return training;
-    }
-
-    @Override
-    public Training update(Training training) {
-
-        Long key = getKeyByName(training.getTrainingName());
-
-        storage.put(key, training);
-
         return training;
     }
 
@@ -55,31 +43,5 @@ public class TrainingDaoImpl implements TrainingDao {
     @Override
     public List<Training> findAll() {
         return new ArrayList<>(storage.values());
-    }
-
-    @Override
-    public void delete(Long id) {
-        storage.remove(id);
-    }
-
-    private Long getKeyByName(String TrainingName){
-
-        return storage.entrySet().stream()
-                .filter(entry -> {
-                    Object value = entry.getValue();
-
-                    if (value instanceof Map) {
-                        return TrainingName.equals(((Map<?, ?>) value).get("trainingName"));
-                    }
-
-                    if (value instanceof Training) {
-                        return ((Training) value).getTrainingName().equals(TrainingName);
-                    }
-
-                    return false;
-                })
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Training not found for update: " + TrainingName));
     }
 }
