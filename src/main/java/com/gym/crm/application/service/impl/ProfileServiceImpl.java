@@ -18,6 +18,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int PASSWORD_LENGTH = 10;
+
     private final Random random = new Random();
 
     private TraineeDao traineeDao;
@@ -30,7 +31,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         int userSerialNumber = 1;
 
-        if(!dbUsernames.contains(username)){
+        if (!dbUsernames.contains(username)) {
             return username;
         }
 
@@ -50,15 +51,16 @@ public class ProfileServiceImpl implements ProfileService {
 
             password.append(CHARACTERS.charAt(index));
         }
+
         return password.toString();
     }
 
-    private Set<String> getAllUsernames(){
+    private Set<String> getAllUsernames() {
         return Stream.concat(
-            traineeDao.findAll().stream().map(User::getUsername),
-            trainerDao.findAll().stream().map(User::getUsername)
-        )
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet());
+                        traineeDao.findAll().stream().map(User::getUsername),
+                        trainerDao.findAll().stream().map(User::getUsername)
+                )
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 }
