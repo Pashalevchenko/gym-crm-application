@@ -11,6 +11,7 @@ import lombok.ToString;
 public class TrainerResponseDTO {
     private final String firstName;
     private final String lastName;
+    private final String username;
     private final boolean isActive;
     private final TrainingType specialization;
 }

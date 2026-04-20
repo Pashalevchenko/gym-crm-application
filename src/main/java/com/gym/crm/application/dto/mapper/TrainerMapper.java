@@ -22,6 +22,7 @@ public class TrainerMapper {
         return TrainerResponseDTO.builder()
                 .firstName(trainer.getFirstName())
                 .lastName(trainer.getLastName())
+                .username(trainer.getUsername())
                 .isActive(trainer.isActive())
                 .specialization(trainer.getSpecialization())
                 .build();

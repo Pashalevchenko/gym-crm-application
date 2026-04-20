@@ -2,6 +2,7 @@ package com.gym.crm.application.service.impl;
 
 import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.model.Trainer;
+import com.gym.crm.application.service.ProfileService;
 import com.gym.crm.application.service.TrainerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,9 +14,15 @@ import java.util.NoSuchElementException;
 public class TrainerServiceImpl implements TrainerService {
 
     private final TrainerDao trainerDao;
+    private final ProfileService profileService;
 
     @Override
     public Trainer createTrainer(Trainer trainer) {
+        String password = profileService.generatePassword();
+        trainer.setPassword(password);
+
+        setUsername(trainer);
+
         return trainerDao.create(trainer);
     }
 
@@ -32,6 +39,17 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     public Trainer updateTrainer(Trainer trainer) {
+        setUsername(trainer);
+
         return trainerDao.update(trainer);
+    }
+
+    private void setUsername(Trainer trainer){
+        String username = profileService.createUsername(
+                trainer.getFirstName(),
+                trainer.getLastName()
+        );
+
+        trainer.setUsername(username);
     }
 }
