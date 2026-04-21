@@ -6,20 +6,29 @@ import com.gym.crm.application.model.Trainee;
 import com.gym.crm.application.model.Trainer;
 import com.gym.crm.application.service.impl.ProfileServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ProfileServiceImplTest {
+
+    private final String USER_FIRST_NAME = "Ivan";
+    private final String USER_LAST_NAME = "Ivanov";
+    private final String USERNAME = USER_FIRST_NAME + '.' + USER_LAST_NAME;
+    private final String USERNAME_PLUS_ONE = USERNAME + "1";
 
     @Mock
     private TraineeDao traineeDao;
@@ -29,11 +38,6 @@ public class ProfileServiceImplTest {
 
     @InjectMocks
     private ProfileServiceImpl profileService;
-
-    private final String USER_FIRST_NAME = "Ivan";
-    private final String USER_LAST_NAME = "Ivanov";
-    private final String USERNAME = USER_FIRST_NAME + '.' + USER_LAST_NAME;
-    private final String USERNAME_PLUS_ONE = USERNAME + "1";
 
     @BeforeEach
     void setUp() {
@@ -45,22 +49,26 @@ public class ProfileServiceImplTest {
     }
 
     @Test
+    @DisplayName("Should successfully generate a standard username by joining first and last name with a dot")
     void createUsername_SimpleCase() {
-        String result = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
-        assertEquals(USERNAME, result);
+        String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
+        assertEquals(USERNAME, actual);
     }
 
     @Test
+    @DisplayName("Should append an index to the username when a collision with an existing user occurs")
     void createUsername_WithCollision() {
         Trainee existingTrainee = Trainee.builder().username(USERNAME).build();
+
         when(traineeDao.findAll()).thenReturn(List.of(existingTrainee));
 
-        String result = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
+        String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
 
-        assertEquals(USERNAME_PLUS_ONE, result);
+        assertEquals(USERNAME_PLUS_ONE, actual);
     }
 
     @Test
+    @DisplayName("Should increment username suffix correctly when multiple collisions exist across both Trainee and Trainer records")
     void createUsername_MultipleCollisions() {
         Trainee t1 = Trainee.builder().username(USERNAME).build();
         Trainer tr1 = Trainer.builder().username(USERNAME_PLUS_ONE).build();
@@ -68,12 +76,13 @@ public class ProfileServiceImplTest {
         when(traineeDao.findAll()).thenReturn(List.of(t1));
         when(trainerDao.findAll()).thenReturn(List.of(tr1));
 
-        String result = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
+        String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
 
-        assertEquals(USERNAME + 2, result);
+        assertEquals(USERNAME + 2, actual);
     }
 
     @Test
+    @DisplayName("Should generate a secure, random 10-character password on each call")
     void generatePassword_Test() {
         String pass1 = profileService.generatePassword();
         String pass2 = profileService.generatePassword();

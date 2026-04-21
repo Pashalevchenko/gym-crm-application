@@ -3,17 +3,23 @@ package com.gym.crm.application.service;
 import com.gym.crm.application.dao.TrainingDao;
 import com.gym.crm.application.model.Training;
 import com.gym.crm.application.service.impl.TrainingServiceImpl;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainingServiceImplTest {
@@ -25,6 +31,7 @@ public class TrainingServiceImplTest {
     private TrainingServiceImpl trainingService;
 
     @Test
+    @DisplayName("Should successfully persist a new training session via the DAO layer")
     void createTraining_ShouldWorkCorrectly() {
         Training training = Training.builder()
                 .trainingName("Crossfit")
@@ -32,14 +39,15 @@ public class TrainingServiceImplTest {
 
         when(trainingDao.create(training)).thenReturn(training);
 
-        Training result = trainingService.createTraining(training);
+        Training actual = trainingService.createTraining(training);
 
-        assertNotNull(result);
-        assertEquals("Crossfit", result.getTrainingName());
+        assertNotNull(actual);
+        assertEquals("Crossfit", actual.getTrainingName());
         verify(trainingDao).create(training);
     }
 
     @Test
+    @DisplayName("Should successfully retrieve a training session by its ID when it exists in the database")
     void getTrainingById_WhenFound() {
         Long id = 10L;
         Training training = Training.builder()
@@ -48,13 +56,14 @@ public class TrainingServiceImplTest {
 
         when(trainingDao.findById(id)).thenReturn(Optional.of(training));
 
-        Training result = trainingService.getTrainingById(id);
+        Training actual = trainingService.getTrainingById(id);
 
-        assertEquals("Yoga", result.getTrainingName());
+        assertEquals("Yoga", actual.getTrainingName());
         verify(trainingDao).findById(id);
     }
 
     @Test
+    @DisplayName("Should throw NoSuchElementException with a descriptive message when training ID is missing")
     void getTrainingById_WhenNotFound() {
         Long id = 999L;
 
@@ -67,14 +76,15 @@ public class TrainingServiceImplTest {
     }
 
     @Test
+    @DisplayName("Should successfully retrieve all training sessions as a list from the database")
     void getAllTrainings_ShouldReturnList() {
         List<Training> trainings = List.of(new Training(), new Training());
 
         when(trainingDao.findAll()).thenReturn(trainings);
 
-        List<Training> result = trainingService.getAllTrainings();
+        List<Training> actual = trainingService.getAllTrainings();
 
-        assertEquals(2, result.size());
+        assertEquals(2, actual.size());
         verify(trainingDao).findAll();
     }
 }

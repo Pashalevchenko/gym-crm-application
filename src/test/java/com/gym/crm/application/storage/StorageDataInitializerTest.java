@@ -9,7 +9,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StorageDataInitializerTest {
 
@@ -19,7 +23,6 @@ class StorageDataInitializerTest {
     @BeforeEach
     void setUp() {
         initializer = new StorageDataInitializer();
-
         ReflectionTestUtils.setField(initializer, "dataFilePath", "test-storage.json");
 
         mockStorage = new HashMap<>();
@@ -41,12 +44,13 @@ class StorageDataInitializerTest {
     }
 
     @Test
+    @DisplayName("Should bypass bean processing when bean name does not match the target storage component")
     void postProcessAfterInitialization_WithOtherBeanName() {
-        String otherBean = "someOtherBean";
+        String expected = "someOtherBean";
 
-        Object result = initializer.postProcessAfterInitialization(otherBean, "notMainStorage");
+        Object actual = initializer.postProcessAfterInitialization(expected, "notMainStorage");
 
-        assertEquals(otherBean, result);
+        assertEquals(expected, actual);
         assertTrue(mockStorage.get("Trainee").isEmpty());
     }
 

@@ -6,9 +6,12 @@ import com.gym.crm.application.dto.response.TrainerResponseDTO;
 import com.gym.crm.application.model.Trainer;
 import com.gym.crm.application.model.TrainingType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TrainerMapperTest {
 
@@ -24,6 +27,7 @@ class TrainerMapperTest {
     }
 
     @Test
+    @DisplayName("Should correctly map TrainerRequestDTO to Trainer entity including nested specialization details")
     void dtoToEntity_ShouldMapAllFieldsCorrectly() {
         TrainingType spec = new TrainingType();
         spec.setTrainingTypeName("Boxing");
@@ -35,17 +39,18 @@ class TrainerMapperTest {
                 .specialization(spec)
                 .build();
 
-        Trainer entity = trainerMapper.dtoToEntity(request);
+        Trainer actual = trainerMapper.dtoToEntity(request);
 
-        assertNotNull(entity);
-        assertEquals(USER_FIRST_NAME, entity.getFirstName());
-        assertEquals(USER_LAST_NAME, entity.getLastName());
-        assertTrue(entity.isActive());
-        assertNotNull(entity.getSpecialization());
-        assertEquals("Boxing", entity.getSpecialization().getTrainingTypeName());
+        assertNotNull(actual);
+        assertEquals(USER_FIRST_NAME, actual.getFirstName());
+        assertEquals(USER_LAST_NAME, actual.getLastName());
+        assertTrue(actual.isActive());
+        assertNotNull(actual.getSpecialization());
+        assertEquals("Boxing", actual.getSpecialization().getTrainingTypeName());
     }
 
     @Test
+    @DisplayName("Should correctly map Trainer entity to Response DTO including username and specialization details")
     void entityToDto_ShouldMapAllFieldsCorrectly() {
         TrainingType spec = new TrainingType();
         spec.setTrainingTypeName("Yoga");
@@ -58,11 +63,11 @@ class TrainerMapperTest {
                 .specialization(spec)
                 .build();
 
-        TrainerResponseDTO response = trainerMapper.entityToDto(entity);
+        TrainerResponseDTO actual = trainerMapper.entityToDto(entity);
 
-        assertNotNull(response);
-        assertEquals(USERNAME, response.getUsername());
-        assertNotNull(response.getSpecialization());
-        assertEquals("Yoga", response.getSpecialization().getTrainingTypeName());
+        assertNotNull(actual);
+        assertEquals(USERNAME, actual.getUsername());
+        assertNotNull(actual.getSpecialization());
+        assertEquals("Yoga", actual.getSpecialization().getTrainingTypeName());
     }
 }

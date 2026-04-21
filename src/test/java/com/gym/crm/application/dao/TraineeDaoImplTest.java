@@ -3,26 +3,36 @@ package com.gym.crm.application.dao;
 import com.gym.crm.application.dao.impl.TraineeDaoImpl;
 import com.gym.crm.application.model.Trainee;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TraineeDaoImplTest {
 
-    @Mock
-    private Map<Long, Trainee> storage;
-
     private final Long TRAINEE_ID = 1L;
     private final Long UNEXIST_TRAINEE_ID = 99L;
 
-    private TraineeDaoImpl traineeDao;
+    @Mock
+    private Map<Long, Trainee> storage;
+
+    private TraineeDao traineeDao;
 
     @BeforeEach
     void setUp() {
@@ -30,27 +40,30 @@ public class TraineeDaoImplTest {
     }
 
     @Test
+    @DisplayName("Should successfully store trainee in storage and return the same object")
     void create_ShouldStoreTrainee() {
-        Trainee trainee = Trainee.builder().id(TRAINEE_ID).firstName("Ivan").build();
-        Trainee result = traineeDao.create(trainee);
+        Trainee expected = Trainee.builder().id(TRAINEE_ID).firstName("Ivan").build();
+        Trainee actual = traineeDao.create(expected);
 
-        verify(storage).put(TRAINEE_ID, trainee);
-        assertEquals(trainee, result);
+        verify(storage).put(TRAINEE_ID, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
+    @DisplayName("Should successfully update trainee data when the ID exists in storage")
     void update_ShouldUpdateTrainee_WhenIdExists() {
-        Trainee trainee = Trainee.builder().id(TRAINEE_ID).firstName("Updated Name").build();
+        Trainee expected = Trainee.builder().id(TRAINEE_ID).firstName("Updated Name").build();
 
         when(storage.containsKey(TRAINEE_ID)).thenReturn(true);
 
-        Trainee result = traineeDao.update(trainee);
+        Trainee actual = traineeDao.update(expected);
 
-        verify(storage).put(TRAINEE_ID, trainee);
-        assertEquals(trainee, result);
+        verify(storage).put(TRAINEE_ID, expected);
+        assertEquals(expected, actual);
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when attempting to update a non-existent trainee")
     void update_ShouldThrowException_WhenIdDoesNotExist() {
         Trainee trainee = Trainee.builder().id(UNEXIST_TRAINEE_ID).build();
 
@@ -65,18 +78,20 @@ public class TraineeDaoImplTest {
     }
 
     @Test
+    @DisplayName("Should return an Optional containing the trainee when a valid ID is provided")
     void findById_ShouldReturnTrainee_WhenIdExists() {
-        Trainee trainee = Trainee.builder().id(TRAINEE_ID).build();
+        Trainee expected = Trainee.builder().id(TRAINEE_ID).build();
 
-        when(storage.get(TRAINEE_ID)).thenReturn(trainee);
+        when(storage.get(TRAINEE_ID)).thenReturn(expected);
 
-        Optional<Trainee> result = traineeDao.findById(TRAINEE_ID);
+        Optional<Trainee> actual = traineeDao.findById(TRAINEE_ID);
 
-        assertTrue(result.isPresent());
-        assertEquals(trainee, result.get());
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
     }
 
     @Test
+    @DisplayName("Should return an empty Optional when the trainee ID does not exist in storage")
     void findById_ShouldReturnNull_IsAbsent() {
         when(storage.get(TRAINEE_ID)).thenReturn(null);
 
@@ -86,21 +101,23 @@ public class TraineeDaoImplTest {
     }
 
     @Test
+    @DisplayName("Should return a list containing all trainees available in storage")
     void findAll_ShouldReturnListOfAllTrainees() {
         Trainee t1 = Trainee.builder().id(TRAINEE_ID).build();
         Trainee t2 = Trainee.builder().id(2L).build();
 
         when(storage.values()).thenReturn(List.of(t1, t2));
 
-        List<Trainee> result = traineeDao.findAll();
+        List<Trainee> actual = traineeDao.findAll();
 
-        assertEquals(2, result.size());
-        assertTrue(result.contains(t1));
-        assertTrue(result.contains(t2));
+        assertEquals(2, actual.size());
+        assertTrue(actual.contains(t1));
+        assertTrue(actual.contains(t2));
         verify(storage).values();
     }
 
     @Test
+    @DisplayName("Should successfully remove trainee from storage by their ID")
     void delete_ShouldRemoveTraineeFromStorage() {
         traineeDao.delete(TRAINEE_ID);
 

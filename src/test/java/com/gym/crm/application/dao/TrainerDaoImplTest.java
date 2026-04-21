@@ -3,27 +3,36 @@ package com.gym.crm.application.dao;
 import com.gym.crm.application.dao.impl.TrainerDaoImpl;
 import com.gym.crm.application.model.Trainer;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrainerDaoImplTest {
 
-    @Mock
-    private Map<Long, Trainer> storage;
-
     private final Long TRAINER_ID = 1L;
     private final Long UNEXIST_TRAINER_ID = 99L;
 
-    private TrainerDaoImpl trainerDao;
+    @Mock
+    private Map<Long, Trainer> storage;
+
+    private TrainerDao trainerDao;
 
     @BeforeEach
     void setUp() {
@@ -31,37 +40,42 @@ public class TrainerDaoImplTest {
     }
 
     @Test
+    @DisplayName("Should successfully save a new trainer to storage and return the saved entity")
     void create_ShouldStoreTrainer() {
-        Trainer trainer = Trainer.builder()
+        Trainer expected = Trainer.builder()
                 .id(TRAINER_ID)
                 .firstName("Stepan")
                 .lastName("Giga")
                 .build();
 
-        Trainer result = trainerDao.create(trainer);
+        Trainer actual = trainerDao.create(expected);
 
-        verify(storage).put(TRAINER_ID, trainer);
-        assertEquals(trainer, result);
+        verify(storage).put(TRAINER_ID, expected);
+        assertEquals(expected, actual);
     }
 
     @Test
+    @DisplayName("Should successfully update trainer details when the trainer ID exists in storage")
     void update_ShouldUpdateTrainer_WhenIdExists() {
-        Trainer trainer = Trainer.builder()
+        Trainer expected = Trainer.builder()
                 .id(TRAINER_ID)
                 .firstName("Stepan")
                 .lastName("Updated")
                 .build();
+
         when(storage.containsKey(TRAINER_ID)).thenReturn(true);
 
-        Trainer result = trainerDao.update(trainer);
+        Trainer actual = trainerDao.update(expected);
 
-        verify(storage).put(TRAINER_ID, trainer);
-        assertEquals(trainer, result);
+        verify(storage).put(TRAINER_ID, expected);
+        assertEquals(expected, actual);
     }
 
     @Test
+    @DisplayName("Should throw RuntimeException when attempting to update a trainer that does not exist")
     void update_ShouldThrowException_WhenIdNotFound() {
         Trainer trainer = Trainer.builder().id(UNEXIST_TRAINER_ID).build();
+
         when(storage.containsKey(UNEXIST_TRAINER_ID)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
@@ -73,39 +87,41 @@ public class TrainerDaoImplTest {
     }
 
     @Test
+    @DisplayName("Should return an Optional containing the trainer when the provided ID exists")
     void findById_ShouldReturnTrainer_IfPresent() {
-        Long id = 5L;
-        Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
-        when(storage.get(TRAINER_ID)).thenReturn(trainer);
+        Trainer expected = Trainer.builder().id(TRAINER_ID).build();
 
-        Optional<Trainer> result = trainerDao.findById(TRAINER_ID);
+        when(storage.get(TRAINER_ID)).thenReturn(expected);
 
-        assertTrue(result.isPresent());
-        assertEquals(trainer, result.get());
+        Optional<Trainer> actual = trainerDao.findById(TRAINER_ID);
+
+        assertTrue(actual.isPresent());
+        assertEquals(expected, actual.get());
     }
 
     @Test
+    @DisplayName("Should return an empty Optional when the trainer ID does not exist in storage")
     void findById_ShouldReturnNull_IsAbsent() {
-        Long id = 5L;
         when(storage.get(TRAINER_ID)).thenReturn(null);
 
-        Optional<Trainer> result = trainerDao.findById(TRAINER_ID);
+        Optional<Trainer> actual = trainerDao.findById(TRAINER_ID);
 
-        assertFalse(result.isPresent());
+        assertFalse(actual.isPresent());
     }
 
     @Test
+    @DisplayName("Should return a list containing all trainers currently stored in the system")
     void findAll_ShouldReturnListOfAllTrainers() {
         Trainer t1 = Trainer.builder().id(1L).build();
         Trainer t2 = Trainer.builder().id(2L).build();
 
         when(storage.values()).thenReturn(List.of(t1, t2));
 
-        List<Trainer> result = trainerDao.findAll();
+        List<Trainer> actual = trainerDao.findAll();
 
-        assertEquals(2, result.size());
-        assertTrue(result.contains(t1));
-        assertTrue(result.contains(t2));
+        assertEquals(2, actual.size());
+        assertTrue(actual.contains(t1));
+        assertTrue(actual.contains(t2));
         verify(storage).values();
     }
 }
