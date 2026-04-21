@@ -65,6 +65,7 @@ public class TrainingDaoImplTest {
     }
 
     @Test
+    @DisplayName("Should retrieve all training records directly from the underlying storage map")
     void findAll_ShouldReturnAllTrainingsFromStorage() {
         Training t1 = Training.builder().trainingName("T1").build();
         Training t2 = Training.builder().trainingName("T2").build();
