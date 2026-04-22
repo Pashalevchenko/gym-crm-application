@@ -93,7 +93,9 @@ public class GymAppFacadeTest {
         when(traineeService.getTraineeById(ENTITY_ID)).thenReturn(trainee);
         when(traineeMapper.entityToDto(trainee)).thenReturn(expected);
 
-        assertEquals(expected, facade.getTraineeById(ENTITY_ID));
+        TraineeResponseDTO actual = facade.getTraineeById(ENTITY_ID);
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -123,7 +125,9 @@ public class GymAppFacadeTest {
         when(traineeService.updateTrainee(trainee)).thenReturn(updated);
         when(traineeMapper.entityToDto(updated)).thenReturn(expected);
 
-        assertEquals(expected, facade.updateTrainee(request));
+        TraineeResponseDTO actual = facade.updateTrainee(request);
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -171,7 +175,9 @@ public class GymAppFacadeTest {
         when(trainerService.updateTrainer(trainer)).thenReturn(updated);
         when(trainerMapper.entityToDto(updated)).thenReturn(expected);
 
-        assertEquals(expected, facade.updateTrainer(request));
+        TrainerResponseDTO actual = facade.updateTrainer(request);
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -183,7 +189,9 @@ public class GymAppFacadeTest {
         when(trainerService.getTrainerById(ENTITY_ID)).thenReturn(trainer);
         when(trainerMapper.entityToDto(trainer)).thenReturn(expected);
 
-        assertEquals(expected, facade.getTrainerById(ENTITY_ID));
+        TrainerResponseDTO actual = facade.getTrainerById(ENTITY_ID);
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -236,7 +244,9 @@ public class GymAppFacadeTest {
         when(trainingService.getTrainingById(ENTITY_ID)).thenReturn(training);
         when(trainingMapper.entityToDto(training)).thenReturn(expected);
 
-        assertEquals(expected, facade.getTrainingById(ENTITY_ID));
+        TrainingResponseDTO actual = facade.getTrainingById(ENTITY_ID);
+
+        assertEquals(expected, actual);
     }
 
     @Test
