@@ -5,13 +5,16 @@ import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.model.User;
 import com.gym.crm.application.service.ProfileService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Component
 @AllArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
@@ -34,6 +37,8 @@ public class ProfileServiceImpl implements ProfileService {
         if (!dbUsernames.contains(username)) {
             return username;
         }
+
+        log.info("Username '{}' already exists. Starting serial number generation for {} {}", username, firstName, lastname);
 
         while (dbUsernames.contains(username + userSerialNumber)) {
             userSerialNumber++;

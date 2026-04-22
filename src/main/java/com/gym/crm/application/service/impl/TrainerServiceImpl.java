@@ -5,10 +5,13 @@ import com.gym.crm.application.model.Trainer;
 import com.gym.crm.application.service.ProfileService;
 import com.gym.crm.application.service.TrainerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TrainerServiceImpl implements TrainerService {
@@ -39,6 +42,8 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     public Trainer updateTrainer(Trainer trainer) {
+        log.warn("Trainer profile update triggered for ID: {}", trainer.getId());
+
         setUsername(trainer);
 
         return trainerDao.update(trainer);

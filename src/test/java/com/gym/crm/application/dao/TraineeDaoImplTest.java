@@ -1,5 +1,9 @@
 package com.gym.crm.application.dao;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.application.dao.impl.TraineeDaoImpl;
 import com.gym.crm.application.model.Trainee;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,11 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,9 +41,16 @@ public class TraineeDaoImplTest {
 
     private TraineeDao traineeDao;
 
+    private ListAppender<ILoggingEvent> listAppender;
+
     @BeforeEach
     void setUp() {
         traineeDao = new TraineeDaoImpl(storage);
+
+        Logger logger = (Logger) LoggerFactory.getLogger(TraineeDaoImpl.class);
+        listAppender = new ListAppender<>();
+        listAppender.start();
+        logger.addAppender(listAppender);
     }
 
     @Test
@@ -60,12 +74,20 @@ public class TraineeDaoImplTest {
 
         verify(storage).put(TRAINEE_ID, expected);
         assertEquals(expected, actual);
+
+        assertThat(listAppender.list)
+                .extracting(ILoggingEvent::getLevel)
+                .doesNotContain(Level.ERROR);
+        assertThat(listAppender.list)
+                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
+                .contains(tuple( String.format("Trainee with id: %d was updated", TRAINEE_ID), Level.INFO));
     }
 
     @Test
-    @DisplayName("Should throw RuntimeException when attempting to update a non-existent trainee")
+    @DisplayName("Should throw Exception and log ERROR when Trainee ID not found in storage")
     void update_ShouldThrowException_WhenIdDoesNotExist() {
         Trainee trainee = Trainee.builder().id(UNEXIST_TRAINEE_ID).build();
+        String expectedLogMessage = String.format("Cannot update Trainee: ID %d not found in storage", UNEXIST_TRAINEE_ID);
 
         when(storage.containsKey(UNEXIST_TRAINEE_ID)).thenReturn(false);
 
@@ -75,6 +97,9 @@ public class TraineeDaoImplTest {
 
         assertTrue(exception.getMessage().contains("not found in storage"));
         verify(storage, never()).put(anyLong(), any());
+        assertThat(listAppender.list)
+                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
+                .contains(tuple(expectedLogMessage, Level.ERROR));
     }
 
     @Test

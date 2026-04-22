@@ -1,23 +1,31 @@
 package com.gym.crm.application.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.application.dao.TraineeDao;
 import com.gym.crm.application.model.Trainee;
 import com.gym.crm.application.service.impl.TraineeServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +45,16 @@ public class TraineeServiceImplTest {
 
     @InjectMocks
     private TraineeServiceImpl traineeService;
+
+    private ListAppender<ILoggingEvent> listAppender;
+    private Logger logger = (Logger) LoggerFactory.getLogger(TraineeServiceImpl.class);
+
+    @BeforeEach
+    void setUp() {
+        listAppender = new ListAppender<>();
+        listAppender.start();
+        logger.addAppender(listAppender);
+    }
 
     @Test
     @DisplayName("Verify that service correctly populates trainee with generated username and password before saving")
@@ -86,8 +104,8 @@ public class TraineeServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should recalculate and update username when trainee profile data is modified")
-    void updateTrainee_ShouldUpdateUsername() {
+    @DisplayName("Should recalculate username and log WARN when trainee profile is updated")
+    void updateTrainee_ShouldUpdateUsernameAndLogWarning() {
         Trainee trainee = Trainee.builder()
                 .id(ENTITY_ID)
                 .firstName(USER_FIRST_NAME)
@@ -101,6 +119,13 @@ public class TraineeServiceImplTest {
 
         assertEquals(USERNAME, actual.getUsername());
         verify(traineeDao).update(trainee);
+
+        assertThat(listAppender.list)
+                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
+                .contains(tuple(
+                        "Trainee profile update triggered for ID: " + ENTITY_ID,
+                        Level.WARN
+                ));
     }
 
     @Test
