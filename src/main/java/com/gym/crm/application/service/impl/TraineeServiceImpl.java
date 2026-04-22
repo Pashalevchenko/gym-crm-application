@@ -5,10 +5,13 @@ import com.gym.crm.application.model.Trainee;
 import com.gym.crm.application.service.ProfileService;
 import com.gym.crm.application.service.TraineeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TraineeServiceImpl implements TraineeService {
@@ -39,6 +42,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public Trainee updateTrainee(Trainee trainee) {
+        log.warn("Trainee profile update triggered for ID: {}. Note: If first or last name is changed, the username will be automatically recalculated.", trainee.getId());
         setUsername(trainee);
 
         return traineeDao.update(trainee);

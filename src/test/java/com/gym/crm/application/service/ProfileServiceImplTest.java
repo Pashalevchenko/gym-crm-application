@@ -1,5 +1,9 @@
 package com.gym.crm.application.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.application.dao.TraineeDao;
 import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.model.Trainee;
@@ -12,10 +16,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -39,6 +46,10 @@ public class ProfileServiceImplTest {
     @InjectMocks
     private ProfileServiceImpl profileService;
 
+    private ListAppender<ILoggingEvent> listAppender;
+
+    private Logger logger = (Logger) LoggerFactory.getLogger(ProfileServiceImpl.class);
+
     @BeforeEach
     void setUp() {
         when(traineeDao.findAll()).thenReturn(Collections.emptyList());
@@ -46,6 +57,10 @@ public class ProfileServiceImplTest {
 
         lenient().when(traineeDao.findAll()).thenReturn(Collections.emptyList());
         lenient().when(trainerDao.findAll()).thenReturn(Collections.emptyList());
+
+        listAppender = new ListAppender<>();
+        listAppender.start();
+        logger.addAppender(listAppender);
     }
 
     @Test
@@ -90,5 +105,22 @@ public class ProfileServiceImplTest {
         assertNotNull(pass1);
         assertEquals(10, pass1.length());
         assertNotEquals(pass1, pass2);
+    }
+
+    @Test
+    @DisplayName("Should log INFO message when a duplicate username is detected during generation")
+    void createUsername_ShouldLogWhenDuplicateFound() {
+        String firstName = "Ivan";
+        String lastName = "Ivanov";
+        Trainee existingTrainee = new Trainee();
+        existingTrainee.setUsername("Ivan.Ivanov");
+
+        when(traineeDao.findAll()).thenReturn(List.of(existingTrainee));
+
+        profileService.createUsername(firstName, lastName);
+
+        assertThat(listAppender.list)
+                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
+                .contains(tuple("Username 'Ivan.Ivanov' already exists. Starting serial number generation for Ivan Ivanov", Level.INFO));
     }
 }

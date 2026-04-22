@@ -1,5 +1,9 @@
 package com.gym.crm.application.dao;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.application.dao.impl.TraineeDaoImpl;
 import com.gym.crm.application.model.Trainee;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,11 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,9 +41,16 @@ public class TraineeDaoImplTest {
 
     private TraineeDao traineeDao;
 
+    private ListAppender<ILoggingEvent> listAppender;
+
     @BeforeEach
     void setUp() {
         traineeDao = new TraineeDaoImpl(storage);
+
+        Logger logger = (Logger) LoggerFactory.getLogger(TraineeDaoImpl.class);
+        listAppender = new ListAppender<>();
+        listAppender.start();
+        logger.addAppender(listAppender);
     }
 
     @Test
@@ -53,17 +67,24 @@ public class TraineeDaoImplTest {
     @DisplayName("Should successfully update trainee data when the ID exists in storage")
     void update_ShouldUpdateTrainee_WhenIdExists() {
         Trainee expected = Trainee.builder().id(TRAINEE_ID).firstName("Updated Name").build();
-
         when(storage.containsKey(TRAINEE_ID)).thenReturn(true);
 
         Trainee actual = traineeDao.update(expected);
 
         verify(storage).put(TRAINEE_ID, expected);
         assertEquals(expected, actual);
+
+        assertThat(listAppender.list)
+                .extracting(ILoggingEvent::getLevel)
+                .doesNotContain(Level.ERROR);
+
+        assertThat(listAppender.list)
+                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
+                .contains(tuple("Trainee with id: " + TRAINEE_ID + " was update", Level.INFO));
     }
 
     @Test
-    @DisplayName("Should throw RuntimeException when attempting to update a non-existent trainee")
+    @DisplayName("Should throw Exception and log ERROR when Trainee ID not found in storage")
     void update_ShouldThrowException_WhenIdDoesNotExist() {
         Trainee trainee = Trainee.builder().id(UNEXIST_TRAINEE_ID).build();
 
@@ -75,6 +96,12 @@ public class TraineeDaoImplTest {
 
         assertTrue(exception.getMessage().contains("not found in storage"));
         verify(storage, never()).put(anyLong(), any());
+        assertThat(listAppender.list)
+                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
+                .contains(tuple(
+                        "Cannot update Trainee: ID " + UNEXIST_TRAINEE_ID + " not found in storage",
+                        Level.ERROR
+                ));
     }
 
     @Test

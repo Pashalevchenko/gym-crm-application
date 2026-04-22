@@ -1,5 +1,9 @@
 package com.gym.crm.application.dao;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.application.dao.impl.TrainerDaoImpl;
 import com.gym.crm.application.model.Trainer;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,11 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,6 +29,8 @@ import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+
 
 @ExtendWith(MockitoExtension.class)
 public class TrainerDaoImplTest {
@@ -34,9 +43,16 @@ public class TrainerDaoImplTest {
 
     private TrainerDao trainerDao;
 
+    private ListAppender<ILoggingEvent> listAppender;
+
     @BeforeEach
     void setUp() {
         trainerDao = new TrainerDaoImpl(storage);
+
+        Logger logger = (Logger) LoggerFactory.getLogger(TrainerDaoImpl.class);
+        listAppender = new ListAppender<>();
+        listAppender.start();
+        logger.addAppender(listAppender);
     }
 
     @Test
@@ -69,6 +85,13 @@ public class TrainerDaoImplTest {
 
         verify(storage).put(TRAINER_ID, expected);
         assertEquals(expected, actual);
+        assertThat(listAppender.list)
+                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
+                .contains(tuple("Trainer with id: " + expected.getId() + " was update", Level.INFO));
+
+        assertThat(listAppender.list)
+                .extracting(ILoggingEvent::getLevel)
+                .doesNotContain(Level.ERROR);
     }
 
     @Test

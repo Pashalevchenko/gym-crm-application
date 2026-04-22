@@ -2,14 +2,17 @@ package com.gym.crm.application.dao.impl;
 
 import com.gym.crm.application.dao.TrainingDao;
 import com.gym.crm.application.model.Training;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Slf4j
 @Repository
 public class TrainingDaoImpl implements TrainingDao {
 
@@ -25,6 +28,8 @@ public class TrainingDaoImpl implements TrainingDao {
     @Override
     public Training create(Training training) {
         storage.put(idGenerator.incrementAndGet(), training);
+
+        log.info("Successfully created new {} training", training.getTrainingName());
 
         return training;
     }
