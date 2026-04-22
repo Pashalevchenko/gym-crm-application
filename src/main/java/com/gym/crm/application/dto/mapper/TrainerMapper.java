@@ -20,6 +20,7 @@ public class TrainerMapper {
 
     public TrainerResponseDTO entityToDto (Trainer trainer){
         return TrainerResponseDTO.builder()
+                .id(trainer.getId())
                 .firstName(trainer.getFirstName())
                 .lastName(trainer.getLastName())
                 .username(trainer.getUsername())

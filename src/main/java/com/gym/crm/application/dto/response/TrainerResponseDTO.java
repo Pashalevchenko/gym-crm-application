@@ -9,6 +9,7 @@ import lombok.ToString;
 @Builder
 @ToString
 public class TrainerResponseDTO {
+    private final long id;
     private final String firstName;
     private final String lastName;
     private final String username;
