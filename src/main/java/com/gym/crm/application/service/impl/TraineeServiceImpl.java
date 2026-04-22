@@ -42,7 +42,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public Trainee updateTrainee(Trainee trainee) {
-        log.warn("Trainee profile update triggered for ID: {}. Note: If first or last name is changed, the username will be automatically recalculated.", trainee.getId());
+        log.warn("Trainee profile update triggered for ID: {}", trainee.getId());
         setUsername(trainee);
 
         return traineeDao.update(trainee);

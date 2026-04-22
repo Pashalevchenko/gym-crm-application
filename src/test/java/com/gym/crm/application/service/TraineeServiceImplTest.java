@@ -123,7 +123,7 @@ public class TraineeServiceImplTest {
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
                 .contains(tuple(
-                        "Trainee profile update triggered for ID: " + ENTITY_ID + ". Note: If first or last name is changed, the username will be automatically recalculated.",
+                        "Trainee profile update triggered for ID: " + ENTITY_ID,
                         Level.WARN
                 ));
     }

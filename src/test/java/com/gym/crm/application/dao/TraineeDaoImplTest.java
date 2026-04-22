@@ -67,6 +67,7 @@ public class TraineeDaoImplTest {
     @DisplayName("Should successfully update trainee data when the ID exists in storage")
     void update_ShouldUpdateTrainee_WhenIdExists() {
         Trainee expected = Trainee.builder().id(TRAINEE_ID).firstName("Updated Name").build();
+
         when(storage.containsKey(TRAINEE_ID)).thenReturn(true);
 
         Trainee actual = traineeDao.update(expected);
@@ -77,16 +78,16 @@ public class TraineeDaoImplTest {
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getLevel)
                 .doesNotContain(Level.ERROR);
-
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple("Trainee with id: " + TRAINEE_ID + " was update", Level.INFO));
+                .contains(tuple( String.format("Trainee with id: %d was updated", TRAINEE_ID), Level.INFO));
     }
 
     @Test
     @DisplayName("Should throw Exception and log ERROR when Trainee ID not found in storage")
     void update_ShouldThrowException_WhenIdDoesNotExist() {
         Trainee trainee = Trainee.builder().id(UNEXIST_TRAINEE_ID).build();
+        String expectedLogMessage = String.format("Cannot update Trainee: ID %d not found in storage", UNEXIST_TRAINEE_ID);
 
         when(storage.containsKey(UNEXIST_TRAINEE_ID)).thenReturn(false);
 
@@ -98,10 +99,7 @@ public class TraineeDaoImplTest {
         verify(storage, never()).put(anyLong(), any());
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple(
-                        "Cannot update Trainee: ID " + UNEXIST_TRAINEE_ID + " not found in storage",
-                        Level.ERROR
-                ));
+                .contains(tuple(expectedLogMessage, Level.ERROR));
     }
 
     @Test

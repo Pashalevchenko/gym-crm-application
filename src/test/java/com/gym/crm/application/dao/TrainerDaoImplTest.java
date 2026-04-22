@@ -30,8 +30,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
-
 @ExtendWith(MockitoExtension.class)
 public class TrainerDaoImplTest {
 
@@ -78,6 +76,7 @@ public class TrainerDaoImplTest {
                 .firstName("Stepan")
                 .lastName("Updated")
                 .build();
+        String expectedLogMessage = String.format("Trainer with id: %d was update", expected.getId());
 
         when(storage.containsKey(TRAINER_ID)).thenReturn(true);
 
@@ -87,8 +86,7 @@ public class TrainerDaoImplTest {
         assertEquals(expected, actual);
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple("Trainer with id: " + expected.getId() + " was update", Level.INFO));
-
+                .contains(tuple(expectedLogMessage, Level.INFO));
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getLevel)
                 .doesNotContain(Level.ERROR);
