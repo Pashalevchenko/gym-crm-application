@@ -1,7 +1,7 @@
 {
   "Trainee": [
     {
-      "id": 1,
+      "userId": 1,
       "firstName": "Oleg",
       "lastName": "Vynnyk",
       "username": "Oleg.Vynnyk",
@@ -11,7 +11,7 @@
       "address": "Kyiv, Ukraine"
     },
     {
-      "id": 2,
+      "userId": 2,
       "firstName": "Mariya",
       "lastName": "Petrenko",
       "username": "Mariya.Petrenko",
@@ -23,7 +23,7 @@
   ],
   "Trainer": [
     {
-      "id": 10,
+      "userId": 10,
       "firstName": "Stepan",
       "lastName": "Giga",
       "username": "Stepan.Giga",
@@ -34,7 +34,7 @@
       }
     },
     {
-      "id": 11,
+      "userId": 11,
       "firstName": "Carlos",
       "lastName": "Bron",
       "username": "Carlos.Bron",

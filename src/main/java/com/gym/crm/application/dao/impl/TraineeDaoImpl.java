@@ -24,13 +24,13 @@ public class TraineeDaoImpl implements TraineeDao {
 
     @Override
     public Trainee create(Trainee trainee) {
-        storage.put(trainee.getId(), trainee);
+        storage.put(trainee.getUserId(), trainee);
         return trainee;
     }
 
     @Override
     public Trainee update(Trainee trainee) {
-        Long id = trainee.getId();
+        Long id = trainee.getUserId();
 
         if (!storage.containsKey(id)) {
             log.error("Cannot update Trainee: ID {} not found in storage", id);

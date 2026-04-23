@@ -57,7 +57,7 @@ public class TrainerDaoImplTest {
     @DisplayName("Should successfully save a new trainer to storage and return the saved entity")
     void create_ShouldStoreTrainer() {
         Trainer expected = Trainer.builder()
-                .id(TRAINER_ID)
+                .userId(TRAINER_ID)
                 .firstName("Stepan")
                 .lastName("Giga")
                 .build();
@@ -72,11 +72,11 @@ public class TrainerDaoImplTest {
     @DisplayName("Should successfully update trainer details when the trainer ID exists in storage")
     void update_ShouldUpdateTrainer_WhenIdExists() {
         Trainer expected = Trainer.builder()
-                .id(TRAINER_ID)
+                .userId(TRAINER_ID)
                 .firstName("Stepan")
                 .lastName("Updated")
                 .build();
-        String expectedLogMessage = String.format("Trainer with id: %d was update", expected.getId());
+        String expectedLogMessage = String.format("Trainer with id: %d was update", expected.getUserId());
 
         when(storage.containsKey(TRAINER_ID)).thenReturn(true);
 
@@ -95,7 +95,7 @@ public class TrainerDaoImplTest {
     @Test
     @DisplayName("Should throw RuntimeException when attempting to update a trainer that does not exist")
     void update_ShouldThrowException_WhenIdNotFound() {
-        Trainer trainer = Trainer.builder().id(UNEXIST_TRAINER_ID).build();
+        Trainer trainer = Trainer.builder().userId(UNEXIST_TRAINER_ID).build();
 
         when(storage.containsKey(UNEXIST_TRAINER_ID)).thenReturn(false);
 
@@ -110,7 +110,7 @@ public class TrainerDaoImplTest {
     @Test
     @DisplayName("Should return an Optional containing the trainer when the provided ID exists")
     void findById_ShouldReturnTrainer_IfPresent() {
-        Trainer expected = Trainer.builder().id(TRAINER_ID).build();
+        Trainer expected = Trainer.builder().userId(TRAINER_ID).build();
 
         when(storage.get(TRAINER_ID)).thenReturn(expected);
 
@@ -133,8 +133,8 @@ public class TrainerDaoImplTest {
     @Test
     @DisplayName("Should return a list containing all trainers currently stored in the system")
     void findAll_ShouldReturnListOfAllTrainers() {
-        Trainer t1 = Trainer.builder().id(1L).build();
-        Trainer t2 = Trainer.builder().id(2L).build();
+        Trainer t1 = Trainer.builder().userId(1L).build();
+        Trainer t2 = Trainer.builder().userId(2L).build();
 
         when(storage.values()).thenReturn(List.of(t1, t2));
 

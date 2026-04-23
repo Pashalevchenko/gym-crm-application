@@ -42,7 +42,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     public Trainer updateTrainer(Trainer trainer) {
-        log.warn("Trainer profile update triggered for ID: {}", trainer.getId());
+        log.warn("Trainer profile update triggered for ID: {}", trainer.getUserId());
 
         setUsername(trainer);
 

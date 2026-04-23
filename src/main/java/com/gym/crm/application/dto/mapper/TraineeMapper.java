@@ -20,7 +20,7 @@ public class TraineeMapper {
 
     public TraineeResponseDTO entityToDto (Trainee trainee){
         return TraineeResponseDTO.builder()
-                .id(trainee.getId())
+                .id(trainee.getUserId())
                 .firstName(trainee.getFirstName())
                 .lastName(trainee.getLastName())
                 .username(trainee.getUsername())

@@ -12,6 +12,6 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class Trainer extends User {
-    private long id;
+    private long userId;
     private TrainingType specialization;
 }

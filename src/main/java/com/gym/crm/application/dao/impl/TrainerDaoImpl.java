@@ -24,7 +24,7 @@ public class TrainerDaoImpl implements TrainerDao {
 
     @Override
     public Trainer create(Trainer trainer) {
-        storage.put(trainer.getId(), trainer);
+        storage.put(trainer.getUserId(), trainer);
         log.info("Trainer {} {} was created", trainer.getFirstName(), trainer.getLastName());
 
         return trainer;
@@ -32,7 +32,7 @@ public class TrainerDaoImpl implements TrainerDao {
 
     @Override
     public Trainer update(Trainer trainer) {
-        Long id = trainer.getId();
+        Long id = trainer.getUserId();
 
         if (!storage.containsKey(id)) {
             log.error("Cannot update Trainer: ID {} not found in storage", id);

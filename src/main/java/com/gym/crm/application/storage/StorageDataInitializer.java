@@ -41,10 +41,10 @@ public class StorageDataInitializer implements BeanPostProcessor {
             );
 
            fillNamespaceStore("Trainee", data, storage,
-                   new TypeReference<>() {}, Trainee::getId);
+                   new TypeReference<>() {}, Trainee::getUserId);
 
            fillNamespaceStore("Trainer", data, storage,
-                   new TypeReference<>() {}, Trainer::getId);
+                   new TypeReference<>() {}, Trainer::getUserId);
 
            fillNamespaceStore("Training", data, storage,
                    new TypeReference<>() {}, createIdGenerator());

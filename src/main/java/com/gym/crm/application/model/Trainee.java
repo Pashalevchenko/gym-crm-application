@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class Trainee extends User {
-    private long id;
+    private long userId;
     private LocalDate dateOfBirth;
     private String address;
 }
