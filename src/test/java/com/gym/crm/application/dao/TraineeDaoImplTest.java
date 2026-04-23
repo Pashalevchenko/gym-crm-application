@@ -56,7 +56,7 @@ public class TraineeDaoImplTest {
     @Test
     @DisplayName("Should successfully store trainee in storage and return the same object")
     void create_ShouldStoreTrainee() {
-        Trainee expected = Trainee.builder().id(TRAINEE_ID).firstName("Ivan").build();
+        Trainee expected = Trainee.builder().userId(TRAINEE_ID).firstName("Ivan").build();
         Trainee actual = traineeDao.create(expected);
 
         verify(storage).put(TRAINEE_ID, actual);
@@ -66,7 +66,7 @@ public class TraineeDaoImplTest {
     @Test
     @DisplayName("Should successfully update trainee data when the ID exists in storage")
     void update_ShouldUpdateTrainee_WhenIdExists() {
-        Trainee expected = Trainee.builder().id(TRAINEE_ID).firstName("Updated Name").build();
+        Trainee expected = Trainee.builder().userId(TRAINEE_ID).firstName("Updated Name").build();
 
         when(storage.containsKey(TRAINEE_ID)).thenReturn(true);
 
@@ -86,7 +86,7 @@ public class TraineeDaoImplTest {
     @Test
     @DisplayName("Should throw Exception and log ERROR when Trainee ID not found in storage")
     void update_ShouldThrowException_WhenIdDoesNotExist() {
-        Trainee trainee = Trainee.builder().id(UNEXIST_TRAINEE_ID).build();
+        Trainee trainee = Trainee.builder().userId(UNEXIST_TRAINEE_ID).build();
         String expectedLogMessage = String.format("Cannot update Trainee: ID %d not found in storage", UNEXIST_TRAINEE_ID);
 
         when(storage.containsKey(UNEXIST_TRAINEE_ID)).thenReturn(false);
@@ -105,7 +105,7 @@ public class TraineeDaoImplTest {
     @Test
     @DisplayName("Should return an Optional containing the trainee when a valid ID is provided")
     void findById_ShouldReturnTrainee_WhenIdExists() {
-        Trainee expected = Trainee.builder().id(TRAINEE_ID).build();
+        Trainee expected = Trainee.builder().userId(TRAINEE_ID).build();
 
         when(storage.get(TRAINEE_ID)).thenReturn(expected);
 
@@ -128,8 +128,8 @@ public class TraineeDaoImplTest {
     @Test
     @DisplayName("Should return a list containing all trainees available in storage")
     void findAll_ShouldReturnListOfAllTrainees() {
-        Trainee t1 = Trainee.builder().id(TRAINEE_ID).build();
-        Trainee t2 = Trainee.builder().id(2L).build();
+        Trainee t1 = Trainee.builder().userId(TRAINEE_ID).build();
+        Trainee t2 = Trainee.builder().userId(2L).build();
 
         when(storage.values()).thenReturn(List.of(t1, t2));
 

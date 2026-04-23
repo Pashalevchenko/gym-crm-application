@@ -10,7 +10,7 @@ public class TrainerMapper {
 
     public Trainer dtoToEntity(TrainerRequestDTO trainerRequestDTO){
         return Trainer.builder()
-                .id(trainerRequestDTO.getId())
+                .userId(trainerRequestDTO.getId())
                 .firstName(trainerRequestDTO.getFirstName())
                 .lastName(trainerRequestDTO.getLastName())
                 .isActive(trainerRequestDTO.isActive())
@@ -20,7 +20,7 @@ public class TrainerMapper {
 
     public TrainerResponseDTO entityToDto (Trainer trainer){
         return TrainerResponseDTO.builder()
-                .id(trainer.getId())
+                .id(trainer.getUserId())
                 .firstName(trainer.getFirstName())
                 .lastName(trainer.getLastName())
                 .username(trainer.getUsername())

@@ -47,14 +47,14 @@ class TraineeMapperTest {
         assertEquals(expected.getDateOfBirth(), actual.getDateOfBirth());
         assertEquals(expected.getAddress(), actual.getAddress());
         assertNull(actual.getUsername());
-        assertEquals(0, actual.getId());
+        assertEquals(0, actual.getUserId());
     }
 
     @Test
     @DisplayName("Should correctly map all fields from Trainee entity to Response DTO including generated values")
     void entityToDto_ShouldMapAllFieldsCorrectly() {
         Trainee expected = Trainee.builder()
-                .id(100L)
+                .userId(100L)
                 .firstName(USER_FIRST_NAME)
                 .lastName(USER_LAST_NAME)
                 .username(USERNAME)
@@ -66,7 +66,7 @@ class TraineeMapperTest {
         TraineeResponseDTO actual = traineeMapper.entityToDto(expected);
 
         assertNotNull(actual);
-        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getUserId(), actual.getId());
         assertEquals(expected.getFirstName(), actual.getFirstName());
         assertEquals(expected.getLastName(), actual.getLastName());
         assertEquals(expected.getUsername(), actual.getUsername());

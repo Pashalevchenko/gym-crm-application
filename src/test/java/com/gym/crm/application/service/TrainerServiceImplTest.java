@@ -68,13 +68,13 @@ public class TrainerServiceImplTest {
     @Test
     @DisplayName("Should return trainer profile when a valid ID is provided")
     void getTrainerById_WhenFound() {
-        Trainer trainer = Trainer.builder().id(ENTITY_ID).firstName(USER_FIRST_NAME).build();
+        Trainer trainer = Trainer.builder().userId(ENTITY_ID).firstName(USER_FIRST_NAME).build();
 
         when(trainerDao.findById(ENTITY_ID)).thenReturn(Optional.of(trainer));
 
         Trainer actual = trainerService.getTrainerById(ENTITY_ID);
 
-        assertEquals(ENTITY_ID, actual.getId());
+        assertEquals(ENTITY_ID, actual.getUserId());
         assertEquals(USER_FIRST_NAME, actual.getFirstName());
     }
 
@@ -92,7 +92,7 @@ public class TrainerServiceImplTest {
     @DisplayName("Should update username and call DAO")
     void updateTrainer_ShouldUpdateUsername() {
         Trainer trainer = Trainer.builder()
-                .id(ENTITY_ID)
+                .userId(ENTITY_ID)
                 .firstName(USER_FIRST_NAME)
                 .lastName(USER_LAST_NAME)
                 .build();

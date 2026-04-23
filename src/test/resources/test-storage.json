@@ -1,7 +1,7 @@
 {
   "Trainee": [
     {
-      "id": 1,
+      "userId": 1,
       "firstName": "Ivan",
       "lastName": "Ivanov",
       "username": "ivan.ivanov",
@@ -12,7 +12,7 @@
   ],
   "Trainer": [
     {
-      "id": 1,
+      "userId": 1,
       "firstName": "Oleg",
       "lastName": "Petrov",
       "username": "oleg.petrov",
