@@ -13,7 +13,6 @@ import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = GymAppConfig.class)
 public class HibernateConfigTest {
