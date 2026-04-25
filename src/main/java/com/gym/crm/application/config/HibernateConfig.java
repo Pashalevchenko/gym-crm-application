@@ -4,7 +4,6 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
 import java.util.Properties;
 
@@ -24,10 +23,8 @@ public class HibernateConfig {
     private String password;
 
     @Bean
-    @Lazy
     public SessionFactory sessionFactory() {
         Properties props = new Properties();
-
         props.put("hibernate.connection.driver_class", driver);
         props.put("hibernate.connection.url", url);
         props.put("hibernate.connection.username", username);
@@ -35,12 +32,10 @@ public class HibernateConfig {
         props.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         props.put("hibernate.show_sql", "true");
         props.put("hibernate.format_sql", "true");
-        props.put("hibernate.hbm2ddl.auto", "none");
-        props.put("hibernate.temp.use_jdbc_metadata_defaults", "false");
+        props.put("hibernate.hbm2ddl.auto", "validate");
 
         return new org.hibernate.cfg.Configuration()
                 .setProperties(props)
-                .addPackage("com.gym.crm.application.model")
                 .buildSessionFactory();
     }
 }
