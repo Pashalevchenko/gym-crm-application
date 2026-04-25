@@ -1,5 +1,10 @@
 package com.gym.crm.application.config;
 
+import com.gym.crm.application.entity.Trainee;
+import com.gym.crm.application.entity.Trainer;
+import com.gym.crm.application.entity.Training;
+import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.entity.User;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,10 +37,15 @@ public class HibernateConfig {
         props.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         props.put("hibernate.show_sql", "true");
         props.put("hibernate.format_sql", "true");
-        props.put("hibernate.hbm2ddl.auto", "validate");
+        props.put("hibernate.hbm2ddl.auto", "none");
 
         return new org.hibernate.cfg.Configuration()
                 .setProperties(props)
+                .addAnnotatedClass(User.class)
+                .addAnnotatedClass(Trainee.class)
+                .addAnnotatedClass(Trainer.class)
+                .addAnnotatedClass(Training.class)
+                .addAnnotatedClass(TrainingType.class)
                 .buildSessionFactory();
     }
 }
