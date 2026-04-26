@@ -30,6 +30,7 @@
             </column>
         </createTable>
     </changeSet>
+
     <changeSet id="002-create-training-types-table" author="gym">
         <createTable tableName="training_types">
             <column name="id" type="BIGSERIAL">
@@ -42,6 +43,7 @@
             </column>
         </createTable>
     </changeSet>
+
     <changeSet id="003-create-trainees-table" author="gym">
         <createTable tableName="trainees">
             <column name="id" type="BIGSERIAL">
@@ -55,6 +57,7 @@
                              uniqueConstraintName="uk_trainees_user_id"/>
             </column>
         </createTable>
+
         <addForeignKeyConstraint
                 baseTableName="trainees"
                 baseColumnNames="user_id"
@@ -62,6 +65,7 @@
                 referencedColumnNames="id"
                 constraintName="fk_trainees_users"/>
     </changeSet>
+
     <changeSet id="004-create-trainers-table" author="gym">
         <createTable tableName="trainers">
             <column name="id" type="BIGSERIAL">
@@ -76,6 +80,7 @@
                              uniqueConstraintName="uk_trainers_user_id"/>
             </column>
         </createTable>
+
         <addForeignKeyConstraint
                 baseTableName="trainers"
                 baseColumnNames="specialization_id"
@@ -89,6 +94,7 @@
                 referencedColumnNames="id"
                 constraintName="fk_trainers_users"/>
     </changeSet>
+
     <changeSet id="005-create-trainings-table" author="gym">
         <createTable tableName="trainings">
             <column name="id" type="BIGSERIAL">
@@ -113,6 +119,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
         <addForeignKeyConstraint
                 baseTableName="trainings"
                 baseColumnNames="training_type_id"
@@ -132,6 +139,7 @@
                 referencedColumnNames="id"
                 constraintName="fk_trainings_trainers"/>
     </changeSet>
+
     <changeSet id="006-create-trainee-trainer-table" author="gym">
         <createTable tableName="trainee_trainer">
             <column name="trainee_id" type="BIGINT">
@@ -141,6 +149,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
         <addPrimaryKey
                 tableName="trainee_trainer"
                 columnNames="trainee_id, trainer_id"
