@@ -34,18 +34,18 @@ public class Training {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "training_name", nullable = false)
+    @Column(name = "training_name", nullable = false, length = 50)
     private String trainingName;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "training_type_id", nullable = false)
-    private TrainingType trainingType;
 
     @Column(name = "training_date", nullable = false)
     private LocalDate trainingDate;
 
     @Column(name = "training_duration", nullable = false)
     private Integer trainingDuration;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "training_type_id", nullable = false)
+    private TrainingType trainingType;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "trainee_id", nullable = false)

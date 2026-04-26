@@ -37,10 +37,6 @@ public class Trainer {
     @Column
     private Long id;
 
-    @OneToOne(optional = false, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User user;
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "specialization", nullable = false)
     private TrainingType specialization;
@@ -50,7 +46,11 @@ public class Trainer {
     @ToString.Exclude
     private Set<Trainee> trainees = new HashSet<>();
 
-    @OneToMany(mappedBy = "trainer")
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+    @OneToMany(mappedBy = "trainers")
     @Builder.Default
     @ToString.Exclude
     private Set<Training> trainings = new HashSet<>();

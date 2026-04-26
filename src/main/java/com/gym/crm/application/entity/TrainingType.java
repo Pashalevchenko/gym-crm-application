@@ -23,7 +23,7 @@ import java.util.Set;
 @Builder
 @ToString
 @Entity
-@Table(name = "training_type")
+@Table(name = "training_types")
 public class TrainingType {
 
     @Id
@@ -31,7 +31,7 @@ public class TrainingType {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "training_type_name", nullable = false, unique = true)
+    @Column(name = "training_type_name", nullable = false, unique = true, length = 100)
     private String trainingTypeName;
 
     @OneToMany(mappedBy = "trainingType")
