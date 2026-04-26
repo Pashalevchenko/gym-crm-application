@@ -38,7 +38,7 @@ public class Trainer {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "specialization", nullable = false)
+    @JoinColumn(name = "specialization_id", nullable = false)
     private TrainingType specialization;
 
     @ManyToMany(mappedBy = "trainers")
@@ -50,7 +50,7 @@ public class Trainer {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @OneToMany(mappedBy = "trainers")
+    @OneToMany(mappedBy = "trainer")
     @Builder.Default
     @ToString.Exclude
     private Set<Training> trainings = new HashSet<>();
