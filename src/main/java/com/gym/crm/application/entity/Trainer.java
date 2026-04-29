@@ -34,6 +34,7 @@ public class Trainer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     @Column
     private Long id;
 
