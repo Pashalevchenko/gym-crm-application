@@ -21,7 +21,6 @@ public class HibernateConfig {
     public SessionFactory sessionFactory(DataSource dataSource) {
         Properties props = new Properties();
         props.put(AvailableSettings.DATASOURCE, dataSource);
-        props.put(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQLDialect");
         props.put(AvailableSettings.SHOW_SQL, "true");
         props.put(AvailableSettings.FORMAT_SQL, "true");
         props.put(AvailableSettings.HBM2DDL_AUTO, "validate");

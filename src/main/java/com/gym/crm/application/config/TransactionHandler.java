@@ -1,19 +1,18 @@
-package com.gym.crm.application.util;
+package com.gym.crm.application.config;
 
+import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-
+import org.springframework.stereotype.Component;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class HibernateTransactionUtil {
+@Component
+@RequiredArgsConstructor
+public class TransactionHandler {
 
     private final SessionFactory sessionFactory;
-
-    public HibernateTransactionUtil(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
 
     public void performWithinTransaction(Consumer<Session> action) {
         try (Session session = sessionFactory.openSession()) {

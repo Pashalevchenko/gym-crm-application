@@ -19,13 +19,11 @@ public interface TraineeDaoHibernate extends CrudDao<Trainee, Long>{
 
     Optional<Trainee> findByUsername(String username);
 
-    List<Training> findTrainingsByCriteria(
-            String traineeUsername,
-            LocalDate fromDate,
-            LocalDate toDate,
-            String trainerName,
-            String trainingTypeName
-    );
+    List<Training> findTrainingsByCriteria(String traineeUsername,
+                                           LocalDate fromDate,
+                                           LocalDate toDate,
+                                           String trainerName,
+                                           String trainingTypeName);
 
     List<Trainer> findNotAssignedTrainers(String traineeUsername);
 

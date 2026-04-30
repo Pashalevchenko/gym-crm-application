@@ -4,16 +4,15 @@ import com.gym.crm.application.dao.TraineeDaoHibernate;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
-import com.gym.crm.application.util.HibernateTransactionUtil;
+import com.gym.crm.application.config.TransactionHandler;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,18 +23,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
+@RequiredArgsConstructor
 public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
 
-    private final HibernateTransactionUtil transactionUtil;
-
-    @Autowired
-    public TraineeDaoHibernateImpl(SessionFactory sessionFactory) {
-        this.transactionUtil = new HibernateTransactionUtil(sessionFactory);
-    }
+    private final TransactionHandler transactionHandler;
 
     @Override
     public Trainee create(Trainee trainee) {
-        Trainee created = transactionUtil.performReturningWithinTransaction(session -> {
+        Trainee created = transactionHandler.performReturningWithinTransaction(session -> {
             session.persist(trainee);
             return trainee;
         });
@@ -46,9 +41,8 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
 
     @Override
     public Trainee update(Trainee trainee) {
-        Trainee updatedTrainee = transactionUtil.performReturningWithinTransaction(
-                session -> session.merge(trainee)
-        );
+        Trainee updatedTrainee = transactionHandler.performReturningWithinTransaction(session ->
+                session.merge(trainee));
 
         log.info("Trainee with id: {} was updated", updatedTrainee.getId());
         return updatedTrainee;
@@ -56,18 +50,15 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
 
     @Override
     public Optional<Trainee> findById(Long id) {
-        return transactionUtil.performReturningWithinTransaction(session ->
-                Optional.ofNullable(session.get(Trainee.class, id))
-        );
+        return transactionHandler.performReturningWithinTransaction(session ->
+                Optional.ofNullable(session.get(Trainee.class, id)));
     }
 
     @Override
     public Optional<Trainee> findByUsername(String username) {
-        return transactionUtil.performReturningWithinTransaction(session ->
-                session.createQuery(
-                                "from Trainee t where t.user.username = :username",
-                                Trainee.class
-                        )
+        return transactionHandler.performReturningWithinTransaction(session ->
+                session.createQuery("from Trainee t where t.user.username = :username",
+                                Trainee.class)
                         .setParameter("username", username)
                         .uniqueResultOptional()
         );
@@ -75,15 +66,14 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
 
     @Override
     public List<Trainee> findAll() {
-        return transactionUtil.performReturningWithinTransaction(session ->
+        return transactionHandler.performReturningWithinTransaction(session ->
                 session.createQuery("from Trainee", Trainee.class)
-                        .getResultList()
-        );
+                        .getResultList());
     }
 
     @Override
     public void delete(Long id) {
-       transactionUtil.performWithinTransaction(session -> {
+       transactionHandler.performWithinTransaction(session -> {
             Trainee trainee = session.get(Trainee.class, id);
 
             if (trainee == null) {
@@ -98,11 +88,9 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
 
     @Override
     public void deleteByUsername(String username) {
-        transactionUtil.performWithinTransaction(session -> {
-            Trainee trainee = session.createQuery(
-                            "from Trainee t where t.user.username = :username",
-                            Trainee.class
-                    )
+        transactionHandler.performWithinTransaction(session -> {
+            Trainee trainee = session.createQuery("from Trainee t where t.user.username = :username",
+                                                  Trainee.class)
                     .setParameter("username", username)
                     .uniqueResult();
 
@@ -117,14 +105,12 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
     }
 
     @Override
-    public List<Training> findTrainingsByCriteria(
-            String traineeUsername,
-            LocalDate fromDate,
-            LocalDate toDate,
-            String trainerName,
-            String trainingTypeName
-    ) {
-        return transactionUtil.performReturningWithinTransaction(session -> {
+    public List<Training> findTrainingsByCriteria(String traineeUsername,
+                                                  LocalDate fromDate,
+                                                  LocalDate toDate,
+                                                  String trainerName,
+                                                  String trainingTypeName) {
+        return transactionHandler.performReturningWithinTransaction(session -> {
             CriteriaBuilder cb = session.getCriteriaBuilder();
             CriteriaQuery<Training> cq = cb.createQuery(Training.class);
             Root<Training> training = cq.from(Training.class);
@@ -132,23 +118,20 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
 
             predicates.add(cb.equal(
                     training.get("trainee").get("user").get("username"),
-                    traineeUsername
-            ));
+                    traineeUsername));
 
             addDateRangePredicates(cb, training, predicates, fromDate, toDate);
 
             if (trainerName != null) {
                 predicates.add(cb.equal(
                         fullName(cb, training.get("trainer").get("user")),
-                        trainerName
-                ));
+                        trainerName));
             }
 
             if (trainingTypeName != null) {
                 predicates.add(cb.equal(
                         training.get("trainingType").get("trainingTypeName"),
-                        trainingTypeName
-                ));
+                        trainingTypeName));
             }
 
             cq.where(predicates.toArray(Predicate[]::new));
@@ -159,7 +142,7 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
 
     @Override
     public List<Trainer> findNotAssignedTrainers(String traineeUsername) {
-        return transactionUtil.performReturningWithinTransaction(session -> {
+        return transactionHandler.performReturningWithinTransaction(session -> {
             String hql = """
                     from Trainer tr
                     where tr not in (
@@ -178,11 +161,9 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
 
     @Override
     public Trainee updateTrainersList(String traineeUsername, Set<Trainer> trainers) {
-        Trainee updatedTrainee = transactionUtil.performReturningWithinTransaction(session -> {
-            Trainee trainee = session.createQuery(
-                            "from Trainee t where t.user.username = :username",
-                            Trainee.class
-                    )
+        Trainee updatedTrainee = transactionHandler.performReturningWithinTransaction(session -> {
+            Trainee trainee = session.createQuery("from Trainee t where t.user.username = :username",
+                                                  Trainee.class)
                     .setParameter("username", traineeUsername)
                     .uniqueResult();
 
@@ -205,32 +186,21 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
         return updatedTrainee;
     }
 
-    private void addDateRangePredicates(
-            CriteriaBuilder cb,
-            Root<Training> training,
-            List<Predicate> predicates,
-            LocalDate fromDate,
-            LocalDate toDate
-    ) {
+    private void addDateRangePredicates(CriteriaBuilder cb,
+                                        Root<Training> training,
+                                        List<Predicate> predicates,
+                                        LocalDate fromDate,
+                                        LocalDate toDate) {
         if (fromDate != null) {
-            predicates.add(cb.greaterThanOrEqualTo(
-                    training.get("trainingDate"),
-                    fromDate
-            ));
+            predicates.add(cb.greaterThanOrEqualTo(training.get("trainingDate"), fromDate));
         }
 
         if (toDate != null) {
-            predicates.add(cb.lessThanOrEqualTo(
-                    training.get("trainingDate"),
-                    toDate
-            ));
+            predicates.add(cb.lessThanOrEqualTo(training.get("trainingDate"), toDate));
         }
     }
 
     private Expression<String> fullName(CriteriaBuilder cb, Path<?> userPath) {
-        return cb.concat(
-                cb.concat(userPath.get("firstName"), " "),
-                userPath.get("lastName")
-        );
+        return cb.concat(cb.concat(userPath.get("firstName"), " "), userPath.get("lastName"));
     }
 }

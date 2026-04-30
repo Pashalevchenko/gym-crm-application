@@ -1,37 +1,30 @@
 package com.gym.crm.application.dao;
 
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.gym.crm.application.config.DaoTestConfig;
-import org.junit.jupiter.api.BeforeEach;
+import com.gym.crm.application.config.DatabaseCleanerTestExecutionListener;
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.Statement;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = DaoTestConfig.class)
+@TestExecutionListeners(listeners = {
+                DependencyInjectionTestExecutionListener.class,
+                DatabaseCleanerTestExecutionListener.class,
+                DbUnitTestExecutionListener.class
+        },
+                      mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class AbstractDaoIntegrationTest {
 
     @Autowired
-    private DataSource dataSource;
+    protected TraineeDaoHibernate traineeDao;
 
-    @BeforeEach
-    void cleanDatabase() throws Exception {
-        try (Connection connection = dataSource.getConnection();
-             Statement statement = connection.createStatement()) {
+    @Autowired
+    protected SessionFactory sessionFactory;
 
-            statement.execute("""
-                    TRUNCATE TABLE
-                        trainee_trainer,
-                        trainings,
-                        trainees,
-                        trainers,
-                        training_types,
-                        users
-                    RESTART IDENTITY CASCADE
-                    """);
-        }
-    }
 }

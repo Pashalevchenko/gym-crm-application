@@ -1,9 +1,9 @@
 package com.gym.crm.application.config;
 
-import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 
 @Configuration
@@ -20,9 +20,9 @@ public class DatabaseConfig {
 
     @Bean
     public DataSource dataSource() {
-        PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setUrl(url);
-        dataSource.setUser(username);
+        dataSource.setUsername(username);
         dataSource.setPassword(password);
 
         return dataSource;
