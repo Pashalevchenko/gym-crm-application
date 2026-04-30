@@ -57,8 +57,7 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
     @Override
     public Optional<Trainee> findByUsername(String username) {
         return transactionHandler.performReturningWithinTransaction(session ->
-                session.createQuery("from Trainee t where t.user.username = :username",
-                                Trainee.class)
+                session.createQuery("from Trainee t where t.user.username = :username", Trainee.class)
                         .setParameter("username", username)
                         .uniqueResultOptional()
         );

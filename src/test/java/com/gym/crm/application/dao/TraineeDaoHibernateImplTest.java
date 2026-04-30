@@ -28,7 +28,6 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
     class CreateTests {
 
         @Test
-        @DatabaseSetup(value = "/datasets/clean-database.xml", type = DatabaseOperation.DELETE_ALL)
         @DisplayName("Should save trainee with all fields")
         void create_success() {
             Trainee trainee = buildTrainee("Borys", "Burpee", "borys.burpee");
@@ -56,7 +55,6 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
         }
 
         @Test
-        @DatabaseSetup(value = "/datasets/clean-database.xml", type = DatabaseOperation.DELETE_ALL)
         @DisplayName("Should throw exception when trainee is null")
         void create_nullTrainee() {
             RuntimeException exception = assertThrows(RuntimeException.class,
@@ -67,11 +65,11 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
     }
 
     @Nested
+    @DatabaseSetup("/datasets/trainee-dataset.xml")
     @DisplayName("update")
     class UpdateTests {
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should update trainee when trainee exists")
         void update_success() {
             Trainee trainee = traineeDao.findById(TRAINEE_ID).orElseThrow();
@@ -99,7 +97,6 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
         }
 
         @Test
-        @DatabaseSetup(value = "/datasets/clean-database.xml", type = DatabaseOperation.DELETE_ALL)
         @DisplayName("Should throw exception when trainee is null")
         void update_nullTrainee() {
             RuntimeException exception = assertThrows(RuntimeException.class,
@@ -110,11 +107,11 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
     }
 
     @Nested
+    @DatabaseSetup("/datasets/trainee-dataset.xml")
     @DisplayName("findById")
     class FindByIdTests {
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should return trainee when trainee with requested id exists")
         void findById_found() {
             Optional<Trainee> found = traineeDao.findById(TRAINEE_ID);
@@ -135,7 +132,6 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
         }
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should return empty optional when trainee with requested id does not exist")
         void findById_notFound() {
             Optional<Trainee> found = traineeDao.findById(999L);
@@ -145,11 +141,11 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
     }
 
     @Nested
+    @DatabaseSetup("/datasets/trainee-dataset.xml")
     @DisplayName("findByUsername")
     class FindByUsernameTests {
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should return trainee when trainee with requested username exists")
         void findByUsername_found() {
             Optional<Trainee> found = traineeDao.findByUsername("marta.muscle");
@@ -170,7 +166,6 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
         }
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should return empty optional when trainee with requested username does not exist")
         void findByUsername_notFound() {
             Optional<Trainee> found = traineeDao.findByUsername("ghost.gains");
@@ -206,11 +201,11 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
     }
 
     @Nested
+    @DatabaseSetup("/datasets/trainee-dataset.xml")
     @DisplayName("delete")
     class DeleteTests {
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should delete trainee when trainee with requested id exists")
         void delete_success() {
             traineeDao.delete(2L);
@@ -220,7 +215,6 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
         }
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should throw exception when trainee with requested id does not exist")
         void delete_notFound() {
             RuntimeException exception = assertThrows(RuntimeException.class,
@@ -231,11 +225,11 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
     }
 
     @Nested
+    @DatabaseSetup("/datasets/trainee-dataset.xml")
     @DisplayName("deleteByUsername")
     class DeleteByUsernameTests {
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should delete trainee when trainee with requested username exists")
         void deleteByUsername_success() {
             traineeDao.deleteByUsername("marta.muscle");
@@ -245,7 +239,6 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
         }
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should throw exception when trainee with requested username does not exist")
         void deleteByUsername_notFound() {
             RuntimeException exception = assertThrows(RuntimeException.class,
@@ -256,11 +249,11 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
     }
 
     @Nested
+    @DatabaseSetup("/datasets/trainee-dataset.xml")
     @DisplayName("findTrainingsByCriteria")
     class FindTrainingsByCriteriaTests {
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should return trainings matching criteria")
         void findTrainingsByCriteria_success() {
             List<Training> trainings = traineeDao.findTrainingsByCriteria("borys.burpee",
@@ -280,7 +273,6 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
         }
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should return empty list when criteria do not match")
         void findTrainingsByCriteria_noMatch() {
             List<Training> trainings = traineeDao.findTrainingsByCriteria("borys.burpee",
@@ -309,10 +301,7 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
         }
 
         @Test
-        @DatabaseSetups({
-                @DatabaseSetup(value = "/datasets/clean-database.xml", type = DatabaseOperation.DELETE_ALL),
-                @DatabaseSetup(value = "/datasets/all-trainers-assigned-dataset.xml", type = DatabaseOperation.INSERT)
-        })
+        @DatabaseSetup("/datasets/all-trainers-assigned-dataset.xml")
         @DisplayName("Should return empty list when all trainers are assigned")
         void findNotAssignedTrainers_empty() {
             List<Trainer> result = traineeDao.findNotAssignedTrainers("borys.burpee");
@@ -322,11 +311,11 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
     }
 
     @Nested
+    @DatabaseSetup("/datasets/trainee-dataset.xml")
     @DisplayName("updateTrainersList")
     class UpdateTrainersListTests {
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should replace trainee trainers list with provided trainers")
         void updateTrainersList_success() {
             Trainer trainerOne = findTrainerById(2L);
@@ -343,7 +332,6 @@ class TraineeDaoHibernateImplTest extends AbstractDaoIntegrationTest {
         }
 
         @Test
-        @DatabaseSetup("/datasets/trainee-dataset.xml")
         @DisplayName("Should throw exception when trainee with requested username does not exist")
         void updateTrainersList_traineeNotFound() {
             Trainer trainer = findTrainerById(TRAINEE_ID);

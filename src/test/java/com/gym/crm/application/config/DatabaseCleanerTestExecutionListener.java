@@ -23,14 +23,14 @@ public class DatabaseCleanerTestExecutionListener extends AbstractTestExecutionL
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
 
-//            statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
-//            statement.execute("TRUNCATE TABLE trainee_trainer RESTART IDENTITY");
-//            statement.execute("TRUNCATE TABLE trainings RESTART IDENTITY");
-//            statement.execute("TRUNCATE TABLE trainees RESTART IDENTITY");
-//            statement.execute("TRUNCATE TABLE trainers RESTART IDENTITY");
-//            statement.execute("TRUNCATE TABLE training_types RESTART IDENTITY");
-//            statement.execute("TRUNCATE TABLE users RESTART IDENTITY");
-//            statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
+            statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
+            statement.execute("TRUNCATE TABLE trainee_trainer RESTART IDENTITY");
+            statement.execute("TRUNCATE TABLE trainings RESTART IDENTITY");
+            statement.execute("TRUNCATE TABLE trainees RESTART IDENTITY");
+            statement.execute("TRUNCATE TABLE trainers RESTART IDENTITY");
+            statement.execute("TRUNCATE TABLE training_types RESTART IDENTITY");
+            statement.execute("TRUNCATE TABLE users RESTART IDENTITY");
+            statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
         }
     }
 }
