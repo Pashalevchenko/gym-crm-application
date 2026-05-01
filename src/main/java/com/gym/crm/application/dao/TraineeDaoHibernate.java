@@ -2,9 +2,6 @@ package com.gym.crm.application.dao;
 
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
-import com.gym.crm.application.entity.Training;
-
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
