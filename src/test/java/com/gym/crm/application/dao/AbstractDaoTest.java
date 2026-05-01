@@ -24,5 +24,4 @@ public abstract class AbstractDaoTest<T> {
 
     @Autowired
     protected SessionFactory sessionFactory;
-
 }
