@@ -8,7 +8,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
 public class TraineeTrainingSearchFilter extends TrainingSearchFilter {
-
     private final String trainerName;
     private final String trainingTypeName;
 }
