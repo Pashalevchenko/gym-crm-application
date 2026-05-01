@@ -12,10 +12,10 @@ public class DatabaseConfig {
     @Value("${db.url}")
     private String url;
 
-    @Value("${db.username}")
+    @Value("${db.username:}")
     private String username;
 
-    @Value("${db.password}")
+    @Value("${db.password:}")
     private String password;
 
     @Bean

@@ -2,7 +2,6 @@ package com.gym.crm.application.dao;
 
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.gym.crm.application.config.DaoTestConfig;
-import com.gym.crm.application.config.DatabaseCleanerTestExecutionListener;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +14,10 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 @ContextConfiguration(classes = DaoTestConfig.class)
 @TestExecutionListeners(listeners = {
                 DependencyInjectionTestExecutionListener.class,
-                DatabaseCleanerTestExecutionListener.class,
                 DbUnitTestExecutionListener.class
         },
                       mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
-public abstract class AbstractDaoIntegrationTest {
+public abstract class AbstractDaoTest {
 
     @Autowired
     protected TraineeDaoHibernate traineeDao;
