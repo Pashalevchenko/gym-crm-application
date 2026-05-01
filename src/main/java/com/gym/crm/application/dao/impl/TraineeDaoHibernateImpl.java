@@ -104,42 +104,6 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
     }
 
     @Override
-    public List<Training> findTrainingsByCriteria(String traineeUsername,
-                                                  LocalDate fromDate,
-                                                  LocalDate toDate,
-                                                  String trainerName,
-                                                  String trainingTypeName) {
-        return transactionHandler.performReturningWithinTransaction(session -> {
-            CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<Training> cq = cb.createQuery(Training.class);
-            Root<Training> training = cq.from(Training.class);
-            List<Predicate> predicates = new ArrayList<>();
-
-            predicates.add(cb.equal(
-                    training.get("trainee").get("user").get("username"),
-                    traineeUsername));
-
-            addDateRangePredicates(cb, training, predicates, fromDate, toDate);
-
-            if (trainerName != null) {
-                predicates.add(cb.equal(
-                        fullName(cb, training.get("trainer").get("user")),
-                        trainerName));
-            }
-
-            if (trainingTypeName != null) {
-                predicates.add(cb.equal(
-                        training.get("trainingType").get("trainingTypeName"),
-                        trainingTypeName));
-            }
-
-            cq.where(predicates.toArray(Predicate[]::new));
-
-            return session.createQuery(cq).getResultList();
-        });
-    }
-
-    @Override
     public List<Trainer> findNotAssignedTrainers(String traineeUsername) {
         return transactionHandler.performReturningWithinTransaction(session -> {
             String hql = """
@@ -183,23 +147,5 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
         log.info("Trainers list for trainee username: {} was updated", traineeUsername);
 
         return updatedTrainee;
-    }
-
-    private void addDateRangePredicates(CriteriaBuilder cb,
-                                        Root<Training> training,
-                                        List<Predicate> predicates,
-                                        LocalDate fromDate,
-                                        LocalDate toDate) {
-        if (fromDate != null) {
-            predicates.add(cb.greaterThanOrEqualTo(training.get("trainingDate"), fromDate));
-        }
-
-        if (toDate != null) {
-            predicates.add(cb.lessThanOrEqualTo(training.get("trainingDate"), toDate));
-        }
-    }
-
-    private Expression<String> fullName(CriteriaBuilder cb, Path<?> userPath) {
-        return cb.concat(cb.concat(userPath.get("firstName"), " "), userPath.get("lastName"));
     }
 }

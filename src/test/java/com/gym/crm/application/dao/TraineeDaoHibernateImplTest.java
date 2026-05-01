@@ -4,7 +4,6 @@ import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
-import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.User;
 import org.hibernate.Session;
 import org.junit.jupiter.api.DisplayName;
@@ -251,43 +250,6 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest<TraineeDaoHibernate> {
                     () -> dao.deleteByUsername("missing.muscle"));
 
             assertThat(exception.getMessage()).contains("not found");
-        }
-    }
-
-    @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
-    @DisplayName("findTrainingsByCriteria")
-    class FindTrainingsByCriteriaTests {
-
-        @Test
-        @DisplayName("Should return trainings matching criteria")
-        void findTrainingsByCriteria_success() {
-            List<Training> trainings = dao.findTrainingsByCriteria("borys.burpee",
-                                                                          LocalDate.of(2026, 4, 1),
-                                                                          LocalDate.of(2026, 4, 30),
-                                                                          "Pavlo Plank",
-                                                                          "Penguin Yoga");
-
-            assertThat(trainings).hasSize(1);
-
-            Training actual = trainings.get(0);
-
-            assertThat(actual.getId()).isEqualTo(1L);
-            assertThat(actual.getTrainingName()).isEqualTo("Morning Penguin Stretch");
-            assertThat(actual.getTrainingDate()).isEqualTo(LocalDate.of(2026, 4, 10));
-            assertThat(actual.getTrainingDuration()).isEqualTo(60);
-        }
-
-        @Test
-        @DisplayName("Should return empty list when criteria do not match")
-        void findTrainingsByCriteria_noMatch() {
-            List<Training> trainings = dao.findTrainingsByCriteria("borys.burpee",
-                                                                          LocalDate.of(2026, 5, 1),
-                                                                          LocalDate.of(2026, 5, 30),
-                                                                          null,
-                                                                          null);
-
-            assertThat(trainings).isEmpty();
         }
     }
 
