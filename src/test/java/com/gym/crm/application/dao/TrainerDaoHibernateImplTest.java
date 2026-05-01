@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.gym.crm.application.entity.Training;
+import com.gym.crm.application.search.filter.TrainerTrainingSearchFilter;
+import java.time.LocalDate;
 
 @DisplayName("Trainer Hibernate DAO DBUnit integration tests")
 class TrainerDaoHibernateImplTest extends AbstractDaoTest<TrainerDaoHibernate> {
@@ -215,6 +218,81 @@ class TrainerDaoHibernateImplTest extends AbstractDaoTest<TrainerDaoHibernate> {
         }
     }
 
+    @Nested
+    @DatabaseSetup(value = "/dataset/trainer-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DisplayName("findTrainingsByCriteria")
+    class FindTrainingsByCriteriaTests {
+
+        @Test
+        @DisplayName("Should return trainer trainings by username")
+        void findTrainingsByCriteria_byUsername() {
+            TrainerTrainingSearchFilter filter = TrainerTrainingSearchFilter.builder()
+                    .username("pavlo.plank")
+                    .build();
+
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual).hasSize(1);
+            assertThat(actual.get(0).getTrainingName()).isEqualTo("Morning Penguin Stretch");
+            assertThat(actual.get(0).getTrainer().getUser().getUsername()).isEqualTo("pavlo.plank");
+        }
+
+        @Test
+        @DisplayName("Should return trainer trainings by date range")
+        void findTrainingsByCriteria_byDateRange() {
+            TrainerTrainingSearchFilter filter = TrainerTrainingSearchFilter.builder()
+                    .username("pavlo.plank")
+                    .fromDate(LocalDate.of(2026, 4, 1))
+                    .toDate(LocalDate.of(2026, 4, 30))
+                    .build();
+
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual).hasSize(1);
+            assertThat(actual.get(0).getTrainingDate()).isEqualTo(LocalDate.of(2026, 4, 10));
+        }
+
+        @Test
+        @DisplayName("Should return trainer trainings by trainee full name")
+        void findTrainingsByCriteria_byTraineeFullName() {
+            TrainerTrainingSearchFilter filter = TrainerTrainingSearchFilter.builder()
+                    .username("pavlo.plank")
+                    .build();
+
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual).hasSize(1);
+            assertThat(actual.get(0).getTrainee().getUser().getUsername()).isEqualTo("fedir.foamroller");
+        }
+
+        @Test
+        @DisplayName("Should return empty list when date range does not match")
+        void findTrainingsByCriteria_dateRangeNotFound() {
+            TrainerTrainingSearchFilter filter = TrainerTrainingSearchFilter.builder()
+                    .username("pavlo.plank")
+                    .fromDate(LocalDate.of(2026, 5, 1))
+                    .toDate(LocalDate.of(2026, 5, 31))
+                    .build();
+
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Should return empty list when trainee full name does not match")
+        void findTrainingsByCriteria_traineeFullNameNotFound() {
+            TrainerTrainingSearchFilter filter = TrainerTrainingSearchFilter.builder()
+                    .username("pavlo.plank")
+                    .traineeName("Ira Iron")
+                    .build();
+
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual).isEmpty();
+        }
+    }
+
     private Trainer buildTrainer(String firstName, String lastName, String username, Long specializationId) {
         User user = User.builder()
                 .firstName(firstName)
@@ -240,6 +318,29 @@ class TrainerDaoHibernateImplTest extends AbstractDaoTest<TrainerDaoHibernate> {
             Trainer trainer = session.get(Trainer.class, id);
 
             if (trainer != null) {
+                Long userId = trainer.getUser().getId();
+
+                session.createMutationQuery("""
+                            delete from Training t
+                            where t.trainer.id = :trainerId
+                            """)
+                        .setParameter("trainerId", id)
+                        .executeUpdate();
+
+                session.createMutationQuery("""
+                            delete from Training t
+                            where t.trainee.user.id = :userId
+                            """)
+                        .setParameter("userId", userId)
+                        .executeUpdate();
+
+                session.createMutationQuery("""
+                            delete from Trainee t
+                            where t.user.id = :userId
+                            """)
+                        .setParameter("userId", userId)
+                        .executeUpdate();
+
                 session.remove(trainer);
             }
 

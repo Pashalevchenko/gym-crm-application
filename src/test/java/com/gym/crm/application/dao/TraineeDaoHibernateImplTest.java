@@ -13,6 +13,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import com.gym.crm.application.entity.Training;
+import com.gym.crm.application.search.filter.TraineeTrainingSearchFilter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -323,6 +325,81 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest<TraineeDaoHibernate> {
                     () -> dao.updateTrainersList("unknown.unicorn", Set.of(trainer)));
 
             assertThat(exception.getMessage()).contains("not found");
+        }
+    }
+
+    @Nested
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DisplayName("findTrainingsByCriteria")
+    class FindTrainingsByCriteriaTests {
+
+        @Test
+        @DisplayName("Should return trainee trainings by username")
+        void findTrainingsByCriteria_byUsername() {
+            TraineeTrainingSearchFilter filter = TraineeTrainingSearchFilter.builder()
+                    .username("borys.burpee")
+                    .build();
+
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual).hasSize(1);
+            assertThat(actual.get(0).getTrainingName()).isEqualTo("Morning Penguin Stretch");
+        }
+
+        @Test
+        @DisplayName("Should return trainee trainings by date range")
+        void findTrainingsByCriteria_byDateRange() {
+            TraineeTrainingSearchFilter filter = TraineeTrainingSearchFilter.builder()
+                    .username("borys.burpee")
+                    .fromDate(LocalDate.of(2026, 4, 1))
+                    .toDate(LocalDate.of(2026, 4, 30))
+                    .build();
+
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual).hasSize(1);
+            assertThat(actual.get(0).getTrainingDate()).isEqualTo(LocalDate.of(2026, 4, 10));
+        }
+
+        @Test
+        @DisplayName("Should return trainee trainings by trainer name")
+        void findTrainingsByCriteria_byTrainerName() {
+            TraineeTrainingSearchFilter filter = TraineeTrainingSearchFilter.builder()
+                    .username("borys.burpee")
+                    .trainerName("Pavlo Plank")
+                    .build();
+
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual).hasSize(1);
+            assertThat(actual.get(0).getTrainer().getUser().getUsername()).isEqualTo("pavlo.plank");
+        }
+
+        @Test
+        @DisplayName("Should return trainee trainings by training type")
+        void findTrainingsByCriteria_byTrainingType() {
+            TraineeTrainingSearchFilter filter = TraineeTrainingSearchFilter.builder()
+                    .username("borys.burpee")
+                    .trainingTypeName("Penguin Yoga")
+                    .build();
+
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual).hasSize(1);
+            assertThat(actual.get(0).getTrainingType().getTrainingTypeName()).isEqualTo("Penguin Yoga");
+        }
+
+        @Test
+        @DisplayName("Should return empty list when criteria does not match")
+        void findTrainingsByCriteria_notFound() {
+            TraineeTrainingSearchFilter filter = TraineeTrainingSearchFilter.builder()
+                    .username("borys.burpee")
+                    .trainingTypeName("Strength Shenanigans")
+                    .build();
+
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual).isEmpty();
         }
     }
 

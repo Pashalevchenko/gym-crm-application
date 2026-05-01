@@ -5,17 +5,13 @@ import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.config.TransactionHandler;
+import com.gym.crm.application.search.TraineeTrainingQueryBuilder;
+import com.gym.crm.application.search.filter.TraineeTrainingSearchFilter;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,6 +23,8 @@ import java.util.stream.Collectors;
 public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
 
     private final TransactionHandler transactionHandler;
+
+    private final TraineeTrainingQueryBuilder traineeTrainingQueryBuilder;
 
     @Override
     public Trainee create(Trainee trainee) {
@@ -68,6 +66,16 @@ public class TraineeDaoHibernateImpl implements TraineeDaoHibernate {
         return transactionHandler.performReturningWithinTransaction(session ->
                 session.createQuery("from Trainee", Trainee.class)
                         .getResultList());
+    }
+
+    @Override
+    public List<Training> findTrainingsByCriteria(TraineeTrainingSearchFilter filter) {
+        return transactionHandler.performReturningWithinTransaction(session -> {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Training> query = traineeTrainingQueryBuilder.build(cb, filter);
+
+            return session.createQuery(query).getResultList();
+        });
     }
 
     @Override
