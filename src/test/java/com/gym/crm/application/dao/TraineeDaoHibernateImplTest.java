@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Trainee Hibernate DAO DBUnit integration tests")
-class TraineeDaoHibernateImplTest extends AbstractDaoTest {
+class TraineeDaoHibernateImplTest extends AbstractDaoTest<TraineeDaoHibernate> {
 
     private static final Long TRAINEE_ID = 1L;
     private static final Long SECOND_TRAINEE_ID = 2L;
@@ -28,28 +28,25 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest {
     private static final Long THIRD_TRAINER_ID = 3L;
 
     @Nested
-    @DatabaseSetup(
-            value = "/dataset/trainee-data-init.xml",
-            type = DatabaseOperation.CLEAN_INSERT
-    )
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
     @DisplayName("create")
     class CreateTests {
 
         @Test
         @DisplayName("Should save trainee")
         void create_success() {
-            traineeDao.delete(2L);
-            traineeDao.delete(1L);
+            dao.delete(2L);
+            dao.delete(1L);
 
             Trainee trainee = buildTrainee("New", "Trainee", "new.trainee");
-            Trainee created = traineeDao.create(trainee);
+            Trainee actual = dao.create(trainee);
 
-            assertThat(created).isNotNull();
-            assertThat(created.getId()).isNotNull();
-            assertThat(created.getUser()).isNotNull();
-            assertThat(created.getUser().getId()).isNotNull();
+            assertThat(actual).isNotNull();
+            assertThat(actual.getId()).isNotNull();
+            assertThat(actual.getUser()).isNotNull();
+            assertThat(actual.getUser().getId()).isNotNull();
 
-            Optional<Trainee> found = traineeDao.findByUsername("new.trainee");
+            Optional<Trainee> found = dao.findByUsername("new.trainee");
 
             assertThat(found).isPresent();
         }
@@ -57,40 +54,38 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest {
         @Test
         @DisplayName("Should throw exception when trainee is null")
         void create_nullTrainee() {
-            RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> traineeDao.create(null));
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> dao.create(null));
 
             assertThat(exception).isNotNull();
         }
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml",
-                   type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
     @DisplayName("update")
     class UpdateTests {
 
         @Test
         @DisplayName("Should update trainee when trainee exists")
         void update_success() {
-            Trainee existing = traineeDao.findById(TRAINEE_ID).orElseThrow();
-
+            Trainee existing = dao.findById(TRAINEE_ID).orElseThrow();
+            User user = User.builder()
+                    .id(existing.getUser().getId())
+                    .firstName("Updated")
+                    .lastName("Burpee")
+                    .username(existing.getUser().getUsername())
+                    .password(existing.getUser().getPassword())
+                    .isActive(existing.getUser().isActive())
+                    .build();
             Trainee traineeToUpdate = Trainee.builder()
                     .id(existing.getId())
                     .dateOfBirth(LocalDate.of(1999, 9, 9))
                     .address("Lviv")
-                    .user(User.builder()
-                            .id(existing.getUser().getId())
-                            .firstName("Updated")
-                            .lastName("Burpee")
-                            .username(existing.getUser().getUsername())
-                            .password(existing.getUser().getPassword())
-                            .isActive(existing.getUser().isActive())
-                            .build())
+                    .user(user)
                     .build();
 
-            Trainee updated = traineeDao.update(traineeToUpdate);
-            Optional<Trainee> found = traineeDao.findById(updated.getId());
+            Trainee updated = dao.update(traineeToUpdate);
+            Optional<Trainee> found = dao.findById(updated.getId());
 
             assertThat(found).isPresent();
 
@@ -110,23 +105,21 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest {
         @Test
         @DisplayName("Should throw exception when trainee is null")
         void update_nullTrainee() {
-            RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> traineeDao.update(null));
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> dao.update(null));
 
             assertThat(exception).isNotNull();
         }
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml",
-                   type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
     @DisplayName("findById")
     class FindByIdTests {
 
         @Test
         @DisplayName("Should return trainee when trainee with requested id exists")
         void findById_found() {
-            Optional<Trainee> found = traineeDao.findById(TRAINEE_ID);
+            Optional<Trainee> found = dao.findById(TRAINEE_ID);
 
             assertThat(found).isPresent();
 
@@ -146,22 +139,21 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest {
         @Test
         @DisplayName("Should return empty optional when trainee with requested id does not exist")
         void findById_notFound() {
-            Optional<Trainee> found = traineeDao.findById(999L);
+            Optional<Trainee> actual = dao.findById(999L);
 
-            assertThat(found).isEmpty();
+            assertThat(actual).isEmpty();
         }
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml",
-                   type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
     @DisplayName("findByUsername")
     class FindByUsernameTests {
 
         @Test
         @DisplayName("Should return trainee when trainee with requested username exists")
         void findByUsername_found() {
-            Optional<Trainee> found = traineeDao.findByUsername("marta.muscle");
+            Optional<Trainee> found = dao.findByUsername("marta.muscle");
 
             assertThat(found).isPresent();
 
@@ -181,25 +173,24 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest {
         @Test
         @DisplayName("Should return empty optional when trainee with requested username does not exist")
         void findByUsername_notFound() {
-            Optional<Trainee> found = traineeDao.findByUsername("ghost.gains");
+            Optional<Trainee> found = dao.findByUsername("ghost.gains");
 
             assertThat(found).isEmpty();
         }
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml",
-                   type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
     @DisplayName("findAll")
     class FindAllTests {
 
         @Test
         @DisplayName("Should return all trainees")
         void findAll_success() {
-            List<Trainee> trainees = traineeDao.findAll();
+            List<Trainee> actual = dao.findAll();
 
-            assertThat(trainees).hasSize(2);
-            assertThat(trainees)
+            assertThat(actual).hasSize(2);
+            assertThat(actual)
                     .extracting(trainee -> trainee.getUser().getUsername())
                     .containsExactlyInAnyOrder("borys.burpee", "marta.muscle");
         }
@@ -207,75 +198,71 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest {
         @Test
         @DisplayName("Should return empty list when there are no trainees")
         void findAll_empty() {
-            traineeDao.delete(SECOND_TRAINEE_ID);
-            traineeDao.delete(TRAINEE_ID);
+            dao.delete(SECOND_TRAINEE_ID);
+            dao.delete(TRAINEE_ID);
 
-            List<Trainee> trainees = traineeDao.findAll();
+            List<Trainee> actual = dao.findAll();
 
-            assertThat(trainees).isEmpty();
+            assertThat(actual).isEmpty();
         }
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml",
-                   type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
     @DisplayName("delete")
     class DeleteTests {
 
         @Test
         @DisplayName("Should delete trainee when trainee with requested id exists")
         void delete_success() {
-            traineeDao.delete(SECOND_TRAINEE_ID);
+            dao.delete(SECOND_TRAINEE_ID);
 
-            assertThat(traineeDao.findById(SECOND_TRAINEE_ID)).isEmpty();
-            assertThat(traineeDao.findByUsername("marta.muscle")).isEmpty();
+            assertThat(dao.findById(SECOND_TRAINEE_ID)).isEmpty();
+            assertThat(dao.findByUsername("marta.muscle")).isEmpty();
         }
 
         @Test
         @DisplayName("Should throw exception when trainee with requested id does not exist")
         void delete_notFound() {
-            RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> traineeDao.delete(999L));
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> dao.delete(999L));
 
             assertThat(exception.getMessage()).contains("not found");
         }
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml",
-                   type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
     @DisplayName("deleteByUsername")
     class DeleteByUsernameTests {
 
         @Test
         @DisplayName("Should delete trainee when trainee with requested username exists")
         void deleteByUsername_success() {
-            traineeDao.deleteByUsername("marta.muscle");
+            dao.deleteByUsername("marta.muscle");
 
-            assertThat(traineeDao.findById(SECOND_TRAINEE_ID)).isEmpty();
-            assertThat(traineeDao.findByUsername("marta.muscle")).isEmpty();
+            assertThat(dao.findById(SECOND_TRAINEE_ID)).isEmpty();
+            assertThat(dao.findByUsername("marta.muscle")).isEmpty();
         }
 
         @Test
         @DisplayName("Should throw exception when trainee with requested username does not exist")
         void deleteByUsername_notFound() {
             RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> traineeDao.deleteByUsername("missing.muscle"));
+                    () -> dao.deleteByUsername("missing.muscle"));
 
             assertThat(exception.getMessage()).contains("not found");
         }
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml",
-                   type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
     @DisplayName("findTrainingsByCriteria")
     class FindTrainingsByCriteriaTests {
 
         @Test
         @DisplayName("Should return trainings matching criteria")
         void findTrainingsByCriteria_success() {
-            List<Training> trainings = traineeDao.findTrainingsByCriteria("borys.burpee",
+            List<Training> trainings = dao.findTrainingsByCriteria("borys.burpee",
                                                                           LocalDate.of(2026, 4, 1),
                                                                           LocalDate.of(2026, 4, 30),
                                                                           "Pavlo Plank",
@@ -294,7 +281,7 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest {
         @Test
         @DisplayName("Should return empty list when criteria do not match")
         void findTrainingsByCriteria_noMatch() {
-            List<Training> trainings = traineeDao.findTrainingsByCriteria("borys.burpee",
+            List<Training> trainings = dao.findTrainingsByCriteria("borys.burpee",
                                                                           LocalDate.of(2026, 5, 1),
                                                                           LocalDate.of(2026, 5, 30),
                                                                           null,
@@ -305,15 +292,14 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest {
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml",
-                   type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
     @DisplayName("findNotAssignedTrainers")
     class FindNotAssignedTrainersTests {
 
         @Test
         @DisplayName("Should return trainers not assigned to trainee")
         void findNotAssignedTrainers_success() {
-            List<Trainer> result = traineeDao.findNotAssignedTrainers("borys.burpee");
+            List<Trainer> result = dao.findNotAssignedTrainers("borys.burpee");
 
             assertThat(result)
                     .extracting(trainer -> trainer.getUser().getUsername())
@@ -331,17 +317,16 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest {
             assertThat(trainerTwo).isNotNull();
             assertThat(trainerThree).isNotNull();
 
-            traineeDao.updateTrainersList("borys.burpee", Set.of(trainerOne, trainerTwo, trainerThree));
+            dao.updateTrainersList("borys.burpee", Set.of(trainerOne, trainerTwo, trainerThree));
 
-            List<Trainer> result = traineeDao.findNotAssignedTrainers("borys.burpee");
+            List<Trainer> result = dao.findNotAssignedTrainers("borys.burpee");
 
             assertThat(result).isEmpty();
         }
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml",
-                   type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
     @DisplayName("updateTrainersList")
     class UpdateTrainersListTests {
 
@@ -354,7 +339,7 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest {
             assertThat(trainerOne).isNotNull();
             assertThat(trainerTwo).isNotNull();
 
-            traineeDao.updateTrainersList("borys.burpee", Set.of(trainerOne, trainerTwo));
+            dao.updateTrainersList("borys.burpee", Set.of(trainerOne, trainerTwo));
 
             Trainee found = findTraineeWithTrainersByUsername("borys.burpee");
 
@@ -373,7 +358,7 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest {
             assertThat(trainer).isNotNull();
 
             RuntimeException exception = assertThrows(RuntimeException.class,
-                    () -> traineeDao.updateTrainersList("unknown.unicorn", Set.of(trainer)));
+                    () -> dao.updateTrainersList("unknown.unicorn", Set.of(trainer)));
 
             assertThat(exception.getMessage()).contains("not found");
         }

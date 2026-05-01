@@ -17,10 +17,10 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
                 DbUnitTestExecutionListener.class
         },
                       mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
-public abstract class AbstractDaoTest {
+public abstract class AbstractDaoTest<T> {
 
     @Autowired
-    protected TraineeDaoHibernate traineeDao;
+    protected T dao;
 
     @Autowired
     protected SessionFactory sessionFactory;

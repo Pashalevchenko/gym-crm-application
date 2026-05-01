@@ -16,7 +16,8 @@
     <trainers id="2" specialization_id="2" user_id="4"/>
     <trainers id="3" specialization_id="2" user_id="5"/>
 
-    <trainings id="1" training_name="Morning Penguin Stretch" training_date="2026-04-10" training_duration="60" training_type_id="1" trainee_id="1" trainer_id="1"/>
+    <trainings id="1" training_name="Morning Penguin Stretch" training_date="2026-04-10"
+               training_duration="60" training_type_id="1" trainee_id="1" trainer_id="1"/>
 
     <trainee_trainer trainee_id="1" trainer_id="1"/>
 </dataset>
