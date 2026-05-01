@@ -109,11 +109,9 @@ class TrainingDaoHibernateImplTest extends AbstractDaoTest<TrainingDaoHibernate>
             List<Training> actual = dao.findAll();
 
             assertThat(actual).hasSize(2);
-
             assertThat(actual)
                     .extracting(Training::getId)
                     .containsExactlyInAnyOrder(TRAINING_ID, SECOND_TRAINING_ID);
-
             assertThat(actual)
                     .extracting(Training::getTrainingName)
                     .containsExactlyInAnyOrder("Morning Penguin Stretch", "Evening Strength");

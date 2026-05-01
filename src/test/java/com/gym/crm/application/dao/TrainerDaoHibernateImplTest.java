@@ -46,6 +46,7 @@ class TrainerDaoHibernateImplTest extends AbstractDaoTest<TrainerDaoHibernate> {
             assertThat(found).isPresent();
 
             Trainer saved = found.get();
+
             assertThat(saved.getUser().getFirstName()).isEqualTo("New");
             assertThat(saved.getUser().getLastName()).isEqualTo("Trainer");
             assertThat(saved.getUser().getUsername()).isEqualTo("new.trainer");
@@ -130,6 +131,7 @@ class TrainerDaoHibernateImplTest extends AbstractDaoTest<TrainerDaoHibernate> {
             assertThat(found).isPresent();
 
             Trainer actual = found.get();
+
             assertThat(actual.getId()).isEqualTo(TRAINER_ID);
             assertThat(actual.getUser().getId()).isEqualTo(TRAINER_USER_ID);
             assertThat(actual.getUser().getFirstName()).isEqualTo("Pavlo");
@@ -163,6 +165,7 @@ class TrainerDaoHibernateImplTest extends AbstractDaoTest<TrainerDaoHibernate> {
             assertThat(found).isPresent();
 
             Trainer actual = found.get();
+
             assertThat(actual.getId()).isEqualTo(SECOND_TRAINER_ID);
             assertThat(actual.getUser().getId()).isEqualTo(SECOND_TRAINER_USER_ID);
             assertThat(actual.getUser().getFirstName()).isEqualTo("Fedir");
@@ -194,7 +197,6 @@ class TrainerDaoHibernateImplTest extends AbstractDaoTest<TrainerDaoHibernate> {
             List<Trainer> actual = dao.findAll();
 
             assertThat(actual).hasSize(3);
-
             assertThat(actual)
                     .extracting(trainer -> trainer.getUser().getUsername())
                     .containsExactlyInAnyOrder("pavlo.plank", "fedir.foamroller", "ira.iron");

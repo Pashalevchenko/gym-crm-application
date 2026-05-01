@@ -20,7 +20,6 @@ public class TrainingDaoHibernateImpl implements TrainingDaoHibernate {
     public Training create(Training training) {
         Training created = transactionHandler.performReturningWithinTransaction(session -> {
             session.persist(training);
-
             return training;
         });
 

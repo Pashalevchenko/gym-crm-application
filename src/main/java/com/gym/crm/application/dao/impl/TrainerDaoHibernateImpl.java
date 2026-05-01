@@ -29,8 +29,7 @@ public class TrainerDaoHibernateImpl implements TrainerDaoHibernate {
 
     @Override
     public Trainer update(Trainer trainer) {
-        Trainer updatedTrainer = transactionHandler.performReturningWithinTransaction(session ->
-                session.merge(trainer));
+        Trainer updatedTrainer = transactionHandler.performReturningWithinTransaction(session -> session.merge(trainer));
 
         log.info("Trainer with id: {} was updated", updatedTrainer.getId());
         return updatedTrainer;
