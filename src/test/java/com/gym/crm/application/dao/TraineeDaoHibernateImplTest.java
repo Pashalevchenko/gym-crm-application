@@ -13,7 +13,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
+import java.util.stream.Stream;
+import com.gym.crm.application.entity.Training;
+import com.gym.crm.application.search.filter.TraineeTrainingSearchFilter;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -326,6 +331,23 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest<TraineeDaoHibernate> {
         }
     }
 
+    @Nested
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DisplayName("findTrainingsByCriteria")
+    class FindTrainingsByCriteriaTests {
+
+        @ParameterizedTest(name = "{index} => {0}")
+        @MethodSource("com.gym.crm.application.dao.TraineeDaoHibernateImplTest#findTrainingsByCriteriaCases")
+        @DisplayName("Should filter trainee trainings by criteria")
+        void findTrainingsByCriteria_shouldFilterTrainings(String testCase, TraineeTrainingSearchFilter filter, List<String> expectedTrainingNames) {
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual)
+                    .extracting(Training::getTrainingName)
+                    .containsExactlyInAnyOrderElementsOf(expectedTrainingNames);
+        }
+    }
+
     private Trainee buildTrainee(String firstName, String lastName, String username) {
         User user = User.builder()
                 .firstName(firstName)
@@ -361,5 +383,37 @@ class TraineeDaoHibernateImplTest extends AbstractDaoTest<TraineeDaoHibernate> {
                     .setParameter("username", username)
                     .uniqueResult();
         }
+    }
+
+    private static Stream<Arguments> findTrainingsByCriteriaCases() {
+        return Stream.of(Arguments.of("by username", TraineeTrainingSearchFilter.builder()
+                                         .username("borys.burpee")
+                                         .build(), List.of("Morning Penguin Stretch")),
+                         Arguments.of("by username and date range", TraineeTrainingSearchFilter.builder()
+                                        .username("borys.burpee")
+                                        .fromDate(LocalDate.of(2026, 4, 1))
+                                        .toDate(LocalDate.of(2026, 4, 30))
+                                        .build(), List.of("Morning Penguin Stretch")),
+                         Arguments.of("by username and trainer name", TraineeTrainingSearchFilter.builder()
+                                        .username("borys.burpee")
+                                        .trainerName("Pavlo Plank")
+                                        .build(), List.of("Morning Penguin Stretch")),
+                         Arguments.of("by username and training type", TraineeTrainingSearchFilter.builder()
+                                        .username("borys.burpee")
+                                        .trainingTypeName("Penguin Yoga")
+                                        .build(), List.of("Morning Penguin Stretch")),
+                         Arguments.of("empty when training type does not match", TraineeTrainingSearchFilter.builder()
+                                        .username("borys.burpee")
+                                        .trainingTypeName("Strength Shenanigans")
+                                        .build(), List.of()),
+                         Arguments.of("empty when date range does not match", TraineeTrainingSearchFilter.builder()
+                                        .username("borys.burpee")
+                                        .fromDate(LocalDate.of(2026, 5, 1))
+                                        .toDate(LocalDate.of(2026, 5, 31))
+                                        .build(), List.of()),
+                         Arguments.of("empty when trainer name does not match", TraineeTrainingSearchFilter.builder()
+                                        .username("borys.burpee")
+                                        .trainerName("Fedir Foamroller")
+                                        .build(), List.of()));
     }
 }

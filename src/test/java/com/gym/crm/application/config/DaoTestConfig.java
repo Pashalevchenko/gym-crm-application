@@ -13,7 +13,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
         HibernateConfig.class,
         DbUnitConfig.class
 })
-@ComponentScan(basePackages = "com.gym.crm.application.dao.impl")
+@ComponentScan({"com.gym.crm.application.dao.impl", "com.gym.crm.application.search"})
 @ComponentScan(basePackageClasses = TransactionHandler.class,
                useDefaultFilters = false,
                includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,

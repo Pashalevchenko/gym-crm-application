@@ -13,6 +13,13 @@ import java.util.List;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.gym.crm.application.entity.Training;
+import com.gym.crm.application.search.filter.TrainerTrainingSearchFilter;
+import java.time.LocalDate;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import java.util.stream.Stream;
 
 @DisplayName("Trainer Hibernate DAO DBUnit integration tests")
 class TrainerDaoHibernateImplTest extends AbstractDaoTest<TrainerDaoHibernate> {
@@ -215,6 +222,23 @@ class TrainerDaoHibernateImplTest extends AbstractDaoTest<TrainerDaoHibernate> {
         }
     }
 
+    @Nested
+    @DatabaseSetup(value = "/dataset/trainer-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DisplayName("findTrainingsByCriteria")
+    class FindTrainingsByCriteriaTests {
+
+        @ParameterizedTest(name = "{index} => {0}")
+        @MethodSource("com.gym.crm.application.dao.TrainerDaoHibernateImplTest#findTrainingsByCriteriaCases")
+        @DisplayName("Should filter trainer trainings by criteria")
+        void findTrainingsByCriteria_shouldFilterTrainings(String testCase, TrainerTrainingSearchFilter filter, List<String> expectedTrainingNames) {
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual)
+                    .extracting(Training::getTrainingName)
+                    .containsExactlyInAnyOrderElementsOf(expectedTrainingNames);
+        }
+    }
+
     private Trainer buildTrainer(String firstName, String lastName, String username, Long specializationId) {
         User user = User.builder()
                 .firstName(firstName)
@@ -236,14 +260,60 @@ class TrainerDaoHibernateImplTest extends AbstractDaoTest<TrainerDaoHibernate> {
     private void deleteTrainer(Long id) {
         try (Session session = sessionFactory.openSession()) {
             var transaction = session.beginTransaction();
-
             Trainer trainer = session.get(Trainer.class, id);
 
-            if (trainer != null) {
-                session.remove(trainer);
+            if (trainer == null) {
+                transaction.commit();
+                return;
             }
 
+            Long userId = trainer.getUser().getId();
+
+            session.createMutationQuery("""
+                            delete from Training t
+                            where t.trainer.id = :trainerId
+                            """)
+                    .setParameter("trainerId", id)
+                    .executeUpdate();
+            session.createMutationQuery("""
+                            delete from Training t
+                            where t.trainee.user.id = :userId
+                            """)
+                    .setParameter("userId", userId)
+                    .executeUpdate();
+            session.createMutationQuery("""
+                            delete from Trainee t
+                            where t.user.id = :userId
+                            """)
+                    .setParameter("userId", userId)
+                    .executeUpdate();
+
+            session.remove(trainer);
             transaction.commit();
         }
+    }
+
+    private static Stream<Arguments> findTrainingsByCriteriaCases() {
+        return Stream.of(Arguments.of("by username", TrainerTrainingSearchFilter.builder()
+                                        .username("pavlo.plank")
+                                        .build(), List.of("Morning Penguin Stretch")),
+                         Arguments.of("by username and date range", TrainerTrainingSearchFilter.builder()
+                                        .username("pavlo.plank")
+                                        .fromDate(LocalDate.of(2026, 4, 1))
+                                        .toDate(LocalDate.of(2026, 4, 30))
+                                        .build(), List.of("Morning Penguin Stretch")),
+                         Arguments.of("by username and trainee name", TrainerTrainingSearchFilter.builder()
+                                        .username("pavlo.plank")
+                                        .traineeName("Fedir Foamroller")
+                                        .build(), List.of("Morning Penguin Stretch")),
+                         Arguments.of("empty when date range does not match", TrainerTrainingSearchFilter.builder()
+                                        .username("pavlo.plank")
+                                        .fromDate(LocalDate.of(2026, 5, 1))
+                                        .toDate(LocalDate.of(2026, 5, 31))
+                                        .build(), List.of()),
+                         Arguments.of("empty when trainee name does not match", TrainerTrainingSearchFilter.builder()
+                                        .username("pavlo.plank")
+                                        .traineeName("Marta Muscle")
+                                        .build(), List.of()));
     }
 }
