@@ -38,12 +38,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TraineeServiceImplTest {
 
-    private static final Long TRAINEE_ID = 1L;
-    private static final Long USER_ID = 10L;
-    private static final String FIRST_NAME = "Ivan";
-    private static final String LAST_NAME = "Ivanov";
-    private static final String USERNAME = FIRST_NAME + "." + LAST_NAME;
-    private static final String PASSWORD = "randomPass123";
+    private final Long TRAINEE_ID = 1L;
+    private final Long USER_ID = 10L;
+    private final String FIRST_NAME = "Ivan";
+    private final String LAST_NAME = "Ivanov";
+    private final String USERNAME = FIRST_NAME + "." + LAST_NAME;
+    private final String PASSWORD = "randomPass123";
 
     @Mock
     private TraineeDaoHibernate traineeDao;
@@ -124,7 +124,7 @@ class TraineeServiceImplTest {
 
     @Test
     @DisplayName("Should throw NoSuchElementException when trainee ID does not exist")
-    void getTraineeById_whenNotFound_shouldThrowException() {
+    void getTraineeById_whenNotFound() {
         Long id = 99L;
 
         when(traineeDao.findById(id)).thenReturn(Optional.empty());

@@ -36,7 +36,7 @@ class GymAppFacadeTest {
 
     private static final String FIRST_NAME = "Ivan";
     private static final String LAST_NAME = "Ivanov";
-    private static final String USERNAME = "ivan.ivanov";
+    private static final String USERNAME = FIRST_NAME + "." + LAST_NAME;
     private static final String NEW_PASSWORD = "new12345";
     private static final Long TRAINEE_ID = 1L;
     private static final Long TRAINER_ID = 2L;
@@ -203,7 +203,6 @@ class GymAppFacadeTest {
         TraineeResponseDTO actual = facade.activateTrainee(USERNAME);
 
         assertEquals(expected, actual);
-
         verify(traineeService).activateTrainee(USERNAME);
         verify(traineeMapper).entityToDto(trainee);
     }
@@ -291,7 +290,6 @@ class GymAppFacadeTest {
 
         assertEquals(1, actual.size());
         assertEquals("trainer.username", actual.get(0).getUsername());
-
         verify(traineeService).getNotAssignedTrainers(USERNAME);
         verify(trainerMapper).entityToDto(trainer);
     }
@@ -321,8 +319,8 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should create trainer using mapper and service")
-    void createTrainer_shouldMapRequestCallServiceAndMapResponse() {
+    @DisplayName("Should verify the complete flow of trainer creation from DTO to entity and back")
+    void createTrainer_Test() {
         TrainerRequestDTO request = TrainerRequestDTO.builder().build();
         Trainer trainer = Trainer.builder().build();
         Trainer createdTrainer = Trainer.builder().id(TRAINER_ID).build();
@@ -354,8 +352,8 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should get trainer by ID")
-    void getTrainerById_shouldReturnMappedDto() {
+    @DisplayName("Should successfully update trainer profile by orchestrating DTO mapping and service calls")
+    void updateTrainer_Test() {
         Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
 
         TrainerResponseDTO expected = TrainerResponseDTO.builder()
@@ -395,8 +393,8 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should get all trainers")
-    void getAllTrainers_shouldReturnMappedDtoList() {
+    @DisplayName("Should retrieve all trainers from service and map the collection to response DTOs")
+    void getAllTrainers_Test() {
         Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
 
         TrainerResponseDTO response = TrainerResponseDTO.builder()

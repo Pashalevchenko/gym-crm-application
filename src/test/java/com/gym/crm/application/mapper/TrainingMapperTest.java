@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TrainingMapperTest {
 
-    private static final Long TRAINEE_ID = 1L;
-    private static final Long TRAINER_ID = 2L;
-    private static final Long TRAINING_TYPE_ID = 3L;
+    private final Long TRAINEE_ID = 1L;
+    private final Long TRAINER_ID = 2L;
+    private final Long TRAINING_TYPE_ID = 3L;
 
     private TrainingMapper trainingMapper;
 
@@ -75,7 +75,7 @@ class TrainingMapperTest {
                 .id(TRAINING_TYPE_ID)
                 .trainingTypeName("Cardio")
                 .build();
-        Training training = Training.builder()
+        Training expected = Training.builder()
                 .trainee(trainee)
                 .trainer(trainer)
                 .trainingName("Morning Run")
@@ -84,14 +84,14 @@ class TrainingMapperTest {
                 .trainingDuration(45)
                 .build();
 
-        TrainingResponseDTO actual = trainingMapper.entityToDto(training);
+        TrainingResponseDTO actual = trainingMapper.entityToDto(expected);
 
         assertNotNull(actual);
         assertEquals(TRAINEE_ID, actual.getTraineeId());
         assertEquals(TRAINER_ID, actual.getTrainerId());
-        assertEquals(training.getTrainingName(), actual.getTrainingName());
-        assertEquals(training.getTrainingType(), actual.getTrainingType());
-        assertEquals(training.getTrainingDate(), actual.getTrainingDate());
-        assertEquals(training.getTrainingDuration(), actual.getTrainingDuration());
+        assertEquals(expected.getTrainingName(), actual.getTrainingName());
+        assertEquals(expected.getTrainingType(), actual.getTrainingType());
+        assertEquals(expected.getTrainingDate(), actual.getTrainingDate());
+        assertEquals(expected.getTrainingDuration(), actual.getTrainingDuration());
     }
 }

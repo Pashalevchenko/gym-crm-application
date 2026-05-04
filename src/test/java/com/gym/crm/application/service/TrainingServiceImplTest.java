@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TrainingServiceImplTest {
 
-    private static final Long TRAINING_ID = 1L;
+    private final Long TRAINING_ID = 1L;
 
     @Mock
     private TrainingDaoHibernate trainingDao;

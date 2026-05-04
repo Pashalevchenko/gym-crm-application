@@ -67,7 +67,7 @@ class ProfileServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should successfully generate a standard lowercase username by joining first and last name with a dot")
+    @DisplayName("Should successfully generate a standard username by joining first and last name with a dot")
     void createUsername_simpleCase() {
         String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
 

@@ -148,13 +148,7 @@ public class GymAppFacade {
         TrainingType trainingType = TrainingType.builder()
                 .trainingTypeName(request.getTrainingType().getTrainingTypeName())
                 .build();
-
-        Training training = trainingMapper.dtoToEntity(
-                request,
-                trainee,
-                trainer,
-                trainingType
-        );
+        Training training = trainingMapper.dtoToEntity(request, trainee, trainer, trainingType);
 
         return trainingMapper.entityToDto(trainingService.createTraining(training));
     }

@@ -9,16 +9,15 @@ import com.gym.crm.application.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TrainerMapperTest {
 
-    private static final String USER_FIRST_NAME = "Ivan";
-    private static final String USER_LAST_NAME = "Ivanov";
-    private static final String USERNAME = USER_FIRST_NAME + '.' + USER_LAST_NAME;
+    private final String USER_FIRST_NAME = "Ivan";
+    private final String USER_LAST_NAME = "Ivanov";
+    private final String USERNAME = USER_FIRST_NAME + '.' + USER_LAST_NAME;
     private TrainerMapper trainerMapper;
 
     @BeforeEach

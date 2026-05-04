@@ -40,14 +40,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TrainerServiceImplTest {
 
-    private static final Long TRAINER_ID = 1L;
-    private static final Long USER_ID = 10L;
-    private static final Long TRAINING_TYPE_ID = 100L;
-    private static final String FIRST_NAME = "Ivan";
-    private static final String LAST_NAME = "Ivanov";
-    private static final String USERNAME = FIRST_NAME + "." + LAST_NAME;
-    private static final String PASSWORD = "secure123";
-    private static final String NEW_PASSWORD = "newPass123";
+    private final Long TRAINER_ID = 1L;
+    private final Long USER_ID = 10L;
+    private final Long TRAINING_TYPE_ID = 100L;
+    private final String FIRST_NAME = "Ivan";
+    private final String LAST_NAME = "Ivanov";
+    private final String USERNAME = FIRST_NAME + "." + LAST_NAME;
+    private final String PASSWORD = "secure123";
+    private final String NEW_PASSWORD = "newPass123";
 
     @Mock
     private TrainerDaoHibernate trainerDao;
@@ -113,8 +113,8 @@ class TrainerServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should return trainer when valid ID is provided")
-    void getTrainerById_whenFound_shouldReturnTrainer() {
+    @DisplayName("Should return trainer profile when a valid ID is provided")
+    void getTrainerById_WhenFound() {
         Trainer trainer = buildTrainer(true);
 
         when(trainerDao.findById(TRAINER_ID)).thenReturn(Optional.of(trainer));
@@ -128,7 +128,7 @@ class TrainerServiceImplTest {
 
     @Test
     @DisplayName("Should throw NoSuchElementException when trainer ID does not exist")
-    void getTrainerById_whenNotFound_shouldThrowException() {
+    void getTrainerById_WhenNotFound() {
         when(trainerDao.findById(TRAINER_ID)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> trainerService.getTrainerById(TRAINER_ID));
