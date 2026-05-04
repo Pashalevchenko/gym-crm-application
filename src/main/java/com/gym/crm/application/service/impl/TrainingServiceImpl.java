@@ -16,11 +16,11 @@ import java.util.NoSuchElementException;
 public class TrainingServiceImpl implements TrainingService {
 
     private final TrainingDaoHibernate trainingDao;
-    private final TrainingValidator trainingValidator;
+    private final TrainingValidator validator;
 
     @Override
     public Training createTraining(Training training) {
-        trainingValidator.validateForCreate(training);
+        validator.validateForCreate(training);
 
         Training created = trainingDao.create(training);
 

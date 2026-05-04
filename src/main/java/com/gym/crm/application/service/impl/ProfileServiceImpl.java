@@ -28,7 +28,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public String createUsername(String firstName, String lastName) {
-        String username = (firstName + "." + lastName);
+        String username = firstName + "." + lastName;
         Set<String> dbUsernames = getAllUsernames();
         int userSerialNumber = 1;
 

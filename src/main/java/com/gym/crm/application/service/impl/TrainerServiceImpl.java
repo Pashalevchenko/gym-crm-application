@@ -22,11 +22,11 @@ public class TrainerServiceImpl implements TrainerService {
 
     private final TrainerDaoHibernate trainerDao;
     private final ProfileService profileService;
-    private final TrainerValidator trainerValidator;
+    private final TrainerValidator validator;
 
     @Override
     public Trainer createTrainer(Trainer trainer) {
-        trainerValidator.validateForCreate(trainer);
+        validator.validateForCreate(trainer);
 
         User user = trainer.getUser();
         String username = profileService.createUsername(user.getFirstName(), user.getLastName());
@@ -52,7 +52,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     public Trainer getTrainerByUsername(String username) {
-        trainerValidator.validateUsername(username);
+        validator.validateUsername(username);
 
         return trainerDao.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException(String.format("Trainer with username %s  not found", username)));
@@ -65,7 +65,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     public Trainer updateTrainer(Trainer trainer) {
-        trainerValidator.validateForUpdate(trainer);
+        validator.validateForUpdate(trainer);
 
         Trainer existing = getTrainerById(trainer.getId());
         User userToUpdate = existing.getUser().toBuilder()
@@ -84,7 +84,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     public void changePassword(String username, String newPassword) {
-        trainerValidator.validateNewPassword(newPassword);
+        validator.validateNewPassword(newPassword);
 
         Trainer existing = getTrainerByUsername(username);
         User userToUpdate = existing.getUser().toBuilder()
@@ -121,7 +121,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     public List<Training> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
-        trainerValidator.validateUsername(username);
+        validator.validateUsername(username);
 
         TrainerTrainingSearchFilter filter = TrainerTrainingSearchFilter.builder()
                 .username(username)

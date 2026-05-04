@@ -24,11 +24,11 @@ public class TraineeServiceImpl implements TraineeService {
 
     private final TraineeDaoHibernate traineeDao;
     private final ProfileService profileService;
-    private final TraineeValidator traineeValidator;
+    private final TraineeValidator validator;
 
     @Override
     public Trainee createTrainee(Trainee trainee) {
-        traineeValidator.validateForCreate(trainee);
+        validator.validateForCreate(trainee);
 
         User user = trainee.getUser();
         String username = profileService.createUsername(user.getFirstName(), user.getLastName());
@@ -58,7 +58,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public Trainee getTraineeByUsername(String username) {
-        traineeValidator.validateUsername(username);
+        validator.validateUsername(username);
 
         return traineeDao.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException(String.format("Trainee with username %s not found", username)));
@@ -71,7 +71,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public Trainee updateTrainee(Trainee trainee) {
-        traineeValidator.validateForUpdate(trainee);
+        validator.validateForUpdate(trainee);
 
         Trainee existing = getTraineeById(trainee.getId());
         User userToUpdate = existing.getUser().toBuilder()
@@ -89,8 +89,8 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public void changePassword(String username, String newPassword) {
-        traineeValidator.validateUsername(username);
-        traineeValidator.validateNewPassword(newPassword);
+        validator.validateUsername(username);
+        validator.validateNewPassword(newPassword);
 
         Trainee existing = getTraineeByUsername(username);
         User userToUpdate = existing.getUser().toBuilder()
@@ -136,14 +136,14 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public void deleteTraineeByUsername(String username) {
-        traineeValidator.validateUsername(username);
+        validator.validateUsername(username);
 
         traineeDao.deleteByUsername(username);
     }
 
     @Override
     public List<Training> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingTypeName) {
-        traineeValidator.validateUsername(username);
+        validator.validateUsername(username);
 
         TraineeTrainingSearchFilter filter = TraineeTrainingSearchFilter.builder()
                 .username(username)
@@ -158,15 +158,15 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     public List<Trainer> getNotAssignedTrainers(String traineeUsername) {
-        traineeValidator.validateUsername(traineeUsername);
+        validator.validateUsername(traineeUsername);
 
         return traineeDao.findNotAssignedTrainers(traineeUsername);
     }
 
     @Override
     public Trainee updateTrainersList(String traineeUsername, Set<Trainer> trainers) {
-        traineeValidator.validateUsername(traineeUsername);
-        traineeValidator.validateTrainersList(trainers);
+        validator.validateUsername(traineeUsername);
+        validator.validateTrainersList(trainers);
 
         return traineeDao.updateTrainersList(traineeUsername, trainers);
     }
