@@ -1,6 +1,6 @@
 package com.gym.crm.application.dto.response;
 
-import com.gym.crm.application.model.TrainingType;
+import com.gym.crm.application.entity.TrainingType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;

@@ -1,90 +1,178 @@
 package com.gym.crm.application.service;
 
-import com.gym.crm.application.dao.TrainingDao;
-import com.gym.crm.application.model.Training;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import com.gym.crm.application.dao.TrainingDaoHibernate;
+import com.gym.crm.application.entity.Trainee;
+import com.gym.crm.application.entity.Trainer;
+import com.gym.crm.application.entity.Training;
+import com.gym.crm.application.entity.TrainingType;
 import com.gym.crm.application.service.impl.TrainingServiceImpl;
+import com.gym.crm.application.validation.TrainingValidator;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.slf4j.LoggerFactory;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TrainingServiceImplTest {
+class TrainingServiceImplTest {
+
+    private final Long TRAINING_ID = 1L;
 
     @Mock
-    private TrainingDao trainingDao;
+    private TrainingDaoHibernate trainingDao;
+
+    @Mock
+    private TrainingValidator trainingValidator;
 
     @InjectMocks
     private TrainingServiceImpl trainingService;
 
+    private ListAppender<ILoggingEvent> listAppender;
+    private Logger logger;
+
+    @BeforeEach
+    void setUp() {
+        logger = (Logger) LoggerFactory.getLogger(TrainingServiceImpl.class);
+        listAppender = new ListAppender<>();
+        listAppender.start();
+        logger.addAppender(listAppender);
+    }
+
+    @AfterEach
+    void tearDown() {
+        logger.detachAppender(listAppender);
+    }
+
     @Test
-    @DisplayName("Should successfully persist a new training session via the DAO layer")
-    void createTraining_ShouldWorkCorrectly() {
-        Training training = Training.builder()
-                .trainingName("Crossfit")
+    @DisplayName("Should validate and create training")
+    void createTraining_shouldValidateAndCreateTraining() {
+        Training training = buildTraining();
+        Training createdTraining = Training.builder()
+                .id(TRAINING_ID)
+                .trainee(training.getTrainee())
+                .trainer(training.getTrainer())
+                .trainingType(training.getTrainingType())
+                .trainingName(training.getTrainingName())
+                .trainingDate(training.getTrainingDate())
+                .trainingDuration(training.getTrainingDuration())
                 .build();
 
-        when(trainingDao.create(training)).thenReturn(training);
+        when(trainingDao.create(training)).thenReturn(createdTraining);
 
         Training actual = trainingService.createTraining(training);
 
-        assertNotNull(actual);
-        assertEquals("Crossfit", actual.getTrainingName());
+        assertSame(createdTraining, actual);
+        assertEquals(TRAINING_ID, actual.getId());
+        assertEquals("Morning Yoga", actual.getTrainingName());
+        verify(trainingValidator).validateForCreate(training);
         verify(trainingDao).create(training);
+
+        assertThat(listAppender.list)
+                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
+                .contains(tuple("Training created with id: " + TRAINING_ID, Level.INFO));
     }
 
     @Test
-    @DisplayName("Should successfully retrieve a training session by its ID when it exists in the database")
-    void getTrainingById_WhenFound() {
-        Long id = 10L;
-        Training training = Training.builder()
-                .trainingName("Yoga")
+    @DisplayName("Should return training when valid ID is provided")
+    void getTrainingById_whenFound_shouldReturnTraining() {
+        Training training = buildTrainingWithId();
+
+        when(trainingDao.findById(TRAINING_ID)).thenReturn(Optional.of(training));
+
+        Training actual = trainingService.getTrainingById(TRAINING_ID);
+
+        assertSame(training, actual);
+        assertEquals(TRAINING_ID, actual.getId());
+        assertEquals("Morning Yoga", actual.getTrainingName());
+        verify(trainingDao).findById(TRAINING_ID);
+    }
+
+    @Test
+    @DisplayName("Should throw NoSuchElementException when training ID does not exist")
+    void getTrainingById_whenNotFound_shouldThrowException() {
+        when(trainingDao.findById(TRAINING_ID)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> trainingService.getTrainingById(TRAINING_ID));
+
+        verify(trainingDao).findById(TRAINING_ID);
+    }
+
+    @Test
+    @DisplayName("Should return all trainings")
+    void getAllTrainings_shouldReturnList() {
+        Training firstTraining = buildTrainingWithId();
+        TrainingType trainingType = TrainingType.builder()
+                .id(2L)
+                .trainingTypeName("Boxing")
+                .build();
+        Training secondTraining = Training.builder()
+                .id(2L)
+                .trainingName("Evening Boxing")
+                .trainingDate(LocalDate.of(2026, 4, 11))
+                .trainingDuration(45)
+                .trainee(Trainee.builder().id(2L).build())
+                .trainer(Trainer.builder().id(2L).build())
+                .trainingType(trainingType)
                 .build();
 
-        when(trainingDao.findById(id)).thenReturn(Optional.of(training));
-
-        Training actual = trainingService.getTrainingById(id);
-
-        assertEquals("Yoga", actual.getTrainingName());
-        verify(trainingDao).findById(id);
-    }
-
-    @Test
-    @DisplayName("Should throw NoSuchElementException with a descriptive message when training ID is missing")
-    void getTrainingById_WhenNotFound() {
-        Long id = 999L;
-
-        when(trainingDao.findById(id)).thenReturn(Optional.empty());
-
-        NoSuchElementException exception = assertThrows(NoSuchElementException.class,
-                () -> trainingService.getTrainingById(id));
-
-        assertTrue(exception.getMessage().contains("ID 999 not found"));
-    }
-
-    @Test
-    @DisplayName("Should successfully retrieve all training sessions as a list from the database")
-    void getAllTrainings_ShouldReturnList() {
-        List<Training> trainings = List.of(new Training(), new Training());
-
-        when(trainingDao.findAll()).thenReturn(trainings);
+        when(trainingDao.findAll()).thenReturn(List.of(firstTraining, secondTraining));
 
         List<Training> actual = trainingService.getAllTrainings();
 
         assertEquals(2, actual.size());
+        assertEquals("Morning Yoga", actual.get(0).getTrainingName());
+        assertEquals("Evening Boxing", actual.get(1).getTrainingName());
         verify(trainingDao).findAll();
+    }
+
+    private Training buildTrainingWithId() {
+        Training training = buildTraining();
+
+        return Training.builder()
+                .id(TRAINING_ID)
+                .trainee(training.getTrainee())
+                .trainer(training.getTrainer())
+                .trainingType(training.getTrainingType())
+                .trainingName(training.getTrainingName())
+                .trainingDate(training.getTrainingDate())
+                .trainingDuration(training.getTrainingDuration())
+                .build();
+    }
+
+    private Training buildTraining() {
+        return Training.builder()
+                .trainee(Trainee.builder()
+                        .id(10L)
+                        .build())
+                .trainer(Trainer.builder()
+                        .id(20L)
+                        .build())
+                .trainingType(TrainingType.builder()
+                        .id(30L)
+                        .trainingTypeName("Yoga")
+                        .build())
+                .trainingName("Morning Yoga")
+                .trainingDate(LocalDate.of(2026, 4, 10))
+                .trainingDuration(60)
+                .build();
     }
 }

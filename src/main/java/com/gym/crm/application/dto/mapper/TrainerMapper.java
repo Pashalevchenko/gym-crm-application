@@ -2,29 +2,39 @@ package com.gym.crm.application.dto.mapper;
 
 import com.gym.crm.application.dto.request.TrainerRequestDTO;
 import com.gym.crm.application.dto.response.TrainerResponseDTO;
-import com.gym.crm.application.model.Trainer;
+import com.gym.crm.application.entity.Trainer;
+import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.entity.User;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TrainerMapper {
 
-    public Trainer dtoToEntity(TrainerRequestDTO trainerRequestDTO){
-        return Trainer.builder()
-                .userId(trainerRequestDTO.getId())
+    public Trainer dtoToEntity(TrainerRequestDTO trainerRequestDTO) {
+        User user = User.builder()
                 .firstName(trainerRequestDTO.getFirstName())
                 .lastName(trainerRequestDTO.getLastName())
                 .isActive(trainerRequestDTO.isActive())
-                .specialization(trainerRequestDTO.getSpecialization())
+                .build();
+        TrainingType specialization = TrainingType.builder()
+                .trainingTypeName(trainerRequestDTO.getSpecialization().getTrainingTypeName())
+                .build();
+
+        return Trainer.builder()
+                .user(user)
+                .specialization(specialization)
                 .build();
     }
 
-    public TrainerResponseDTO entityToDto (Trainer trainer){
+    public TrainerResponseDTO entityToDto(Trainer trainer) {
+        User user = trainer.getUser();
+
         return TrainerResponseDTO.builder()
-                .id(trainer.getUserId())
-                .firstName(trainer.getFirstName())
-                .lastName(trainer.getLastName())
-                .username(trainer.getUsername())
-                .isActive(trainer.isActive())
+                .id(trainer.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .username(user.getUsername())
+                .isActive(user.isActive())
                 .specialization(trainer.getSpecialization())
                 .build();
     }

@@ -2,27 +2,30 @@ package com.gym.crm.application.dto.mapper;
 
 import com.gym.crm.application.dto.request.TrainingRequestDTO;
 import com.gym.crm.application.dto.response.TrainingResponseDTO;
-import com.gym.crm.application.model.Training;
+import com.gym.crm.application.entity.Trainee;
+import com.gym.crm.application.entity.Trainer;
+import com.gym.crm.application.entity.Training;
+import com.gym.crm.application.entity.TrainingType;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TrainingMapper {
 
-    public Training dtoToEntity(TrainingRequestDTO trainingRequestDTO){
+    public Training dtoToEntity(TrainingRequestDTO trainingRequestDTO, Trainee trainee, Trainer trainer, TrainingType trainingType) {
         return Training.builder()
-                .traineeId(trainingRequestDTO.getTraineeId())
-                .trainerId(trainingRequestDTO.getTrainerId())
+                .trainee(trainee)
+                .trainer(trainer)
                 .trainingName(trainingRequestDTO.getTrainingName())
-                .trainingType(trainingRequestDTO.getTrainingType())
+                .trainingType(trainingType)
                 .trainingDate(trainingRequestDTO.getTrainingDate())
                 .trainingDuration(trainingRequestDTO.getTrainingDuration())
                 .build();
     }
 
-    public TrainingResponseDTO entityToDto (Training training){
+    public TrainingResponseDTO entityToDto(Training training) {
         return TrainingResponseDTO.builder()
-                .traineeId(training.getTraineeId())
-                .trainerId(training.getTrainerId())
+                .traineeId(training.getTrainee().getId())
+                .trainerId(training.getTrainer().getId())
                 .trainingName(training.getTrainingName())
                 .trainingType(training.getTrainingType())
                 .trainingDate(training.getTrainingDate())

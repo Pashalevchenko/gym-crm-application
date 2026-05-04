@@ -1,13 +1,14 @@
 package com.gym.crm.application.service.impl;
 
-import com.gym.crm.application.dao.TraineeDao;
-import com.gym.crm.application.dao.TrainerDao;
-import com.gym.crm.application.model.User;
+import com.gym.crm.application.dao.TraineeDaoHibernate;
+import com.gym.crm.application.dao.TrainerDaoHibernate;
+import com.gym.crm.application.entity.Trainee;
+import com.gym.crm.application.entity.Trainer;
+import com.gym.crm.application.entity.User;
 import com.gym.crm.application.service.ProfileService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -16,29 +17,26 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int PASSWORD_LENGTH = 10;
-
     private final Random random = new Random();
-
-    private TraineeDao traineeDao;
-    private TrainerDao trainerDao;
+    private final TraineeDaoHibernate traineeDao;
+    private final TrainerDaoHibernate trainerDao;
 
     @Override
-    public String createUsername(String firstName, String lastname) {
-        String username = firstName + "." + lastname;
+    public String createUsername(String firstName, String lastName) {
+        String username = firstName + "." + lastName;
         Set<String> dbUsernames = getAllUsernames();
-
         int userSerialNumber = 1;
 
         if (!dbUsernames.contains(username)) {
             return username;
         }
 
-        log.info("Username '{}' already exists. Starting serial number generation for {} {}", username, firstName, lastname);
+        log.info("Username '{}' already exists. Starting serial number generation for {} {}", username, firstName, lastName);
 
         while (dbUsernames.contains(username + userSerialNumber)) {
             userSerialNumber++;
@@ -61,10 +59,8 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     private Set<String> getAllUsernames() {
-        return Stream.concat(
-                        traineeDao.findAll().stream().map(User::getUsername),
-                        trainerDao.findAll().stream().map(User::getUsername)
-                )
+        return Stream.concat(traineeDao.findAll().stream().map(Trainee::getUser).filter(Objects::nonNull).map(User::getUsername),
+                        trainerDao.findAll().stream().map(Trainer::getUser).filter(Objects::nonNull).map(User::getUsername))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
