@@ -1,6 +1,6 @@
 package com.gym.crm.application.service;
 
-import com.gym.crm.application.model.Training;
+import com.gym.crm.application.entity.Training;
 import java.util.List;
 
 public interface TrainingService {

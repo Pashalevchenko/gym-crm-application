@@ -1,8 +1,9 @@
 package com.gym.crm.application.service.impl;
 
-import com.gym.crm.application.dao.TrainingDao;
-import com.gym.crm.application.model.Training;
+import com.gym.crm.application.dao.TrainingDaoHibernate;
+import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.service.TrainingService;
+import com.gym.crm.application.validation.TrainingValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,19 +15,23 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class TrainingServiceImpl implements TrainingService {
 
-    private final TrainingDao trainingDao;
+    private final TrainingDaoHibernate trainingDao;
+    private final TrainingValidator trainingValidator;
 
     @Override
     public Training createTraining(Training training) {
-        log.info("Creation training {} on process ", training.getTrainingName());
+        trainingValidator.validateForCreate(training);
 
-        return trainingDao.create(training);
+        Training created = trainingDao.create(training);
+
+        log.info("Training created with id: {}", created.getId());
+        return created;
     }
 
     @Override
     public Training getTrainingById(Long id) {
         return trainingDao.findById(id).orElseThrow(() ->
-                new NoSuchElementException(String.format("Trainer with ID %d not found", id)));
+                new NoSuchElementException("Training with ID " + id + " not found"));
     }
 
     @Override

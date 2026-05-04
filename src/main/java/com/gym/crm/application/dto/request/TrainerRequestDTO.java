@@ -1,6 +1,6 @@
 package com.gym.crm.application.dto.request;
 
-import com.gym.crm.application.model.TrainingType;
+import com.gym.crm.application.entity.TrainingType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

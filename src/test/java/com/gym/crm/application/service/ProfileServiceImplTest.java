@@ -4,11 +4,13 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.gym.crm.application.dao.TraineeDao;
-import com.gym.crm.application.dao.TrainerDao;
-import com.gym.crm.application.model.Trainee;
-import com.gym.crm.application.model.Trainer;
+import com.gym.crm.application.dao.TraineeDaoHibernate;
+import com.gym.crm.application.dao.TrainerDaoHibernate;
+import com.gym.crm.application.entity.Trainee;
+import com.gym.crm.application.entity.Trainer;
+import com.gym.crm.application.entity.User;
 import com.gym.crm.application.service.impl.ProfileServiceImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,56 +26,64 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ProfileServiceImplTest {
+class ProfileServiceImplTest {
 
-    private final String USER_FIRST_NAME = "Ivan";
-    private final String USER_LAST_NAME = "Ivanov";
-    private final String USERNAME = USER_FIRST_NAME + '.' + USER_LAST_NAME;
-    private final String USERNAME_PLUS_ONE = USERNAME + "1";
-
-    @Mock
-    private TraineeDao traineeDao;
+    private static final String USER_FIRST_NAME = "Ivan";
+    private static final String USER_LAST_NAME = "Ivanov";
+    private static final String USERNAME = "ivan.ivanov";
+    private static final String USERNAME_PLUS_ONE = USERNAME + "1";
 
     @Mock
-    private TrainerDao trainerDao;
+    private TraineeDaoHibernate traineeDao;
+
+    @Mock
+    private TrainerDaoHibernate trainerDao;
 
     @InjectMocks
     private ProfileServiceImpl profileService;
 
     private ListAppender<ILoggingEvent> listAppender;
-
-    private Logger logger = (Logger) LoggerFactory.getLogger(ProfileServiceImpl.class);
+    private Logger logger;
 
     @BeforeEach
     void setUp() {
-        when(traineeDao.findAll()).thenReturn(Collections.emptyList());
-        when(trainerDao.findAll()).thenReturn(Collections.emptyList());
-
         lenient().when(traineeDao.findAll()).thenReturn(Collections.emptyList());
         lenient().when(trainerDao.findAll()).thenReturn(Collections.emptyList());
 
+        logger = (Logger) LoggerFactory.getLogger(ProfileServiceImpl.class);
+
         listAppender = new ListAppender<>();
         listAppender.start();
+
         logger.addAppender(listAppender);
     }
 
+    @AfterEach
+    void tearDown() {
+        logger.detachAppender(listAppender);
+    }
+
     @Test
-    @DisplayName("Should successfully generate a standard username by joining first and last name with a dot")
-    void createUsername_SimpleCase() {
+    @DisplayName("Should successfully generate a standard lowercase username by joining first and last name with a dot")
+    void createUsername_simpleCase() {
         String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
+
         assertEquals(USERNAME, actual);
     }
 
     @Test
-    @DisplayName("Should append an index to the username when a collision with an existing user occurs")
-    void createUsername_WithCollision() {
-        Trainee existingTrainee = Trainee.builder().username(USERNAME).build();
+    @DisplayName("Should append an index to the username when a collision with an existing trainee occurs")
+    void createUsername_withTraineeCollision() {
+        Trainee existingTrainee = Trainee.builder()
+                .user(User.builder()
+                        .username(USERNAME)
+                        .build())
+                .build();
 
         when(traineeDao.findAll()).thenReturn(List.of(existingTrainee));
 
@@ -83,13 +93,22 @@ public class ProfileServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should increment username suffix correctly when multiple collisions exist across both Trainee and Trainer records")
-    void createUsername_MultipleCollisions() {
-        Trainee t1 = Trainee.builder().username(USERNAME).build();
-        Trainer tr1 = Trainer.builder().username(USERNAME_PLUS_ONE).build();
+    @DisplayName("Should increment username suffix correctly when multiple collisions exist across trainee and trainer records")
+    void createUsername_multipleCollisions() {
+        Trainee existingTrainee = Trainee.builder()
+                .user(User.builder()
+                        .username(USERNAME)
+                        .build())
+                .build();
 
-        when(traineeDao.findAll()).thenReturn(List.of(t1));
-        when(trainerDao.findAll()).thenReturn(List.of(tr1));
+        Trainer existingTrainer = Trainer.builder()
+                .user(User.builder()
+                        .username(USERNAME_PLUS_ONE)
+                        .build())
+                .build();
+
+        when(traineeDao.findAll()).thenReturn(List.of(existingTrainee));
+        when(trainerDao.findAll()).thenReturn(List.of(existingTrainer));
 
         String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
 
@@ -97,30 +116,71 @@ public class ProfileServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should generate a secure, random 10-character password on each call")
-    void generatePassword_Test() {
-        String pass1 = profileService.generatePassword();
-        String pass2 = profileService.generatePassword();
+    @DisplayName("Should generate a 10-character password")
+    void generatePassword_shouldGeneratePasswordWithExpectedLength() {
+        String password = profileService.generatePassword();
 
-        assertNotNull(pass1);
-        assertEquals(10, pass1.length());
-        assertNotEquals(pass1, pass2);
+        assertNotNull(password);
+        assertEquals(10, password.length());
+    }
+
+    @Test
+    @DisplayName("Should generate password only from allowed characters")
+    void generatePassword_shouldUseOnlyAllowedCharacters() {
+        String password = profileService.generatePassword();
+
+        assertThat(password)
+                .matches("[A-Za-z0-9]{10}");
     }
 
     @Test
     @DisplayName("Should log INFO message when a duplicate username is detected during generation")
-    void createUsername_ShouldLogWhenDuplicateFound() {
-        String firstName = "Ivan";
-        String lastName = "Ivanov";
-        Trainee existingTrainee = new Trainee();
-        existingTrainee.setUsername("Ivan.Ivanov");
+    void createUsername_shouldLogWhenDuplicateFound() {
+        Trainee existingTrainee = Trainee.builder()
+                .user(User.builder()
+                        .username(USERNAME)
+                        .build())
+                .build();
 
         when(traineeDao.findAll()).thenReturn(List.of(existingTrainee));
 
-        profileService.createUsername(firstName, lastName);
+        profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
 
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple("Username 'Ivan.Ivanov' already exists. Starting serial number generation for Ivan Ivanov", Level.INFO));
+                .contains(tuple(
+                        "Username 'ivan.ivanov' already exists. Starting serial number generation for Ivan Ivanov",
+                        Level.INFO
+                ));
+    }
+
+    @Test
+    @DisplayName("Should ignore users with null profile user")
+    void createUsername_shouldIgnoreNullUserInsideProfile() {
+        Trainee traineeWithoutUser = Trainee.builder()
+                .user(null)
+                .build();
+
+        when(traineeDao.findAll()).thenReturn(List.of(traineeWithoutUser));
+
+        String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
+
+        assertEquals(USERNAME, actual);
+    }
+
+    @Test
+    @DisplayName("Should ignore null usernames")
+    void createUsername_shouldIgnoreNullUsername() {
+        Trainee traineeWithNullUsername = Trainee.builder()
+                .user(User.builder()
+                        .username(null)
+                        .build())
+                .build();
+
+        when(traineeDao.findAll()).thenReturn(List.of(traineeWithNullUsername));
+
+        String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
+
+        assertEquals(USERNAME, actual);
     }
 }

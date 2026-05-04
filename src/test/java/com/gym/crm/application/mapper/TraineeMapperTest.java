@@ -3,7 +3,8 @@ package com.gym.crm.application.mapper;
 import com.gym.crm.application.dto.mapper.TraineeMapper;
 import com.gym.crm.application.dto.request.TraineeRequestDTO;
 import com.gym.crm.application.dto.response.TraineeResponseDTO;
-import com.gym.crm.application.model.Trainee;
+import com.gym.crm.application.entity.Trainee;
+import com.gym.crm.application.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,9 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class TraineeMapperTest {
 
-    private final String USER_FIRST_NAME = "Ivan";
-    private final String USER_LAST_NAME = "Ivanov";
-    private final String USERNAME = USER_FIRST_NAME + '.' + USER_LAST_NAME;
+    private static final Long TRAINEE_ID = 100L;
+    private static final String USER_FIRST_NAME = "Ivan";
+    private static final String USER_LAST_NAME = "Ivanov";
+    private static final String USERNAME = "ivan.ivanov";
 
     private TraineeMapper traineeMapper;
 
@@ -29,8 +31,8 @@ class TraineeMapperTest {
 
     @Test
     @DisplayName("Should correctly map all provided fields from TraineeRequestDTO to Trainee entity")
-    void dtoToEntity_ShouldMapAllFieldsCorrectly() {
-        TraineeRequestDTO expected = TraineeRequestDTO.builder()
+    void dtoToEntity_shouldMapAllFieldsCorrectly() {
+        TraineeRequestDTO request = TraineeRequestDTO.builder()
                 .firstName(USER_FIRST_NAME)
                 .lastName(USER_LAST_NAME)
                 .isActive(true)
@@ -38,40 +40,45 @@ class TraineeMapperTest {
                 .address("Kyiv")
                 .build();
 
-        Trainee actual = traineeMapper.dtoToEntity(expected);
+        Trainee actual = traineeMapper.dtoToEntity(request);
 
         assertNotNull(actual);
-        assertEquals(expected.getFirstName(), actual.getFirstName());
-        assertEquals(expected.getLastName(), actual.getLastName());
-        assertEquals(expected.isActive(), actual.isActive());
-        assertEquals(expected.getDateOfBirth(), actual.getDateOfBirth());
-        assertEquals(expected.getAddress(), actual.getAddress());
-        assertNull(actual.getUsername());
-        assertEquals(0, actual.getUserId());
+        assertNotNull(actual.getUser());
+        assertEquals(request.getFirstName(), actual.getUser().getFirstName());
+        assertEquals(request.getLastName(), actual.getUser().getLastName());
+        assertEquals(request.isActive(), actual.getUser().isActive());
+        assertEquals(request.getDateOfBirth(), actual.getDateOfBirth());
+        assertEquals(request.getAddress(), actual.getAddress());
+
+        assertNull(actual.getId());
+        assertNull(actual.getUser().getUsername());
+        assertNull(actual.getUser().getPassword());
     }
 
     @Test
     @DisplayName("Should correctly map all fields from Trainee entity to Response DTO including generated values")
-    void entityToDto_ShouldMapAllFieldsCorrectly() {
-        Trainee expected = Trainee.builder()
-                .userId(100L)
-                .firstName(USER_FIRST_NAME)
-                .lastName(USER_LAST_NAME)
-                .username(USERNAME)
-                .isActive(false)
+    void entityToDto_shouldMapAllFieldsCorrectly() {
+        Trainee trainee = Trainee.builder()
+                .id(TRAINEE_ID)
+                .user(User.builder()
+                        .firstName(USER_FIRST_NAME)
+                        .lastName(USER_LAST_NAME)
+                        .username(USERNAME)
+                        .isActive(false)
+                        .build())
                 .dateOfBirth(LocalDate.of(1960, 4, 15))
                 .address("Ivano-Frankivsk")
                 .build();
 
-        TraineeResponseDTO actual = traineeMapper.entityToDto(expected);
+        TraineeResponseDTO actual = traineeMapper.entityToDto(trainee);
 
         assertNotNull(actual);
-        assertEquals(expected.getUserId(), actual.getId());
-        assertEquals(expected.getFirstName(), actual.getFirstName());
-        assertEquals(expected.getLastName(), actual.getLastName());
-        assertEquals(expected.getUsername(), actual.getUsername());
-        assertEquals(expected.isActive(), actual.isActive());
-        assertEquals(expected.getDateOfBirth(), actual.getDateOfBirth());
-        assertEquals(expected.getAddress(), actual.getAddress());
+        assertEquals(trainee.getId(), actual.getId());
+        assertEquals(trainee.getUser().getFirstName(), actual.getFirstName());
+        assertEquals(trainee.getUser().getLastName(), actual.getLastName());
+        assertEquals(trainee.getUser().getUsername(), actual.getUsername());
+        assertEquals(trainee.getUser().isActive(), actual.isActive());
+        assertEquals(trainee.getDateOfBirth(), actual.getDateOfBirth());
+        assertEquals(trainee.getAddress(), actual.getAddress());
     }
 }
