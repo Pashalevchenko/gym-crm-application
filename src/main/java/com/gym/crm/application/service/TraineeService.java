@@ -3,7 +3,6 @@ package com.gym.crm.application.service;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -19,8 +18,6 @@ public interface TraineeService {
     List<Trainee> getAllTrainees();
 
     Trainee updateTrainee(Trainee trainee);
-
-    boolean isPasswordCorrect(String username, String password);
 
     void changePassword(String username, String newPassword);
 

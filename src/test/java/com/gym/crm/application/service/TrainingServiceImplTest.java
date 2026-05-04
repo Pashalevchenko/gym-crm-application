@@ -66,7 +66,6 @@ class TrainingServiceImplTest {
     @DisplayName("Should validate and create training")
     void createTraining_shouldValidateAndCreateTraining() {
         Training training = buildTraining();
-
         Training createdTraining = Training.builder()
                 .id(TRAINING_ID)
                 .trainee(training.getTrainee())
@@ -84,16 +83,12 @@ class TrainingServiceImplTest {
         assertSame(createdTraining, actual);
         assertEquals(TRAINING_ID, actual.getId());
         assertEquals("Morning Yoga", actual.getTrainingName());
-
         verify(trainingValidator).validateForCreate(training);
         verify(trainingDao).create(training);
 
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple(
-                        "Training created with id: " + TRAINING_ID,
-                        Level.INFO
-                ));
+                .contains(tuple("Training created with id: " + TRAINING_ID, Level.INFO));
     }
 
     @Test
@@ -108,7 +103,6 @@ class TrainingServiceImplTest {
         assertSame(training, actual);
         assertEquals(TRAINING_ID, actual.getId());
         assertEquals("Morning Yoga", actual.getTrainingName());
-
         verify(trainingDao).findById(TRAINING_ID);
     }
 
@@ -117,10 +111,7 @@ class TrainingServiceImplTest {
     void getTrainingById_whenNotFound_shouldThrowException() {
         when(trainingDao.findById(TRAINING_ID)).thenReturn(Optional.empty());
 
-        assertThrows(
-                NoSuchElementException.class,
-                () -> trainingService.getTrainingById(TRAINING_ID)
-        );
+        assertThrows(NoSuchElementException.class, () -> trainingService.getTrainingById(TRAINING_ID));
 
         verify(trainingDao).findById(TRAINING_ID);
     }
@@ -129,7 +120,10 @@ class TrainingServiceImplTest {
     @DisplayName("Should return all trainings")
     void getAllTrainings_shouldReturnList() {
         Training firstTraining = buildTrainingWithId();
-
+        TrainingType trainingType = TrainingType.builder()
+                .id(2L)
+                .trainingTypeName("Boxing")
+                .build();
         Training secondTraining = Training.builder()
                 .id(2L)
                 .trainingName("Evening Boxing")
@@ -137,10 +131,7 @@ class TrainingServiceImplTest {
                 .trainingDuration(45)
                 .trainee(Trainee.builder().id(2L).build())
                 .trainer(Trainer.builder().id(2L).build())
-                .trainingType(TrainingType.builder()
-                        .id(2L)
-                        .trainingTypeName("Boxing")
-                        .build())
+                .trainingType(trainingType)
                 .build();
 
         when(trainingDao.findAll()).thenReturn(List.of(firstTraining, secondTraining));
@@ -150,7 +141,6 @@ class TrainingServiceImplTest {
         assertEquals(2, actual.size());
         assertEquals("Morning Yoga", actual.get(0).getTrainingName());
         assertEquals("Evening Boxing", actual.get(1).getTrainingName());
-
         verify(trainingDao).findAll();
     }
 

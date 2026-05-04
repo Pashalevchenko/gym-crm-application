@@ -8,9 +8,7 @@ import com.gym.crm.application.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -20,7 +18,7 @@ class TraineeMapperTest {
     private static final Long TRAINEE_ID = 100L;
     private static final String USER_FIRST_NAME = "Ivan";
     private static final String USER_LAST_NAME = "Ivanov";
-    private static final String USERNAME = "ivan.ivanov";
+    private static final String USERNAME = USER_FIRST_NAME + '.' + USER_LAST_NAME;
 
     private TraineeMapper traineeMapper;
 
@@ -58,14 +56,15 @@ class TraineeMapperTest {
     @Test
     @DisplayName("Should correctly map all fields from Trainee entity to Response DTO including generated values")
     void entityToDto_shouldMapAllFieldsCorrectly() {
+        User user = User.builder()
+                .firstName(USER_FIRST_NAME)
+                .lastName(USER_LAST_NAME)
+                .username(USERNAME)
+                .isActive(false)
+                .build();
         Trainee trainee = Trainee.builder()
                 .id(TRAINEE_ID)
-                .user(User.builder()
-                        .firstName(USER_FIRST_NAME)
-                        .lastName(USER_LAST_NAME)
-                        .username(USERNAME)
-                        .isActive(false)
-                        .build())
+                .user(user)
                 .dateOfBirth(LocalDate.of(1960, 4, 15))
                 .address("Ivano-Frankivsk")
                 .build();

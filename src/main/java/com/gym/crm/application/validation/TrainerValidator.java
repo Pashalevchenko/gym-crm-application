@@ -31,17 +31,12 @@ public class TrainerValidator {
     private void validateBaseFields(Trainer trainer) {
         Validation.requireNotNull(trainer, "Trainer");
         Validation.requireNotNull(trainer.getUser(), "User");
-
         Validation.requireNotBlank(trainer.getUser().getFirstName(), "First name");
         Validation.requireNotBlank(trainer.getUser().getLastName(), "Last name");
     }
 
     private void validateSpecialization(Trainer trainer) {
         Validation.requireNotNull(trainer.getSpecialization(), "Specialization");
-
-        Validation.requireNotBlank(
-                trainer.getSpecialization().getTrainingTypeName(),
-                "Specialization"
-        );
+        Validation.requireNotBlank(trainer.getSpecialization().getTrainingTypeName(), "Specialization");
     }
 }

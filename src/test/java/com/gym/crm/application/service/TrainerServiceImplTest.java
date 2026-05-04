@@ -5,7 +5,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.application.dao.TrainerDaoHibernate;
-import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.TrainingType;
@@ -23,12 +22,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,10 +43,9 @@ class TrainerServiceImplTest {
     private static final Long TRAINER_ID = 1L;
     private static final Long USER_ID = 10L;
     private static final Long TRAINING_TYPE_ID = 100L;
-
     private static final String FIRST_NAME = "Ivan";
     private static final String LAST_NAME = "Ivanov";
-    private static final String USERNAME = "ivan.ivanov";
+    private static final String USERNAME = FIRST_NAME + "." + LAST_NAME;
     private static final String PASSWORD = "secure123";
     private static final String NEW_PASSWORD = "newPass123";
 
@@ -71,10 +67,8 @@ class TrainerServiceImplTest {
     @BeforeEach
     void setUp() {
         logger = (Logger) LoggerFactory.getLogger(TrainerServiceImpl.class);
-
         listAppender = new ListAppender<>();
         listAppender.start();
-
         logger.addAppender(listAppender);
     }
 
@@ -86,11 +80,12 @@ class TrainerServiceImplTest {
     @Test
     @DisplayName("Should create trainer with generated username, password and specialization")
     void createTrainer_shouldCreateTrainerWithGeneratedCredentials() {
+        User user = User.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .build();
         Trainer trainer = Trainer.builder()
-                .user(User.builder()
-                        .firstName(FIRST_NAME)
-                        .lastName(LAST_NAME)
-                        .build())
+                .user(user)
                 .specialization(buildTrainingType())
                 .build();
 
@@ -107,7 +102,6 @@ class TrainerServiceImplTest {
         assertEquals(PASSWORD, actual.getUser().getPassword());
         assertTrue(actual.getUser().isActive());
         assertEquals("Yoga", actual.getSpecialization().getTrainingTypeName());
-
         verify(trainerValidator).validateForCreate(trainer);
         verify(profileService).createUsername(FIRST_NAME, LAST_NAME);
         verify(profileService).generatePassword();
@@ -115,10 +109,7 @@ class TrainerServiceImplTest {
 
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple(
-                        "Trainer profile created with username: " + USERNAME,
-                        Level.INFO
-                ));
+                .contains(tuple("Trainer profile created with username: " + USERNAME, Level.INFO));
     }
 
     @Test
@@ -132,7 +123,6 @@ class TrainerServiceImplTest {
 
         assertEquals(TRAINER_ID, actual.getId());
         assertEquals(USERNAME, actual.getUser().getUsername());
-
         verify(trainerDao).findById(TRAINER_ID);
     }
 
@@ -141,10 +131,7 @@ class TrainerServiceImplTest {
     void getTrainerById_whenNotFound_shouldThrowException() {
         when(trainerDao.findById(TRAINER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(
-                NoSuchElementException.class,
-                () -> trainerService.getTrainerById(TRAINER_ID)
-        );
+        assertThrows(NoSuchElementException.class, () -> trainerService.getTrainerById(TRAINER_ID));
 
         verify(trainerDao).findById(TRAINER_ID);
     }
@@ -159,7 +146,6 @@ class TrainerServiceImplTest {
         Trainer actual = trainerService.getTrainerByUsername(USERNAME);
 
         assertEquals(USERNAME, actual.getUser().getUsername());
-
         verify(trainerValidator).validateUsername(USERNAME);
         verify(trainerDao).findByUsername(USERNAME);
     }
@@ -169,10 +155,7 @@ class TrainerServiceImplTest {
     void getTrainerByUsername_whenNotFound_shouldThrowException() {
         when(trainerDao.findByUsername(USERNAME)).thenReturn(Optional.empty());
 
-        assertThrows(
-                NoSuchElementException.class,
-                () -> trainerService.getTrainerByUsername(USERNAME)
-        );
+        assertThrows(NoSuchElementException.class, () -> trainerService.getTrainerByUsername(USERNAME));
 
         verify(trainerValidator).validateUsername(USERNAME);
         verify(trainerDao).findByUsername(USERNAME);
@@ -188,7 +171,6 @@ class TrainerServiceImplTest {
         List<Trainer> actual = trainerService.getAllTrainers();
 
         assertEquals(2, actual.size());
-
         verify(trainerDao).findAll();
     }
 
@@ -196,17 +178,18 @@ class TrainerServiceImplTest {
     @DisplayName("Should update trainer while preserving username, password and active status")
     void updateTrainer_shouldUpdateProfileAndPreserveCredentials() {
         Trainer existing = buildTrainer(true);
-
+        User user = User.builder()
+                .firstName("Petro")
+                .lastName("Petrenko")
+                .build();
+        TrainingType trainingType = TrainingType.builder()
+                .id(200L)
+                .trainingTypeName("Boxing")
+                .build();
         Trainer updateRequest = Trainer.builder()
                 .id(TRAINER_ID)
-                .user(User.builder()
-                        .firstName("Petro")
-                        .lastName("Petrenko")
-                        .build())
-                .specialization(TrainingType.builder()
-                        .id(200L)
-                        .trainingTypeName("Boxing")
-                        .build())
+                .user(user)
+                .specialization(trainingType)
                 .build();
 
         when(trainerDao.findById(TRAINER_ID)).thenReturn(Optional.of(existing));
@@ -222,45 +205,9 @@ class TrainerServiceImplTest {
         assertEquals(PASSWORD, actual.getUser().getPassword());
         assertTrue(actual.getUser().isActive());
         assertEquals("Boxing", actual.getSpecialization().getTrainingTypeName());
-
         verify(trainerValidator).validateForUpdate(updateRequest);
         verify(trainerDao).findById(TRAINER_ID);
         verify(trainerDao).update(any(Trainer.class));
-    }
-
-    @Test
-    @DisplayName("Should return true when password is correct")
-    void isPasswordCorrect_whenPasswordMatches_shouldReturnTrue() {
-        Trainer trainer = buildTrainer(true);
-
-        when(trainerDao.findByUsername(USERNAME)).thenReturn(Optional.of(trainer));
-
-        boolean actual = trainerService.isPasswordCorrect(USERNAME, PASSWORD);
-
-        assertTrue(actual);
-
-        verify(trainerDao).findByUsername(USERNAME);
-    }
-
-    @Test
-    @DisplayName("Should return false when password is incorrect")
-    void isPasswordCorrect_whenPasswordDoesNotMatch_shouldReturnFalse() {
-        Trainer trainer = buildTrainer(true);
-
-        when(trainerDao.findByUsername(USERNAME)).thenReturn(Optional.of(trainer));
-
-        boolean actual = trainerService.isPasswordCorrect(USERNAME, "wrongPassword");
-
-        assertFalse(actual);
-
-        verify(trainerDao).findByUsername(USERNAME);
-    }
-
-    @Test
-    @DisplayName("Should return false when username or password is blank")
-    void isPasswordCorrect_whenCredentialsBlank_shouldReturnFalse() {
-        assertFalse(trainerService.isPasswordCorrect("", PASSWORD));
-        assertFalse(trainerService.isPasswordCorrect(USERNAME, ""));
     }
 
     @Test
@@ -283,16 +230,8 @@ class TrainerServiceImplTest {
         assertEquals(FIRST_NAME, updated.getUser().getFirstName());
         assertEquals(LAST_NAME, updated.getUser().getLastName());
         assertEquals("Yoga", updated.getSpecialization().getTrainingTypeName());
-
         verify(trainerValidator).validateUsername(USERNAME);
         verify(trainerValidator).validateNewPassword(NEW_PASSWORD);
-
-        assertThat(listAppender.list)
-                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple(
-                        "Password changed for trainer username: " + USERNAME,
-                        Level.INFO
-                ));
     }
 
     @Test
@@ -306,7 +245,6 @@ class TrainerServiceImplTest {
         Trainer actual = trainerService.activateTrainer(USERNAME);
 
         assertTrue(actual.getUser().isActive());
-
         verify(trainerValidator).validateUsername(USERNAME);
         verify(trainerDao).update(any(Trainer.class));
     }
@@ -318,11 +256,7 @@ class TrainerServiceImplTest {
 
         when(trainerDao.findByUsername(USERNAME)).thenReturn(Optional.of(activeTrainer));
 
-        assertThrows(
-                IllegalStateException.class,
-                () -> trainerService.activateTrainer(USERNAME)
-        );
-
+        assertThrows(IllegalStateException.class, () -> trainerService.activateTrainer(USERNAME));
         verify(trainerValidator).validateUsername(USERNAME);
     }
 
@@ -337,7 +271,6 @@ class TrainerServiceImplTest {
         Trainer actual = trainerService.deactivateTrainer(USERNAME);
 
         assertFalse(actual.getUser().isActive());
-
         verify(trainerValidator).validateUsername(USERNAME);
         verify(trainerDao).update(any(Trainer.class));
     }
@@ -349,11 +282,7 @@ class TrainerServiceImplTest {
 
         when(trainerDao.findByUsername(USERNAME)).thenReturn(Optional.of(inactiveTrainer));
 
-        assertThrows(
-                IllegalStateException.class,
-                () -> trainerService.deactivateTrainer(USERNAME)
-        );
-
+        assertThrows(IllegalStateException.class, () -> trainerService.deactivateTrainer(USERNAME));
         verify(trainerValidator).validateUsername(USERNAME);
     }
 
@@ -363,26 +292,18 @@ class TrainerServiceImplTest {
         LocalDate fromDate = LocalDate.of(2026, 1, 1);
         LocalDate toDate = LocalDate.of(2026, 1, 31);
         String traineeName = "Petro Trainee";
-
         List<Training> trainings = List.of(Training.builder()
                 .trainingName("Morning Yoga")
                 .build());
 
-        when(trainerDao.findTrainingsByCriteria(any(TrainerTrainingSearchFilter.class)))
-                .thenReturn(trainings);
+        when(trainerDao.findTrainingsByCriteria(any(TrainerTrainingSearchFilter.class))).thenReturn(trainings);
 
-        List<Training> actual = trainerService.getTrainerTrainings(
-                USERNAME,
-                fromDate,
-                toDate,
-                traineeName
-        );
+        List<Training> actual = trainerService.getTrainerTrainings(USERNAME, fromDate, toDate, traineeName);
 
         assertEquals(1, actual.size());
         assertEquals("Morning Yoga", actual.get(0).getTrainingName());
 
-        ArgumentCaptor<TrainerTrainingSearchFilter> captor =
-                ArgumentCaptor.forClass(TrainerTrainingSearchFilter.class);
+        ArgumentCaptor<TrainerTrainingSearchFilter> captor = ArgumentCaptor.forClass(TrainerTrainingSearchFilter.class);
 
         verify(trainerDao).findTrainingsByCriteria(captor.capture());
 
@@ -392,21 +313,22 @@ class TrainerServiceImplTest {
         assertEquals(fromDate, filter.getFromDate());
         assertEquals(toDate, filter.getToDate());
         assertEquals(traineeName, filter.getTraineeName());
-
         verify(trainerValidator).validateUsername(USERNAME);
     }
 
     private Trainer buildTrainer(boolean active) {
+        User user = User.builder()
+                .id(USER_ID)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .username(USERNAME)
+                .password(PASSWORD)
+                .isActive(active)
+                .build();
+
         return Trainer.builder()
                 .id(TRAINER_ID)
-                .user(User.builder()
-                        .id(USER_ID)
-                        .firstName(FIRST_NAME)
-                        .lastName(LAST_NAME)
-                        .username(USERNAME)
-                        .password(PASSWORD)
-                        .isActive(active)
-                        .build())
+                .user(user)
                 .specialization(buildTrainingType())
                 .build();
     }

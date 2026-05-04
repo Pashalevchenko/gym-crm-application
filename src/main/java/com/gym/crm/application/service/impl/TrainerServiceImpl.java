@@ -11,7 +11,6 @@ import com.gym.crm.application.validation.TrainerValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -32,16 +31,13 @@ public class TrainerServiceImpl implements TrainerService {
         User user = trainer.getUser();
         String username = profileService.createUsername(user.getFirstName(), user.getLastName());
         String password = profileService.generatePassword();
-        User userWithCredentials = User.builder()
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
+        User userWithCredentials = user.toBuilder()
                 .username(username)
                 .password(password)
                 .isActive(true)
                 .build();
-        Trainer trainerToCreate = Trainer.builder()
+        Trainer trainerToCreate = trainer.toBuilder()
                 .user(userWithCredentials)
-                .specialization(trainer.getSpecialization())
                 .build();
         Trainer created = trainerDao.create(trainerToCreate);
 
@@ -51,7 +47,7 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     public Trainer getTrainerById(Long id) {
-        return trainerDao.findById(id).orElseThrow(() -> new NoSuchElementException("Trainer with ID " + id + " not found"));
+        return trainerDao.findById(id).orElseThrow(() -> new NoSuchElementException(String.format("Trainer with ID %d not found", id)));
     }
 
     @Override
@@ -59,7 +55,7 @@ public class TrainerServiceImpl implements TrainerService {
         trainerValidator.validateUsername(username);
 
         return trainerDao.findByUsername(username)
-                .orElseThrow(() -> new NoSuchElementException("Trainer with username " + username + " not found"));
+                .orElseThrow(() -> new NoSuchElementException(String.format("Trainer with username %s  not found", username)));
     }
 
     @Override
@@ -72,36 +68,18 @@ public class TrainerServiceImpl implements TrainerService {
         trainerValidator.validateForUpdate(trainer);
 
         Trainer existing = getTrainerById(trainer.getId());
-        User existingUser = existing.getUser();
-        User newUser = trainer.getUser();
-        User userToUpdate = User.builder()
-                .id(existingUser.getId())
-                .firstName(newUser.getFirstName())
-                .lastName(newUser.getLastName())
-                .username(existingUser.getUsername())
-                .password(existingUser.getPassword())
-                .isActive(existingUser.isActive())
+        User userToUpdate = existing.getUser().toBuilder()
+                .firstName(trainer.getUser().getFirstName())
+                .lastName(trainer.getUser().getLastName())
                 .build();
-        Trainer trainerToUpdate = Trainer.builder()
-                .id(existing.getId())
-                .user(userToUpdate)
+        Trainer trainerToUpdate = existing.toBuilder()
                 .specialization(trainer.getSpecialization())
+                .user(userToUpdate)
                 .build();
         Trainer updated = trainerDao.update(trainerToUpdate);
 
-        log.info("Trainer profile updated for username: {}", trainer.getUser().getUsername());
+        log.info("Trainer profile updated for username: {}", updated.getUser().getUsername());
         return updated;
-    }
-
-    @Override
-    public boolean isPasswordCorrect(String username, String password) {
-        if (username == null || username.isBlank() || password == null || password.isBlank()) {
-            return false;
-        }
-
-        return trainerDao.findByUsername(username)
-                .map(trainer -> trainer.getUser().getPassword().equals(password))
-                .orElse(false);
     }
 
     @Override
@@ -109,23 +87,14 @@ public class TrainerServiceImpl implements TrainerService {
         trainerValidator.validateNewPassword(newPassword);
 
         Trainer existing = getTrainerByUsername(username);
-        User existingUser = existing.getUser();
-        User userToUpdate = User.builder()
-                .id(existingUser.getId())
-                .firstName(existingUser.getFirstName())
-                .lastName(existingUser.getLastName())
-                .username(existingUser.getUsername())
+        User userToUpdate = existing.getUser().toBuilder()
                 .password(newPassword)
-                .isActive(existingUser.isActive())
                 .build();
-        Trainer trainerToUpdate = Trainer.builder()
-                .id(existing.getId())
+        Trainer trainerToUpdate = existing.toBuilder()
                 .user(userToUpdate)
-                .specialization(existing.getSpecialization())
                 .build();
 
         trainerDao.update(trainerToUpdate);
-        log.info("Password changed for trainer username: {}", username);
     }
 
     @Override
@@ -165,24 +134,13 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     private Trainer updateActiveStatus(Trainer trainer, boolean active) {
-        User existingUser = trainer.getUser();
-        User userToUpdate = User.builder()
-                .id(existingUser.getId())
-                .firstName(existingUser.getFirstName())
-                .lastName(existingUser.getLastName())
-                .username(existingUser.getUsername())
-                .password(existingUser.getPassword())
+        User userToUpdate = trainer.getUser().toBuilder()
                 .isActive(active)
                 .build();
-        Trainer trainerToUpdate = Trainer.builder()
-                .id(trainer.getId())
+        Trainer trainerToUpdate = trainer.toBuilder()
                 .user(userToUpdate)
-                .specialization(trainer.getSpecialization())
                 .build();
 
-        Trainer updated = trainerDao.update(trainerToUpdate);
-
-        log.info("Trainer active status changed to {} for username: {}", active, existingUser.getUsername());
-        return updated;
+        return trainerDao.update(trainerToUpdate);
     }
 }

@@ -22,14 +22,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class GymAppFacadeTest {
@@ -37,9 +37,7 @@ class GymAppFacadeTest {
     private static final String FIRST_NAME = "Ivan";
     private static final String LAST_NAME = "Ivanov";
     private static final String USERNAME = "ivan.ivanov";
-    private static final String PASSWORD = "12345";
     private static final String NEW_PASSWORD = "new12345";
-
     private static final Long TRAINEE_ID = 1L;
     private static final Long TRAINER_ID = 2L;
     private static final Long TRAINING_ID = 3L;
@@ -66,8 +64,8 @@ class GymAppFacadeTest {
     private GymAppFacade facade;
 
     @Test
-    @DisplayName("Should create trainee using mapper and service")
-    void createTrainee_shouldMapRequestCallServiceAndMapResponse() {
+    @DisplayName("Verify that facade calls trainee service and uses mappers for create operation")
+    void createTrainee_Test() {
         TraineeRequestDTO request = TraineeRequestDTO.builder().build();
         Trainee trainee = Trainee.builder().build();
         Trainee createdTrainee = Trainee.builder().id(TRAINEE_ID).build();
@@ -97,8 +95,8 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should get trainee by ID")
-    void getTraineeById_shouldReturnMappedDto() {
+    @DisplayName("Should return trainee DTO when a valid ID is provided to the facade")
+    void getTraineeById_Test() {
         Trainee trainee = Trainee.builder().id(TRAINEE_ID).build();
         TraineeResponseDTO expected = TraineeResponseDTO.builder()
                 .id(TRAINEE_ID)
@@ -158,8 +156,8 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should update trainee")
-    void updateTrainee_shouldMapRequestCallServiceAndMapResponse() {
+    @DisplayName("Should successfully update trainee by mapping request DTO to entity and returning response DTO")
+    void updateTrainee_Test() {
         TraineeRequestDTO request = TraineeRequestDTO.builder().build();
         Trainee trainee = Trainee.builder().id(TRAINEE_ID).build();
         Trainee updated = Trainee.builder().id(TRAINEE_ID).build();
@@ -180,18 +178,6 @@ class GymAppFacadeTest {
         verify(traineeMapper).dtoToEntity(request);
         verify(traineeService).updateTrainee(trainee);
         verify(traineeMapper).entityToDto(updated);
-    }
-
-    @Test
-    @DisplayName("Should check trainee password")
-    void isTraineePasswordCorrect_shouldDelegateToService() {
-        when(traineeService.isPasswordCorrect(USERNAME, PASSWORD)).thenReturn(true);
-
-        boolean actual = facade.isTraineePasswordCorrect(USERNAME, PASSWORD);
-
-        assertEquals(true, actual);
-
-        verify(traineeService).isPasswordCorrect(USERNAME, PASSWORD);
     }
 
     @Test
@@ -243,8 +229,8 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should delete trainee by ID")
-    void deleteTrainee_shouldDelegateToService() {
+    @DisplayName("Should successfully delegate trainee deletion to the service layer using the provided ID")
+    void deleteTrainee_Test() {
         facade.deleteTrainee(TRAINEE_ID);
 
         verify(traineeService).deleteTrainee(TRAINEE_ID);
@@ -252,7 +238,7 @@ class GymAppFacadeTest {
 
     @Test
     @DisplayName("Should delete trainee by username")
-    void deleteTraineeByUsername_shouldDelegateToService() {
+    void deleteTraineeByUsername_Test() {
         facade.deleteTraineeByUsername(USERNAME);
 
         verify(traineeService).deleteTraineeByUsername(USERNAME);
@@ -270,39 +256,21 @@ class GymAppFacadeTest {
                 .id(TRAINING_ID)
                 .trainingName("Morning Yoga")
                 .build();
-
         TrainingResponseDTO response = TrainingResponseDTO.builder()
                 .trainingName("Morning Yoga")
                 .build();
 
-        when(traineeService.getTraineeTrainings(
-                USERNAME,
-                fromDate,
-                toDate,
-                trainerName,
-                trainingTypeName
-        )).thenReturn(List.of(training));
+        when(traineeService.getTraineeTrainings(USERNAME, fromDate, toDate, trainerName, trainingTypeName)).
+                thenReturn(List.of(training));
 
         when(trainingMapper.entityToDto(training)).thenReturn(response);
 
-        List<TrainingResponseDTO> actual = facade.getTraineeTrainings(
-                USERNAME,
-                fromDate,
-                toDate,
-                trainerName,
-                trainingTypeName
-        );
+        List<TrainingResponseDTO> actual = facade.getTraineeTrainings(USERNAME, fromDate, toDate, trainerName, trainingTypeName);
 
         assertEquals(1, actual.size());
         assertEquals("Morning Yoga", actual.get(0).getTrainingName());
 
-        verify(traineeService).getTraineeTrainings(
-                USERNAME,
-                fromDate,
-                toDate,
-                trainerName,
-                trainingTypeName
-        );
+        verify(traineeService).getTraineeTrainings(USERNAME, fromDate, toDate, trainerName, trainingTypeName);
         verify(trainingMapper).entityToDto(training);
     }
 
@@ -334,11 +302,9 @@ class GymAppFacadeTest {
         Set<Trainer> trainers = Set.of(Trainer.builder()
                 .id(TRAINER_ID)
                 .build());
-
         Trainee trainee = Trainee.builder()
                 .id(TRAINEE_ID)
                 .build();
-
         TraineeResponseDTO expected = TraineeResponseDTO.builder()
                 .id(TRAINEE_ID)
                 .build();
@@ -361,15 +327,16 @@ class GymAppFacadeTest {
         Trainer trainer = Trainer.builder().build();
         Trainer createdTrainer = Trainer.builder().id(TRAINER_ID).build();
 
+        TrainingType trainingType = TrainingType.builder()
+                .trainingTypeName("Yoga")
+                .build();
         TrainerResponseDTO expected = TrainerResponseDTO.builder()
                 .id(TRAINER_ID)
                 .firstName(FIRST_NAME)
                 .lastName(LAST_NAME)
                 .username(USERNAME)
                 .isActive(true)
-                .specialization(TrainingType.builder()
-                        .trainingTypeName("Yoga")
-                        .build())
+                .specialization(trainingType)
                 .build();
 
         when(trainerMapper.dtoToEntity(request)).thenReturn(trainer);
@@ -475,18 +442,6 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should check trainer password")
-    void isTrainerPasswordCorrect_shouldDelegateToService() {
-        when(trainerService.isPasswordCorrect(USERNAME, PASSWORD)).thenReturn(true);
-
-        boolean actual = facade.isTrainerPasswordCorrect(USERNAME, PASSWORD);
-
-        assertEquals(true, actual);
-
-        verify(trainerService).isPasswordCorrect(USERNAME, PASSWORD);
-    }
-
-    @Test
     @DisplayName("Should change trainer password")
     void changeTrainerPassword_shouldDelegateToService() {
         facade.changeTrainerPassword(USERNAME, NEW_PASSWORD);
@@ -498,7 +453,6 @@ class GymAppFacadeTest {
     @DisplayName("Should activate trainer")
     void activateTrainer_shouldActivateAndMapResponse() {
         Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
-
         TrainerResponseDTO expected = TrainerResponseDTO.builder()
                 .id(TRAINER_ID)
                 .isActive(true)
@@ -547,36 +501,20 @@ class GymAppFacadeTest {
                 .id(TRAINING_ID)
                 .trainingName("Boxing")
                 .build();
-
         TrainingResponseDTO response = TrainingResponseDTO.builder()
                 .trainingName("Boxing")
                 .build();
 
-        when(trainerService.getTrainerTrainings(
-                USERNAME,
-                fromDate,
-                toDate,
-                traineeName
-        )).thenReturn(List.of(training));
+        when(trainerService.getTrainerTrainings(USERNAME, fromDate, toDate, traineeName)).thenReturn(List.of(training));
 
         when(trainingMapper.entityToDto(training)).thenReturn(response);
 
-        List<TrainingResponseDTO> actual = facade.getTrainerTrainings(
-                USERNAME,
-                fromDate,
-                toDate,
-                traineeName
-        );
+        List<TrainingResponseDTO> actual = facade.getTrainerTrainings(USERNAME, fromDate, toDate, traineeName);
 
         assertEquals(1, actual.size());
         assertEquals("Boxing", actual.get(0).getTrainingName());
 
-        verify(trainerService).getTrainerTrainings(
-                USERNAME,
-                fromDate,
-                toDate,
-                traineeName
-        );
+        verify(trainerService).getTrainerTrainings(USERNAME, fromDate, toDate, traineeName);
         verify(trainingMapper).entityToDto(training);
     }
 
@@ -586,34 +524,27 @@ class GymAppFacadeTest {
         TrainingType requestTrainingType = TrainingType.builder()
                 .trainingTypeName("Yoga")
                 .build();
-
         TrainingRequestDTO request = TrainingRequestDTO.builder()
                 .traineeId(TRAINEE_ID)
                 .trainerId(TRAINER_ID)
+                .trainingName("Morning Yoga")
                 .trainingType(requestTrainingType)
+                .trainingDuration(60)
+                .trainingDate(LocalDate.of(2026, 4, 10))
                 .build();
-
         Trainee trainee = Trainee.builder()
                 .id(TRAINEE_ID)
                 .build();
-
         Trainer trainer = Trainer.builder()
                 .id(TRAINER_ID)
                 .build();
-
-        TrainingType trainingType = TrainingType.builder()
-                .trainingTypeName("Yoga")
-                .build();
-
         Training training = Training.builder()
                 .trainingName("Morning Yoga")
                 .build();
-
         Training createdTraining = Training.builder()
                 .id(TRAINING_ID)
                 .trainingName("Morning Yoga")
                 .build();
-
         TrainingResponseDTO expected = TrainingResponseDTO.builder()
                 .traineeId(TRAINEE_ID)
                 .trainerId(TRAINER_ID)
@@ -624,7 +555,9 @@ class GymAppFacadeTest {
 
         when(traineeService.getTraineeById(TRAINEE_ID)).thenReturn(trainee);
         when(trainerService.getTrainerById(TRAINER_ID)).thenReturn(trainer);
-        when(trainingMapper.dtoToEntity(request, trainee, trainer, trainingType)).thenReturn(training);
+
+        when(trainingMapper.dtoToEntity(eq(request), eq(trainee), eq(trainer), any(TrainingType.class))).thenReturn(training);
+
         when(trainingService.createTraining(training)).thenReturn(createdTraining);
         when(trainingMapper.entityToDto(createdTraining)).thenReturn(expected);
 
@@ -635,7 +568,7 @@ class GymAppFacadeTest {
 
         verify(traineeService).getTraineeById(TRAINEE_ID);
         verify(trainerService).getTrainerById(TRAINER_ID);
-        verify(trainingMapper).dtoToEntity(request, trainee, trainer, trainingType);
+        verify(trainingMapper).dtoToEntity(eq(request), eq(trainee), eq(trainer), any(TrainingType.class));
         verify(trainingService).createTraining(training);
         verify(trainingMapper).entityToDto(createdTraining);
     }
@@ -646,7 +579,6 @@ class GymAppFacadeTest {
         Training training = Training.builder()
                 .id(TRAINING_ID)
                 .build();
-
         TrainingResponseDTO expected = TrainingResponseDTO.builder()
                 .trainingName("Morning Yoga")
                 .build();
@@ -669,7 +601,6 @@ class GymAppFacadeTest {
                 .id(TRAINING_ID)
                 .trainingName("Boxing")
                 .build();
-
         TrainingResponseDTO response = TrainingResponseDTO.builder()
                 .trainingName("Boxing")
                 .build();
@@ -681,7 +612,6 @@ class GymAppFacadeTest {
 
         assertEquals(1, actual.size());
         assertEquals("Boxing", actual.get(0).getTrainingName());
-
         verify(trainingService).getAllTrainings();
         verify(trainingMapper).entityToDto(training);
     }

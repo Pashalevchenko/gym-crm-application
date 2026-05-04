@@ -59,10 +59,6 @@ public class GymAppFacade {
         return traineeMapper.entityToDto(traineeService.updateTrainee(trainee));
     }
 
-    public boolean isTraineePasswordCorrect(String username, String password) {
-        return traineeService.isPasswordCorrect(username, password);
-    }
-
     public void changeTraineePassword(String username, String newPassword) {
         traineeService.changePassword(username, newPassword);
     }
@@ -83,20 +79,8 @@ public class GymAppFacade {
         traineeService.deleteTraineeByUsername(username);
     }
 
-    public List<TrainingResponseDTO> getTraineeTrainings(
-            String username,
-            LocalDate fromDate,
-            LocalDate toDate,
-            String trainerName,
-            String trainingTypeName
-    ) {
-        return traineeService.getTraineeTrainings(
-                        username,
-                        fromDate,
-                        toDate,
-                        trainerName,
-                        trainingTypeName
-                ).stream()
+    public List<TrainingResponseDTO> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingTypeName) {
+        return traineeService.getTraineeTrainings(username, fromDate, toDate, trainerName, trainingTypeName).stream()
                 .map(trainingMapper::entityToDto)
                 .toList();
     }
@@ -139,10 +123,6 @@ public class GymAppFacade {
         return trainerMapper.entityToDto(trainerService.updateTrainer(trainer));
     }
 
-    public boolean isTrainerPasswordCorrect(String username, String password) {
-        return trainerService.isPasswordCorrect(username, password);
-    }
-
     public void changeTrainerPassword(String username, String newPassword) {
         trainerService.changePassword(username, newPassword);
     }
@@ -155,18 +135,8 @@ public class GymAppFacade {
         return trainerMapper.entityToDto(trainerService.deactivateTrainer(username));
     }
 
-    public List<TrainingResponseDTO> getTrainerTrainings(
-            String username,
-            LocalDate fromDate,
-            LocalDate toDate,
-            String traineeName
-    ) {
-        return trainerService.getTrainerTrainings(
-                        username,
-                        fromDate,
-                        toDate,
-                        traineeName
-                ).stream()
+    public List<TrainingResponseDTO> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
+        return trainerService.getTrainerTrainings(username, fromDate, toDate, traineeName).stream()
                 .map(trainingMapper::entityToDto)
                 .toList();
     }

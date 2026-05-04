@@ -18,8 +18,7 @@ class TrainerMapperTest {
 
     private static final String USER_FIRST_NAME = "Ivan";
     private static final String USER_LAST_NAME = "Ivanov";
-    private static final String USERNAME = "ivan.ivanov";
-
+    private static final String USERNAME = USER_FIRST_NAME + '.' + USER_LAST_NAME;
     private TrainerMapper trainerMapper;
 
     @BeforeEach
@@ -33,23 +32,19 @@ class TrainerMapperTest {
         TrainingType specialization = TrainingType.builder()
                 .trainingTypeName("Boxing")
                 .build();
-
         TrainerRequestDTO request = TrainerRequestDTO.builder()
                 .firstName(USER_FIRST_NAME)
                 .lastName(USER_LAST_NAME)
                 .isActive(true)
                 .specialization(specialization)
                 .build();
-
         Trainer actual = trainerMapper.dtoToEntity(request);
 
         assertNotNull(actual);
-
         assertNotNull(actual.getUser());
         assertEquals(USER_FIRST_NAME, actual.getUser().getFirstName());
         assertEquals(USER_LAST_NAME, actual.getUser().getLastName());
         assertTrue(actual.getUser().isActive());
-
         assertNotNull(actual.getSpecialization());
         assertEquals("Boxing", actual.getSpecialization().getTrainingTypeName());
     }
@@ -60,27 +55,23 @@ class TrainerMapperTest {
         TrainingType specialization = TrainingType.builder()
                 .trainingTypeName("Yoga")
                 .build();
-
         User user = User.builder()
                 .firstName(USER_FIRST_NAME)
                 .lastName(USER_LAST_NAME)
                 .username(USERNAME)
                 .isActive(false)
                 .build();
-
         Trainer entity = Trainer.builder()
+                .id(1L)
                 .user(user)
                 .specialization(specialization)
                 .build();
-
         TrainerResponseDTO actual = trainerMapper.entityToDto(entity);
 
         assertNotNull(actual);
-
         assertEquals(USER_FIRST_NAME, actual.getFirstName());
         assertEquals(USER_LAST_NAME, actual.getLastName());
         assertEquals(USERNAME, actual.getUsername());
-
         assertNotNull(actual.getSpecialization());
         assertEquals("Yoga", actual.getSpecialization().getTrainingTypeName());
     }

@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,10 +40,9 @@ class TraineeServiceImplTest {
 
     private static final Long TRAINEE_ID = 1L;
     private static final Long USER_ID = 10L;
-
     private static final String FIRST_NAME = "Ivan";
     private static final String LAST_NAME = "Ivanov";
-    private static final String USERNAME = "ivan.ivanov";
+    private static final String USERNAME = FIRST_NAME + "." + LAST_NAME;
     private static final String PASSWORD = "randomPass123";
 
     @Mock
@@ -63,10 +63,8 @@ class TraineeServiceImplTest {
     @BeforeEach
     void setUp() {
         logger = (Logger) LoggerFactory.getLogger(TraineeServiceImpl.class);
-
         listAppender = new ListAppender<>();
         listAppender.start();
-
         logger.addAppender(listAppender);
     }
 
@@ -78,11 +76,12 @@ class TraineeServiceImplTest {
     @Test
     @DisplayName("Should create trainee with generated username and password")
     void createTrainee_shouldCreateTraineeWithGeneratedCredentials() {
+        User user = User.builder()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .build();
         Trainee trainee = Trainee.builder()
-                .user(User.builder()
-                        .firstName(FIRST_NAME)
-                        .lastName(LAST_NAME)
-                        .build())
+                .user(user)
                 .dateOfBirth(LocalDate.of(2000, 1, 1))
                 .address("Kyiv")
                 .build();
@@ -95,27 +94,17 @@ class TraineeServiceImplTest {
 
         assertNotNull(actual);
         assertNotNull(actual.getUser());
-
         assertEquals(FIRST_NAME, actual.getUser().getFirstName());
         assertEquals(LAST_NAME, actual.getUser().getLastName());
         assertEquals(USERNAME, actual.getUser().getUsername());
         assertEquals(PASSWORD, actual.getUser().getPassword());
-        assertEquals(true, actual.getUser().isActive());
-
+        assertTrue(actual.getUser().isActive());
         assertEquals(LocalDate.of(2000, 1, 1), actual.getDateOfBirth());
         assertEquals("Kyiv", actual.getAddress());
-
         verify(traineeValidator).validateForCreate(trainee);
         verify(profileService).createUsername(FIRST_NAME, LAST_NAME);
         verify(profileService).generatePassword();
         verify(traineeDao).create(any(Trainee.class));
-
-        assertThat(listAppender.list)
-                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple(
-                        "Trainee profile created with username: " + USERNAME,
-                        Level.INFO
-                ));
     }
 
     @Test
@@ -130,7 +119,6 @@ class TraineeServiceImplTest {
         assertEquals(TRAINEE_ID, actual.getId());
         assertEquals(FIRST_NAME, actual.getUser().getFirstName());
         assertEquals(USERNAME, actual.getUser().getUsername());
-
         verify(traineeDao).findById(TRAINEE_ID);
     }
 
@@ -141,10 +129,7 @@ class TraineeServiceImplTest {
 
         when(traineeDao.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(
-                NoSuchElementException.class,
-                () -> traineeService.getTraineeById(id)
-        );
+        assertThrows(NoSuchElementException.class, () -> traineeService.getTraineeById(id));
 
         verify(traineeDao).findById(id);
     }
@@ -153,13 +138,13 @@ class TraineeServiceImplTest {
     @DisplayName("Should update trainee profile and preserve username, password and active status")
     void updateTrainee_shouldUpdateProfileAndPreserveCredentials() {
         Trainee existing = buildTrainee(true);
-
+        User user = User.builder()
+                .firstName("Petro")
+                .lastName("Petrenko")
+                .build();
         Trainee updateRequest = Trainee.builder()
                 .id(TRAINEE_ID)
-                .user(User.builder()
-                        .firstName("Petro")
-                        .lastName("Petrenko")
-                        .build())
+                .user(user)
                 .dateOfBirth(LocalDate.of(1999, 5, 10))
                 .address("Lviv")
                 .build();
@@ -171,17 +156,13 @@ class TraineeServiceImplTest {
 
         assertEquals(TRAINEE_ID, actual.getId());
         assertEquals(USER_ID, actual.getUser().getId());
-
         assertEquals("Petro", actual.getUser().getFirstName());
         assertEquals("Petrenko", actual.getUser().getLastName());
-
         assertEquals(USERNAME, actual.getUser().getUsername());
         assertEquals(PASSWORD, actual.getUser().getPassword());
-        assertEquals(true, actual.getUser().isActive());
-
+        assertTrue(actual.getUser().isActive());
         assertEquals(LocalDate.of(1999, 5, 10), actual.getDateOfBirth());
         assertEquals("Lviv", actual.getAddress());
-
         verify(traineeValidator).validateForUpdate(updateRequest);
         verify(traineeDao).findById(TRAINEE_ID);
         verify(traineeDao).update(any(Trainee.class));
@@ -191,13 +172,13 @@ class TraineeServiceImplTest {
     @DisplayName("Should pass correctly rebuilt trainee to DAO during update")
     void updateTrainee_shouldPassCorrectTraineeToDao() {
         Trainee existing = buildTrainee(true);
-
+        User user = User.builder()
+                .firstName("Petro")
+                .lastName("Petrenko")
+                .build();
         Trainee updateRequest = Trainee.builder()
                 .id(TRAINEE_ID)
-                .user(User.builder()
-                        .firstName("Petro")
-                        .lastName("Petrenko")
-                        .build())
+                .user(user)
                 .dateOfBirth(LocalDate.of(1999, 5, 10))
                 .address("Lviv")
                 .build();
@@ -218,7 +199,7 @@ class TraineeServiceImplTest {
         assertEquals("Petrenko", passedToDao.getUser().getLastName());
         assertEquals(USERNAME, passedToDao.getUser().getUsername());
         assertEquals(PASSWORD, passedToDao.getUser().getPassword());
-        assertEquals(true, passedToDao.getUser().isActive());
+        assertTrue(passedToDao.getUser().isActive());
         assertEquals(LocalDate.of(1999, 5, 10), passedToDao.getDateOfBirth());
         assertEquals("Lviv", passedToDao.getAddress());
     }
@@ -226,18 +207,18 @@ class TraineeServiceImplTest {
     @Test
     @DisplayName("Should return all trainees")
     void getAllTrainees_shouldReturnList() {
-        List<Trainee> trainees = List.of(
-                buildTrainee(true),
+        User user = User.builder()
+                .id(20L)
+                .firstName("Anna")
+                .lastName("Smith")
+                .username("anna.smith")
+                .password("pass")
+                .isActive(true)
+                .build();
+        List<Trainee> trainees = List.of(buildTrainee(true),
                 Trainee.builder()
                         .id(2L)
-                        .user(User.builder()
-                                .id(20L)
-                                .firstName("Anna")
-                                .lastName("Smith")
-                                .username("anna.smith")
-                                .password("pass")
-                                .isActive(true)
-                                .build())
+                        .user(user)
                         .build()
         );
 
@@ -248,7 +229,6 @@ class TraineeServiceImplTest {
         assertEquals(2, actual.size());
         assertEquals(USERNAME, actual.get(0).getUser().getUsername());
         assertEquals("anna.smith", actual.get(1).getUser().getUsername());
-
         verify(traineeDao).findAll();
     }
 
@@ -261,23 +241,22 @@ class TraineeServiceImplTest {
 
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple(
-                        "Trainee profile deleted with id: " + TRAINEE_ID,
-                        Level.INFO
-                ));
+                .contains(tuple("Trainee profile deleted with id: " + TRAINEE_ID, Level.INFO));
     }
 
     private Trainee buildTrainee(boolean active) {
+        User user = User.builder()
+                .id(USER_ID)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .username(USERNAME)
+                .password(PASSWORD)
+                .isActive(active)
+                .build();
+
         return Trainee.builder()
                 .id(TRAINEE_ID)
-                .user(User.builder()
-                        .id(USER_ID)
-                        .firstName(FIRST_NAME)
-                        .lastName(LAST_NAME)
-                        .username(USERNAME)
-                        .password(PASSWORD)
-                        .isActive(active)
-                        .build())
+                .user(user)
                 .dateOfBirth(LocalDate.of(2000, 1, 1))
                 .address("Kyiv")
                 .build();

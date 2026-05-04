@@ -31,7 +31,7 @@ public class TrainingServiceImpl implements TrainingService {
     @Override
     public Training getTrainingById(Long id) {
         return trainingDao.findById(id).orElseThrow(() ->
-                new NoSuchElementException("Training with ID " + id + " not found"));
+                new NoSuchElementException(String.format("Trainer with ID %d not found", id)));
     }
 
     @Override

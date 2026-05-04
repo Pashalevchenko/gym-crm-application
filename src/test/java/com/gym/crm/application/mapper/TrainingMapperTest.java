@@ -32,36 +32,26 @@ class TrainingMapperTest {
     @Test
     @DisplayName("Should correctly map TrainingRequestDTO to Training entity with relations and session details")
     void dtoToEntity_shouldMapAllFieldsCorrectly() {
+        TrainingType trainingType =TrainingType.builder()
+                .id(TRAINING_TYPE_ID)
+                .trainingTypeName("Strength")
+                .build();
         TrainingRequestDTO request = TrainingRequestDTO.builder()
                 .traineeId(TRAINEE_ID)
                 .trainerId(TRAINER_ID)
                 .trainingName("Deadlift Session")
-                .trainingType(TrainingType.builder()
-                        .trainingTypeName("Strength")
-                        .build())
+                .trainingType(trainingType)
                 .trainingDate(LocalDate.of(2026, 5, 20))
                 .trainingDuration(90)
                 .build();
-
         Trainee trainee = Trainee.builder()
                 .id(TRAINEE_ID)
                 .build();
-
         Trainer trainer = Trainer.builder()
                 .id(TRAINER_ID)
                 .build();
 
-        TrainingType trainingType = TrainingType.builder()
-                .id(TRAINING_TYPE_ID)
-                .trainingTypeName("Strength")
-                .build();
-
-        Training actual = trainingMapper.dtoToEntity(
-                request,
-                trainee,
-                trainer,
-                trainingType
-        );
+        Training actual = trainingMapper.dtoToEntity(request, trainee, trainer, trainingType);
 
         assertNotNull(actual);
         assertEquals(trainee, actual.getTrainee());
@@ -78,16 +68,13 @@ class TrainingMapperTest {
         Trainee trainee = Trainee.builder()
                 .id(TRAINEE_ID)
                 .build();
-
         Trainer trainer = Trainer.builder()
                 .id(TRAINER_ID)
                 .build();
-
         TrainingType trainingType = TrainingType.builder()
                 .id(TRAINING_TYPE_ID)
                 .trainingTypeName("Cardio")
                 .build();
-
         Training training = Training.builder()
                 .trainee(trainee)
                 .trainer(trainer)

@@ -33,6 +33,7 @@ public class TraineeServiceImpl implements TraineeService {
         User user = trainee.getUser();
         String username = profileService.createUsername(user.getFirstName(), user.getLastName());
         String password = profileService.generatePassword();
+
         User userWithCredentials = User.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -46,16 +47,13 @@ public class TraineeServiceImpl implements TraineeService {
                 .user(userWithCredentials)
                 .build();
 
-        Trainee created = traineeDao.create(traineeToCreate);
-
-        log.info("Trainee profile created with username: {}", username);
-        return created;
+        return traineeDao.create(traineeToCreate);
     }
 
     @Override
     public Trainee getTraineeById(Long id) {
         return traineeDao.findById(id).orElseThrow(() ->
-                new NoSuchElementException("Trainee with ID " + id + " not found"));
+                new NoSuchElementException(String.format("Trainee with ID %d not found", id)));
     }
 
     @Override
@@ -63,7 +61,7 @@ public class TraineeServiceImpl implements TraineeService {
         traineeValidator.validateUsername(username);
 
         return traineeDao.findByUsername(username)
-                .orElseThrow(() -> new NoSuchElementException("Trainee with username " + username + " not found"));
+                .orElseThrow(() -> new NoSuchElementException(String.format("Trainee with username %s not found", username)));
     }
 
     @Override
@@ -76,18 +74,11 @@ public class TraineeServiceImpl implements TraineeService {
         traineeValidator.validateForUpdate(trainee);
 
         Trainee existing = getTraineeById(trainee.getId());
-        User existingUser = existing.getUser();
-        User newUser = trainee.getUser();
-        User userToUpdate = User.builder()
-                .id(existingUser.getId())
-                .firstName(newUser.getFirstName())
-                .lastName(newUser.getLastName())
-                .username(existingUser.getUsername())
-                .password(existingUser.getPassword())
-                .isActive(existingUser.isActive())
+        User userToUpdate = existing.getUser().toBuilder()
+                .firstName(trainee.getUser().getFirstName())
+                .lastName(trainee.getUser().getLastName())
                 .build();
-        Trainee traineeToUpdate = Trainee.builder()
-                .id(existing.getId())
+        Trainee traineeToUpdate = existing.toBuilder()
                 .dateOfBirth(trainee.getDateOfBirth())
                 .address(trainee.getAddress())
                 .user(userToUpdate)
@@ -97,37 +88,15 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
-    public boolean isPasswordCorrect(String username, String password) {
-        if (username == null || username.isBlank() || password == null || password.isBlank()) {
-            return false;
-        }
-
-        return traineeDao.findByUsername(username)
-                .map(trainee -> trainee.getUser().getPassword().equals(password))
-                .orElse(false);
-    }
-
-    @Override
     public void changePassword(String username, String newPassword) {
         traineeValidator.validateUsername(username);
         traineeValidator.validateNewPassword(newPassword);
 
         Trainee existing = getTraineeByUsername(username);
-        User existingUser = existing.getUser();
-
-        User userToUpdate = User.builder()
-                .id(existingUser.getId())
-                .firstName(existingUser.getFirstName())
-                .lastName(existingUser.getLastName())
-                .username(existingUser.getUsername())
+        User userToUpdate = existing.getUser().toBuilder()
                 .password(newPassword)
-                .isActive(existingUser.isActive())
                 .build();
-
-        Trainee traineeToUpdate = Trainee.builder()
-                .id(existing.getId())
-                .dateOfBirth(existing.getDateOfBirth())
-                .address(existing.getAddress())
+        Trainee traineeToUpdate = existing.toBuilder()
                 .user(userToUpdate)
                 .build();
 
@@ -170,7 +139,6 @@ public class TraineeServiceImpl implements TraineeService {
         traineeValidator.validateUsername(username);
 
         traineeDao.deleteByUsername(username);
-        log.info("Trainee profile deleted by username: {}", username);
     }
 
     @Override
@@ -200,35 +168,17 @@ public class TraineeServiceImpl implements TraineeService {
         traineeValidator.validateUsername(traineeUsername);
         traineeValidator.validateTrainersList(trainers);
 
-        Trainee updated = traineeDao.updateTrainersList(traineeUsername, trainers);
-
-        log.info("Trainers list updated for trainee username: {}", traineeUsername);
-        return updated;
+        return traineeDao.updateTrainersList(traineeUsername, trainers);
     }
 
     private Trainee updateActiveStatus(Trainee trainee, boolean active) {
-        User existingUser = trainee.getUser();
-
-        User userToUpdate = User.builder()
-                .id(existingUser.getId())
-                .firstName(existingUser.getFirstName())
-                .lastName(existingUser.getLastName())
-                .username(existingUser.getUsername())
-                .password(existingUser.getPassword())
+        User updatedUser = trainee.getUser().toBuilder()
                 .isActive(active)
                 .build();
-
-        Trainee traineeToUpdate = Trainee.builder()
-                .id(trainee.getId())
-                .dateOfBirth(trainee.getDateOfBirth())
-                .address(trainee.getAddress())
-                .user(userToUpdate)
+        Trainee traineeToUpdate = trainee.toBuilder()
+                .user(updatedUser)
                 .build();
 
-        Trainee updated = traineeDao.update(traineeToUpdate);
-
-        log.info("Trainee active status changed to {} for username: {}", active, existingUser.getUsername());
-
-        return updated;
+        return traineeDao.update(traineeToUpdate);
     }
 }

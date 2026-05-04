@@ -28,7 +28,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public String createUsername(String firstName, String lastName) {
-        String username = (firstName + "." + lastName).toLowerCase();
+        String username = (firstName + "." + lastName);
         Set<String> dbUsernames = getAllUsernames();
         int userSerialNumber = 1;
 
@@ -36,8 +36,7 @@ public class ProfileServiceImpl implements ProfileService {
             return username;
         }
 
-        log.info("Username '{}' already exists. Starting serial number generation for {} {}",
-                username, firstName, lastName);
+        log.info("Username '{}' already exists. Starting serial number generation for {} {}", username, firstName, lastName);
 
         while (dbUsernames.contains(username + userSerialNumber)) {
             userSerialNumber++;
@@ -61,8 +60,8 @@ public class ProfileServiceImpl implements ProfileService {
 
     private Set<String> getAllUsernames() {
         return Stream.concat(traineeDao.findAll().stream().map(Trainee::getUser).filter(Objects::nonNull).map(User::getUsername),
-                             trainerDao.findAll().stream().map(Trainer::getUser).filter(Objects::nonNull).map(User::getUsername))
-                     .filter(Objects::nonNull)
-                     .collect(Collectors.toSet());
+                        trainerDao.findAll().stream().map(Trainer::getUser).filter(Objects::nonNull).map(User::getUsername))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 }

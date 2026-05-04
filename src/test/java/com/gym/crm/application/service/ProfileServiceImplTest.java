@@ -33,10 +33,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ProfileServiceImplTest {
 
-    private static final String USER_FIRST_NAME = "Ivan";
-    private static final String USER_LAST_NAME = "Ivanov";
-    private static final String USERNAME = "ivan.ivanov";
-    private static final String USERNAME_PLUS_ONE = USERNAME + "1";
+    private final String USER_FIRST_NAME = "Ivan";
+    private final String USER_LAST_NAME = "Ivanov";
+    private final String USERNAME = USER_FIRST_NAME + '.' + USER_LAST_NAME;
+    private final String USERNAME_PLUS_ONE = USERNAME + "1";
 
     @Mock
     private TraineeDaoHibernate traineeDao;
@@ -56,10 +56,8 @@ class ProfileServiceImplTest {
         lenient().when(trainerDao.findAll()).thenReturn(Collections.emptyList());
 
         logger = (Logger) LoggerFactory.getLogger(ProfileServiceImpl.class);
-
         listAppender = new ListAppender<>();
         listAppender.start();
-
         logger.addAppender(listAppender);
     }
 
@@ -79,10 +77,11 @@ class ProfileServiceImplTest {
     @Test
     @DisplayName("Should append an index to the username when a collision with an existing trainee occurs")
     void createUsername_withTraineeCollision() {
+        User user = User.builder()
+                .username(USERNAME)
+                .build();
         Trainee existingTrainee = Trainee.builder()
-                .user(User.builder()
-                        .username(USERNAME)
-                        .build())
+                .user(user)
                 .build();
 
         when(traineeDao.findAll()).thenReturn(List.of(existingTrainee));
@@ -95,16 +94,17 @@ class ProfileServiceImplTest {
     @Test
     @DisplayName("Should increment username suffix correctly when multiple collisions exist across trainee and trainer records")
     void createUsername_multipleCollisions() {
-        Trainee existingTrainee = Trainee.builder()
-                .user(User.builder()
-                        .username(USERNAME)
-                        .build())
+        User user = User.builder()
+                .username(USERNAME)
                 .build();
-
+        Trainee existingTrainee = Trainee.builder()
+                .user(user)
+                .build();
+        User UserPlusOne = User.builder()
+                .username(USERNAME_PLUS_ONE)
+                .build();
         Trainer existingTrainer = Trainer.builder()
-                .user(User.builder()
-                        .username(USERNAME_PLUS_ONE)
-                        .build())
+                .user(UserPlusOne)
                 .build();
 
         when(traineeDao.findAll()).thenReturn(List.of(existingTrainee));
@@ -129,17 +129,17 @@ class ProfileServiceImplTest {
     void generatePassword_shouldUseOnlyAllowedCharacters() {
         String password = profileService.generatePassword();
 
-        assertThat(password)
-                .matches("[A-Za-z0-9]{10}");
+        assertThat(password).matches("[A-Za-z0-9]{10}");
     }
 
     @Test
     @DisplayName("Should log INFO message when a duplicate username is detected during generation")
     void createUsername_shouldLogWhenDuplicateFound() {
+        User user = User.builder()
+                .username(USERNAME)
+                .build();
         Trainee existingTrainee = Trainee.builder()
-                .user(User.builder()
-                        .username(USERNAME)
-                        .build())
+                .user(user)
                 .build();
 
         when(traineeDao.findAll()).thenReturn(List.of(existingTrainee));
@@ -148,10 +148,7 @@ class ProfileServiceImplTest {
 
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple(
-                        "Username 'ivan.ivanov' already exists. Starting serial number generation for Ivan Ivanov",
-                        Level.INFO
-                ));
+                .contains(tuple("Username 'Ivan.Ivanov' already exists. Starting serial number generation for Ivan Ivanov", Level.INFO));
     }
 
     @Test
@@ -171,10 +168,11 @@ class ProfileServiceImplTest {
     @Test
     @DisplayName("Should ignore null usernames")
     void createUsername_shouldIgnoreNullUsername() {
+        User user = User.builder()
+                .username(null)
+                .build();
         Trainee traineeWithNullUsername = Trainee.builder()
-                .user(User.builder()
-                        .username(null)
-                        .build())
+                .user(user)
                 .build();
 
         when(traineeDao.findAll()).thenReturn(List.of(traineeWithNullUsername));
