@@ -1,6 +1,6 @@
 package com.gym.crm.application.service.impl;
 
-import com.gym.crm.application.dao.TraineeDaoHibernate;
+import com.gym.crm.application.dao.TraineeDao;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
@@ -22,7 +22,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class TraineeServiceImpl implements TraineeService {
 
-    private final TraineeDaoHibernate traineeDao;
+    private final TraineeDao traineeDao;
     private final ProfileService profileService;
     private final TraineeValidator validator;
 

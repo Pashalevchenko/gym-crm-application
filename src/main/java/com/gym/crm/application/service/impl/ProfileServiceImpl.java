@@ -1,7 +1,7 @@
 package com.gym.crm.application.service.impl;
 
-import com.gym.crm.application.dao.TraineeDaoHibernate;
-import com.gym.crm.application.dao.TrainerDaoHibernate;
+import com.gym.crm.application.dao.TraineeDao;
+import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.User;
@@ -23,8 +23,8 @@ public class ProfileServiceImpl implements ProfileService {
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int PASSWORD_LENGTH = 10;
     private final Random random = new Random();
-    private final TraineeDaoHibernate traineeDao;
-    private final TrainerDaoHibernate trainerDao;
+    private final TraineeDao traineeDao;
+    private final TrainerDao trainerDao;
 
     @Override
     public String createUsername(String firstName, String lastName) {

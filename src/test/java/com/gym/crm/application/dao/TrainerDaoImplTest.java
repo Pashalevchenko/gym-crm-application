@@ -1,148 +1,319 @@
 package com.gym.crm.application.dao;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import com.gym.crm.application.dao.impl.TrainerDaoImpl;
-import com.gym.crm.application.model.Trainer;
-import org.junit.jupiter.api.BeforeEach;
+import com.github.springtestdbunit.annotation.DatabaseOperation;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
+import com.gym.crm.application.entity.Trainer;
+import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.entity.User;
+import org.hibernate.Session;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.gym.crm.application.entity.Training;
+import com.gym.crm.application.search.filter.TrainerTrainingSearchFilter;
+import java.time.LocalDate;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import java.util.stream.Stream;
 
-@ExtendWith(MockitoExtension.class)
-public class TrainerDaoImplTest {
+@DisplayName("Trainer DAO DBUnit integration tests")
+class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
 
-    private final Long TRAINER_ID = 1L;
-    private final Long UNEXIST_TRAINER_ID = 99L;
+    private static final Long TRAINER_ID = 10L;
+    private static final Long SECOND_TRAINER_ID = 12L;
+    private static final Long THIRD_TRAINER_ID = 15L;
+    private static final Long TRAINER_USER_ID = 10L;
+    private static final Long SECOND_TRAINER_USER_ID = 12L;
+    private static final Long SPECIALIZATION_ID = 10L;
+    private static final Long SECOND_SPECIALIZATION_ID = 12L;
 
-    @Mock
-    private Map<Long, Trainer> storage;
+    @Nested
+    @DatabaseSetup(value = "/dataset/trainer-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DisplayName("create")
+    class CreateTests {
 
-    private TrainerDao trainerDao;
+        @Test
+        @DisplayName("Should save trainer")
+        void create_success() {
+            Trainer trainer = buildTrainer("New", "Trainer", "new.trainer", SPECIALIZATION_ID);
+            Trainer actual = dao.create(trainer);
 
-    private ListAppender<ILoggingEvent> listAppender;
+            assertThat(actual).isNotNull();
+            assertThat(actual.getId()).isNotNull();
+            assertThat(actual.getUser()).isNotNull();
+            assertThat(actual.getUser().getId()).isNotNull();
 
-    @BeforeEach
-    void setUp() {
-        trainerDao = new TrainerDaoImpl(storage);
+            Optional<Trainer> found = dao.findByUsername("new.trainer");
 
-        Logger logger = (Logger) LoggerFactory.getLogger(TrainerDaoImpl.class);
-        listAppender = new ListAppender<>();
-        listAppender.start();
-        logger.addAppender(listAppender);
+            assertThat(found).isPresent();
+
+            Trainer saved = found.get();
+
+            assertThat(saved.getUser().getFirstName()).isEqualTo("New");
+            assertThat(saved.getUser().getLastName()).isEqualTo("Trainer");
+            assertThat(saved.getUser().getUsername()).isEqualTo("new.trainer");
+            assertThat(saved.getUser().getPassword()).isEqualTo("12345");
+            assertThat(saved.getUser().isActive()).isTrue();
+            assertThat(saved.getSpecialization().getId()).isEqualTo(SPECIALIZATION_ID);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when trainer is null")
+        void create_nullTrainer() {
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> dao.create(null));
+
+            assertThat(exception).isNotNull();
+        }
     }
 
-    @Test
-    @DisplayName("Should successfully save a new trainer to storage and return the saved entity")
-    void create_ShouldStoreTrainer() {
-        Trainer expected = Trainer.builder()
-                .userId(TRAINER_ID)
-                .firstName("Stepan")
-                .lastName("Giga")
+    @Nested
+    @DatabaseSetup(value = "/dataset/trainer-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DisplayName("update")
+    class UpdateTests {
+
+        @Test
+        @DisplayName("Should update trainer when trainer exists")
+        void update_success() {
+            Trainer existing = dao.findById(TRAINER_ID).orElseThrow();
+
+            User user = User.builder()
+                    .id(existing.getUser().getId())
+                    .firstName("Updated")
+                    .lastName("Trainer")
+                    .username(existing.getUser().getUsername())
+                    .password(existing.getUser().getPassword())
+                    .isActive(existing.getUser().isActive())
+                    .build();
+            TrainingType specialization = TrainingType.builder()
+                    .id(SECOND_SPECIALIZATION_ID)
+                    .trainingTypeName("Strength Shenanigans")
+                    .build();
+            Trainer trainerToUpdate = Trainer.builder()
+                    .id(existing.getId())
+                    .user(user)
+                    .specialization(specialization)
+                    .build();
+
+            Trainer updated = dao.update(trainerToUpdate);
+            Optional<Trainer> found = dao.findById(updated.getId());
+
+            assertThat(found).isPresent();
+
+            Trainer actual = found.get();
+            assertThat(actual.getId()).isEqualTo(TRAINER_ID);
+            assertThat(actual.getUser().getId()).isEqualTo(TRAINER_USER_ID);
+            assertThat(actual.getUser().getFirstName()).isEqualTo("Updated");
+            assertThat(actual.getUser().getLastName()).isEqualTo("Trainer");
+            assertThat(actual.getUser().getUsername()).isEqualTo("pavlo.plank");
+            assertThat(actual.getUser().getPassword()).isEqualTo("12345");
+            assertThat(actual.getUser().isActive()).isTrue();
+            assertThat(actual.getSpecialization().getId()).isEqualTo(SECOND_SPECIALIZATION_ID);
+            assertThat(actual.getSpecialization().getTrainingTypeName()).isEqualTo("Strength Shenanigans");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when trainer is null")
+        void update_nullTrainer() {
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> dao.update(null));
+
+            assertThat(exception).isNotNull();
+        }
+    }
+
+    @Nested
+    @DatabaseSetup(value = "/dataset/trainer-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DisplayName("findById")
+    class FindByIdTests {
+
+        @Test
+        @DisplayName("Should return trainer when trainer with requested id exists")
+        void findById_found() {
+            Optional<Trainer> found = dao.findById(TRAINER_ID);
+
+            assertThat(found).isPresent();
+
+            Trainer actual = found.get();
+
+            assertThat(actual.getId()).isEqualTo(TRAINER_ID);
+            assertThat(actual.getUser().getId()).isEqualTo(TRAINER_USER_ID);
+            assertThat(actual.getUser().getFirstName()).isEqualTo("Pavlo");
+            assertThat(actual.getUser().getLastName()).isEqualTo("Plank");
+            assertThat(actual.getUser().getUsername()).isEqualTo("pavlo.plank");
+            assertThat(actual.getUser().getPassword()).isEqualTo("12345");
+            assertThat(actual.getUser().isActive()).isTrue();
+            assertThat(actual.getSpecialization().getId()).isEqualTo(SPECIALIZATION_ID);
+            assertThat(actual.getSpecialization().getTrainingTypeName()).isEqualTo("Penguin Yoga");
+        }
+
+        @Test
+        @DisplayName("Should return empty optional when trainer with requested id does not exist")
+        void findById_notFound() {
+            Optional<Trainer> actual = dao.findById(999L);
+
+            assertThat(actual).isEmpty();
+        }
+    }
+
+    @Nested
+    @DatabaseSetup(value = "/dataset/trainer-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DisplayName("findByUsername")
+    class FindByUsernameTests {
+
+        @Test
+        @DisplayName("Should return trainer when trainer with requested username exists")
+        void findByUsername_found() {
+            Optional<Trainer> found = dao.findByUsername("fedir.foamroller");
+
+            assertThat(found).isPresent();
+
+            Trainer actual = found.get();
+
+            assertThat(actual.getId()).isEqualTo(SECOND_TRAINER_ID);
+            assertThat(actual.getUser().getId()).isEqualTo(SECOND_TRAINER_USER_ID);
+            assertThat(actual.getUser().getFirstName()).isEqualTo("Fedir");
+            assertThat(actual.getUser().getLastName()).isEqualTo("Foamroller");
+            assertThat(actual.getUser().getUsername()).isEqualTo("fedir.foamroller");
+            assertThat(actual.getUser().getPassword()).isEqualTo("12345");
+            assertThat(actual.getUser().isActive()).isTrue();
+            assertThat(actual.getSpecialization().getId()).isEqualTo(SECOND_SPECIALIZATION_ID);
+            assertThat(actual.getSpecialization().getTrainingTypeName()).isEqualTo("Strength Shenanigans");
+        }
+
+        @Test
+        @DisplayName("Should return empty optional when trainer with requested username does not exist")
+        void findByUsername_notFound() {
+            Optional<Trainer> found = dao.findByUsername("ghost.trainer");
+
+            assertThat(found).isEmpty();
+        }
+    }
+
+    @Nested
+    @DatabaseSetup(value = "/dataset/trainer-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DisplayName("findAll")
+    class FindAllTests {
+
+        @Test
+        @DisplayName("Should return all trainers")
+        void findAll_success() {
+            List<Trainer> actual = dao.findAll();
+
+            assertThat(actual).hasSize(3);
+            assertThat(actual)
+                    .extracting(trainer -> trainer.getUser().getUsername())
+                    .containsExactlyInAnyOrder("pavlo.plank", "fedir.foamroller", "ira.iron");
+        }
+
+        @Test
+        @DisplayName("Should return empty list when there are no trainers")
+        void findAll_empty() {
+            deleteTrainer(THIRD_TRAINER_ID);
+            deleteTrainer(SECOND_TRAINER_ID);
+            deleteTrainer(TRAINER_ID);
+
+            List<Trainer> actual = dao.findAll();
+
+            assertThat(actual).isEmpty();
+        }
+    }
+
+    @Nested
+    @DatabaseSetup(value = "/dataset/trainer-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DisplayName("findTrainingsByCriteria")
+    class FindTrainingsByCriteriaTests {
+
+        @ParameterizedTest(name = "{index} => {0}")
+        @MethodSource("com.gym.crm.application.dao.TrainerDaoImplTest#findTrainingsByCriteriaCases")
+        @DisplayName("Should filter trainer trainings by criteria")
+        void findTrainingsByCriteria_shouldFilterTrainings(String testCase, TrainerTrainingSearchFilter filter, List<String> expectedTrainingNames) {
+            List<Training> actual = dao.findTrainingsByCriteria(filter);
+
+            assertThat(actual)
+                    .extracting(Training::getTrainingName)
+                    .containsExactlyInAnyOrderElementsOf(expectedTrainingNames);
+        }
+    }
+
+    private Trainer buildTrainer(String firstName, String lastName, String username, Long specializationId) {
+        User user = User.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .username(username)
+                .password("12345")
+                .isActive(true)
+                .build();
+        TrainingType specialization = TrainingType.builder()
+                .id(specializationId)
                 .build();
 
-        Trainer actual = trainerDao.create(expected);
-
-        verify(storage).put(TRAINER_ID, expected);
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    @DisplayName("Should successfully update trainer details when the trainer ID exists in storage")
-    void update_ShouldUpdateTrainer_WhenIdExists() {
-        Trainer expected = Trainer.builder()
-                .userId(TRAINER_ID)
-                .firstName("Stepan")
-                .lastName("Updated")
+        return Trainer.builder()
+                .user(user)
+                .specialization(specialization)
                 .build();
-        String expectedLogMessage = String.format("Trainer with id: %d was update", expected.getUserId());
-
-        when(storage.containsKey(TRAINER_ID)).thenReturn(true);
-
-        Trainer actual = trainerDao.update(expected);
-
-        verify(storage).put(TRAINER_ID, expected);
-        assertEquals(expected, actual);
-        assertThat(listAppender.list)
-                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple(expectedLogMessage, Level.INFO));
-        assertThat(listAppender.list)
-                .extracting(ILoggingEvent::getLevel)
-                .doesNotContain(Level.ERROR);
     }
 
-    @Test
-    @DisplayName("Should throw RuntimeException when attempting to update a trainer that does not exist")
-    void update_ShouldThrowException_WhenIdNotFound() {
-        Trainer trainer = Trainer.builder().userId(UNEXIST_TRAINER_ID).build();
+    private void deleteTrainer(Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            var transaction = session.beginTransaction();
+            Trainer trainer = session.get(Trainer.class, id);
 
-        when(storage.containsKey(UNEXIST_TRAINER_ID)).thenReturn(false);
+            if (trainer == null) {
+                transaction.commit();
+                return;
+            }
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                trainerDao.update(trainer)
-        );
+            Long userId = trainer.getUser().getId();
 
-        assertTrue(exception.getMessage().contains("not found in storage"));
-        verify(storage, never()).put(anyLong(), any());
+            session.createMutationQuery("""
+                            delete from Training t
+                            where t.trainer.id = :trainerId
+                            """)
+                    .setParameter("trainerId", id)
+                    .executeUpdate();
+            session.createMutationQuery("""
+                            delete from Training t
+                            where t.trainee.user.id = :userId
+                            """)
+                    .setParameter("userId", userId)
+                    .executeUpdate();
+            session.createMutationQuery("""
+                            delete from Trainee t
+                            where t.user.id = :userId
+                            """)
+                    .setParameter("userId", userId)
+                    .executeUpdate();
+
+            session.remove(trainer);
+            transaction.commit();
+        }
     }
 
-    @Test
-    @DisplayName("Should return an Optional containing the trainer when the provided ID exists")
-    void findById_ShouldReturnTrainer_IfPresent() {
-        Trainer expected = Trainer.builder().userId(TRAINER_ID).build();
-
-        when(storage.get(TRAINER_ID)).thenReturn(expected);
-
-        Optional<Trainer> actual = trainerDao.findById(TRAINER_ID);
-
-        assertTrue(actual.isPresent());
-        assertEquals(expected, actual.get());
-    }
-
-    @Test
-    @DisplayName("Should return an empty Optional when the trainer ID does not exist in storage")
-    void findById_ShouldReturnNull_IsAbsent() {
-        when(storage.get(TRAINER_ID)).thenReturn(null);
-
-        Optional<Trainer> actual = trainerDao.findById(TRAINER_ID);
-
-        assertFalse(actual.isPresent());
-    }
-
-    @Test
-    @DisplayName("Should return a list containing all trainers currently stored in the system")
-    void findAll_ShouldReturnListOfAllTrainers() {
-        Trainer t1 = Trainer.builder().userId(1L).build();
-        Trainer t2 = Trainer.builder().userId(2L).build();
-
-        when(storage.values()).thenReturn(List.of(t1, t2));
-
-        List<Trainer> actual = trainerDao.findAll();
-
-        assertEquals(2, actual.size());
-        assertTrue(actual.contains(t1));
-        assertTrue(actual.contains(t2));
-        verify(storage).values();
+    private static Stream<Arguments> findTrainingsByCriteriaCases() {
+        return Stream.of(Arguments.of("by username", TrainerTrainingSearchFilter.builder()
+                                        .username("pavlo.plank")
+                                        .build(), List.of("Morning Penguin Stretch")),
+                         Arguments.of("by username and date range", TrainerTrainingSearchFilter.builder()
+                                        .username("pavlo.plank")
+                                        .fromDate(LocalDate.of(2026, 4, 1))
+                                        .toDate(LocalDate.of(2026, 4, 30))
+                                        .build(), List.of("Morning Penguin Stretch")),
+                         Arguments.of("by username and trainee name", TrainerTrainingSearchFilter.builder()
+                                        .username("pavlo.plank")
+                                        .traineeName("Fedir Foamroller")
+                                        .build(), List.of("Morning Penguin Stretch")),
+                         Arguments.of("empty when date range does not match", TrainerTrainingSearchFilter.builder()
+                                        .username("pavlo.plank")
+                                        .fromDate(LocalDate.of(2026, 5, 1))
+                                        .toDate(LocalDate.of(2026, 5, 31))
+                                        .build(), List.of()),
+                         Arguments.of("empty when trainee name does not match", TrainerTrainingSearchFilter.builder()
+                                        .username("pavlo.plank")
+                                        .traineeName("Marta Muscle")
+                                        .build(), List.of()));
     }
 }

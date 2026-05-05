@@ -1,56 +1,42 @@
 package com.gym.crm.application.dao.impl;
 
+import com.gym.crm.application.config.TransactionHandler;
 import com.gym.crm.application.dao.TrainingDao;
-import com.gym.crm.application.model.Training;
+import com.gym.crm.application.entity.Training;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Repository
+@RequiredArgsConstructor
 public class TrainingDaoImpl implements TrainingDao {
 
-    private final Map<Long, Training> storage;
-    private final AtomicLong idGenerator = new AtomicLong(1);
-
-    @Autowired
-    public TrainingDaoImpl(Map<Long, Training> trainingStorage) {
-        this.storage = trainingStorage;
-        syncStorageId();
-    }
+    private final TransactionHandler transactionHandler;
 
     @Override
     public Training create(Training training) {
-        storage.put(idGenerator.incrementAndGet(), training);
+        Training created = transactionHandler.performReturningWithinTransaction(session -> {
+            session.persist(training);
+            return training;
+        });
 
-        log.info("Successfully created new {} training", training.getTrainingName());
-
-        return training;
+        log.info("Training with id: {} was created", created.getId());
+        return created;
     }
+
 
     @Override
     public Optional<Training> findById(Long id) {
-        return Optional.ofNullable(storage.get(id));
+        return transactionHandler.performReturningWithinTransaction(session ->
+                Optional.ofNullable(session.get(Training.class, id)));
     }
 
     @Override
     public List<Training> findAll() {
-        return new ArrayList<>(storage.values());
-    }
-
-    private void syncStorageId(){
-        if (!storage.isEmpty()) {
-            long maxId = storage.keySet().stream()
-                    .max(Long::compare)
-                    .orElse(0L);
-
-            idGenerator.set(maxId);
-        }
+        return transactionHandler.performReturningWithinTransaction(session ->
+                session.createQuery("from Training", Training.class).getResultList());
     }
 }

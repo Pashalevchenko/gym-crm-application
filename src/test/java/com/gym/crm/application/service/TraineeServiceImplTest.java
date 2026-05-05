@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.gym.crm.application.dao.TraineeDaoHibernate;
+import com.gym.crm.application.dao.TraineeDao;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.User;
 import com.gym.crm.application.service.impl.TraineeServiceImpl;
@@ -46,7 +46,7 @@ class TraineeServiceImplTest {
     private final String PASSWORD = "randomPass123";
 
     @Mock
-    private TraineeDaoHibernate traineeDao;
+    private TraineeDao traineeDao;
 
     @Mock
     private ProfileService profileService;

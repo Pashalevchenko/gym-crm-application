@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.gym.crm.application.dao.TrainerDaoHibernate;
+import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.TrainingType;
@@ -50,7 +50,7 @@ class TrainerServiceImplTest {
     private final String NEW_PASSWORD = "newPass123";
 
     @Mock
-    private TrainerDaoHibernate trainerDao;
+    private TrainerDao trainerDao;
 
     @Mock
     private ProfileService profileService;

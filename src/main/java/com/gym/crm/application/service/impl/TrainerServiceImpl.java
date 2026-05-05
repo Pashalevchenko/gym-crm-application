@@ -1,6 +1,6 @@
 package com.gym.crm.application.service.impl;
 
-import com.gym.crm.application.dao.TrainerDaoHibernate;
+import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.User;
@@ -20,7 +20,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class TrainerServiceImpl implements TrainerService {
 
-    private final TrainerDaoHibernate trainerDao;
+    private final TrainerDao trainerDao;
     private final ProfileService profileService;
     private final TrainerValidator validator;
 

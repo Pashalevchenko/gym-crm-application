@@ -1,7 +1,6 @@
 package com.gym.crm.application.dao;
 
-import com.gym.crm.application.model.Training;
+import com.gym.crm.application.entity.Training;
 
-public interface TrainingDao extends CrudDao<Training, Long> {
-
+public interface TrainingDao extends CrudDao<Training, Long>{
 }
