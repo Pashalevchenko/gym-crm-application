@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.gym.crm.application.dao.TrainingDaoHibernate;
+import com.gym.crm.application.dao.TrainingDao;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
@@ -38,7 +38,7 @@ class TrainingServiceImplTest {
     private final Long TRAINING_ID = 1L;
 
     @Mock
-    private TrainingDaoHibernate trainingDao;
+    private TrainingDao trainingDao;
 
     @Mock
     private TrainingValidator trainingValidator;

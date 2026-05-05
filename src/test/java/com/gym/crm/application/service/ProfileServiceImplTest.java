@@ -4,8 +4,8 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.gym.crm.application.dao.TraineeDaoHibernate;
-import com.gym.crm.application.dao.TrainerDaoHibernate;
+import com.gym.crm.application.dao.TraineeDao;
+import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.User;
@@ -39,10 +39,10 @@ class ProfileServiceImplTest {
     private final String USERNAME_PLUS_ONE = USERNAME + "1";
 
     @Mock
-    private TraineeDaoHibernate traineeDao;
+    private TraineeDao traineeDao;
 
     @Mock
-    private TrainerDaoHibernate trainerDao;
+    private TrainerDao trainerDao;
 
     @InjectMocks
     private ProfileServiceImpl profileService;
