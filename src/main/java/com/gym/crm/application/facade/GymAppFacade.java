@@ -1,5 +1,8 @@
 package com.gym.crm.application.facade;
 
+import com.gym.crm.application.annotation.Authenticated;
+import com.gym.crm.application.annotation.PersistenceTx;
+import com.gym.crm.application.context.SecurityContextHolder;
 import com.gym.crm.application.dto.mapper.TraineeMapper;
 import com.gym.crm.application.dto.mapper.TrainerMapper;
 import com.gym.crm.application.dto.mapper.TrainingMapper;
@@ -13,6 +16,7 @@ import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.service.AuthenticationService;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
@@ -32,6 +36,17 @@ public class GymAppFacade {
     private final TraineeMapper traineeMapper;
     private final TrainerMapper trainerMapper;
     private final TrainingMapper trainingMapper;
+    private final AuthenticationService authService;
+
+    @PersistenceTx
+    public void login(String username, String password) {
+        authService.authenticate(username, password);
+        SecurityContextHolder.setContext(username);
+    }
+
+    public void logout() {
+        SecurityContextHolder.clear();
+    }
 
     public TraineeResponseDTO createTrainee(TraineeRequestDTO request) {
         Trainee trainee = traineeMapper.dtoToEntity(request);
@@ -59,6 +74,8 @@ public class GymAppFacade {
         return traineeMapper.entityToDto(traineeService.updateTrainee(trainee));
     }
 
+    @Authenticated
+    @PersistenceTx
     public void changeTraineePassword(String username, String newPassword) {
         traineeService.changePassword(username, newPassword);
     }
@@ -97,6 +114,7 @@ public class GymAppFacade {
         );
     }
 
+    @PersistenceTx
     public TrainerResponseDTO createTrainer(TrainerRequestDTO request) {
         Trainer trainer = trainerMapper.dtoToEntity(request);
 

@@ -15,7 +15,7 @@ public class TransactionHandler {
     private final SessionFactory sessionFactory;
 
     public void performWithinTransaction(Consumer<Session> action) {
-        try (Session session = sessionFactory.openSession()) {
+        try (Session session = sessionFactory.getCurrentSession()) {
             Transaction transaction = session.beginTransaction();
 
             try {
