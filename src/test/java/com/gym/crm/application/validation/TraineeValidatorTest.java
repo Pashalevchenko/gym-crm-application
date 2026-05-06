@@ -37,10 +37,7 @@ public class TraineeValidatorTest {
     @DisplayName("Should throw exception when trainee first name is blank")
     void validateForCreate_whenFirstNameIsBlank_shouldThrowException() {
         Trainee trainee = Trainee.builder()
-                .user(User.builder()
-                        .firstName(" ")
-                        .lastName("Ivanov")
-                        .build())
+                .user(generateUser(" ", "Ivanov"))
                 .build();
 
         assertThrows(IllegalArgumentException.class, () -> validator.validateForCreate(trainee));
@@ -50,10 +47,7 @@ public class TraineeValidatorTest {
     @DisplayName("Should throw exception when trainee last name is blank")
     void validateForCreate_whenLastNameIsBlank_shouldThrowException() {
         Trainee trainee = Trainee.builder()
-                .user(User.builder()
-                        .firstName("Ivan")
-                        .lastName(" ")
-                        .build())
+                .user(generateUser("Ivan", " "))
                 .build();
 
         assertThrows(IllegalArgumentException.class, () -> validator.validateForCreate(trainee));
