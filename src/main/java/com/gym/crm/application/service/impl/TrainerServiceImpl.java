@@ -1,5 +1,6 @@
 package com.gym.crm.application.service.impl;
 
+import com.gym.crm.application.annotation.PersistenceTx;
 import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
@@ -25,6 +26,7 @@ public class TrainerServiceImpl implements TrainerService {
     private final TrainerValidator validator;
 
     @Override
+    @PersistenceTx
     public Trainer createTrainer(Trainer trainer) {
         validator.validateForCreate(trainer);
 
@@ -64,6 +66,7 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
+    @PersistenceTx
     public Trainer updateTrainer(Trainer trainer) {
         validator.validateForUpdate(trainer);
 
@@ -83,6 +86,7 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
+    @PersistenceTx
     public void changePassword(String username, String newPassword) {
         validator.validateNewPassword(newPassword);
 
