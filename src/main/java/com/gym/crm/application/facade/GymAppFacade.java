@@ -1,7 +1,7 @@
 package com.gym.crm.application.facade;
 
 import com.gym.crm.application.annotation.Authenticated;
-import com.gym.crm.application.annotation.PersistenceTx;
+import com.gym.crm.application.annotation.Transactional;
 import com.gym.crm.application.context.SecurityContextHolder;
 import com.gym.crm.application.dto.mapper.TraineeMapper;
 import com.gym.crm.application.dto.mapper.TrainerMapper;
@@ -38,7 +38,7 @@ public class GymAppFacade {
     private final TrainingMapper trainingMapper;
     private final AuthenticationServiceImpl authService;
 
-    @PersistenceTx
+    @Transactional
     public void login(String username, String password) {
         authService.authenticate(username, password);
         SecurityContextHolder.setContext(username);

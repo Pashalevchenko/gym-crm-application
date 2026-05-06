@@ -1,5 +1,6 @@
 package com.gym.crm.application.service.impl;
 
+import com.gym.crm.application.annotation.Transactional;
 import com.gym.crm.application.dao.TraineeDao;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
@@ -27,6 +28,7 @@ public class TraineeServiceImpl implements TraineeService {
     private final TraineeValidator validator;
 
     @Override
+    @Transactional
     public Trainee createTrainee(Trainee trainee) {
         validator.validateForCreate(trainee);
 
@@ -70,6 +72,7 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
+    @Transactional
     public Trainee updateTrainee(Trainee trainee) {
         validator.validateForUpdate(trainee);
 
@@ -88,6 +91,7 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
+    @Transactional
     public void changePassword(String username, String newPassword) {
         validator.validateUsername(username);
         validator.validateNewPassword(newPassword);
