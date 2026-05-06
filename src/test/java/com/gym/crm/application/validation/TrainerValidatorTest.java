@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TrainerValidatorTest {
 
-
     private TrainerValidator trainerValidator;
 
     @BeforeEach
