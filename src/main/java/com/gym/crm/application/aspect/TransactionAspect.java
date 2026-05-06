@@ -8,12 +8,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-@Order(2)
 @RequiredArgsConstructor
 public class TransactionAspect {
 
