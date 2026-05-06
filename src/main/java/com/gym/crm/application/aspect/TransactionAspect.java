@@ -24,7 +24,6 @@ public class TransactionAspect {
 
         try {
             transaction = session.beginTransaction();
-
             Object result = joinPoint.proceed();
 
             transaction.commit();
