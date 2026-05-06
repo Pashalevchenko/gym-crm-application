@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PersistenceTx {
+public @interface Transactional {
     boolean readOnly() default false;
 }

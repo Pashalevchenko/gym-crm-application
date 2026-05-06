@@ -1,6 +1,6 @@
 package com.gym.crm.application.aspect;
 
-import com.gym.crm.application.annotation.PersistenceTx;
+import com.gym.crm.application.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -17,8 +17,8 @@ public class TransactionAspect {
 
     private final SessionFactory sessionFactory;
 
-    @Around("@annotation(persistenceTx)")
-    public Object handleTransaction(ProceedingJoinPoint joinPoint, PersistenceTx persistenceTx) throws Throwable {
+    @Around("@annotation(com.gym.crm.application.annotation.Transactional)")
+    public Object handleTransaction(ProceedingJoinPoint joinPoint, Transactional transactional) throws Throwable {
         Session session = sessionFactory.getCurrentSession();
         Transaction transaction = null;
 
