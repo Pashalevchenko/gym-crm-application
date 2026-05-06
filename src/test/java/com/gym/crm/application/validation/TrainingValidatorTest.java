@@ -13,11 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TrainingValidatorTest {
 
-    private TrainingValidator trainingValidator;
+    private TrainingValidator validator;
 
     @BeforeEach
     void setUp() {
-        trainingValidator = new TrainingValidator();
+        validator = new TrainingValidator();
     }
 
     @Test
@@ -32,13 +32,13 @@ public class TrainingValidatorTest {
                 .trainingDuration(60)
                 .build();
 
-        assertDoesNotThrow(() -> trainingValidator.validateForCreate(training));
+        assertDoesNotThrow(() -> validator.validateForCreate(training));
     }
 
     @Test
     @DisplayName("Should throw exception when training create request is null")
     void validateForCreate_whenTrainingIsNull_shouldThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> trainingValidator.validateForCreate(null));
+        assertThrows(IllegalArgumentException.class, () -> validator.validateForCreate(null));
     }
 
     @Test
@@ -53,7 +53,7 @@ public class TrainingValidatorTest {
                 .trainingDuration(60)
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> trainingValidator.validateForCreate(training));
+        assertThrows(IllegalArgumentException.class, () -> validator.validateForCreate(training));
     }
 
     @Test
@@ -68,7 +68,7 @@ public class TrainingValidatorTest {
                 .trainingDuration(0)
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> trainingValidator.validateForCreate(training));
+        assertThrows(IllegalArgumentException.class, () -> validator.validateForCreate(training));
     }
 
     @Test
@@ -83,6 +83,6 @@ public class TrainingValidatorTest {
                 .trainingDuration(45)
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> trainingValidator.validateForCreate(training));
+        assertThrows(IllegalArgumentException.class, () -> validator.validateForCreate(training));
     }
 }

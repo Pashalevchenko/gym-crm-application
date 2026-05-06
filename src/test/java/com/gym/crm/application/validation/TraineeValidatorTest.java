@@ -10,30 +10,27 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TraineeValidatorTest {
 
-    private TraineeValidator traineeValidator;
+    private TraineeValidator validator;
 
     @BeforeEach
     void setUp() {
-        traineeValidator = new TraineeValidator();
+        validator = new TraineeValidator();
     }
 
     @Test
     @DisplayName("Should pass validation when trainee create request is valid")
     void validateForCreate_whenTraineeIsValid_shouldNotThrowException() {
         Trainee trainee = Trainee.builder()
-                .user(User.builder()
-                        .firstName("Ivan")
-                        .lastName("Ivanov")
-                        .build())
+                .user(generateUser("Ivan", "Ivanov"))
                 .build();
 
-        assertDoesNotThrow(() -> traineeValidator.validateForCreate(trainee));
+        assertDoesNotThrow(() -> validator.validateForCreate(trainee));
     }
 
     @Test
     @DisplayName("Should throw exception when trainee create request is null")
     void validateForCreate_whenTraineeIsNull_shouldThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> traineeValidator.validateForCreate(null));
+        assertThrows(IllegalArgumentException.class, () -> validator.validateForCreate(null));
     }
 
     @Test
@@ -46,7 +43,7 @@ public class TraineeValidatorTest {
                         .build())
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> traineeValidator.validateForCreate(trainee));
+        assertThrows(IllegalArgumentException.class, () -> validator.validateForCreate(trainee));
     }
 
     @Test
@@ -59,6 +56,13 @@ public class TraineeValidatorTest {
                         .build())
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> traineeValidator.validateForCreate(trainee));
+        assertThrows(IllegalArgumentException.class, () -> validator.validateForCreate(trainee));
+    }
+
+    private User generateUser(String firstName, String lastName){
+        return User.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .build();
     }
 }
