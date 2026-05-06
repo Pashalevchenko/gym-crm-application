@@ -2,6 +2,7 @@ package com.gym.crm.application.dao;
 
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.gym.crm.application.config.DaoTestConfig;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

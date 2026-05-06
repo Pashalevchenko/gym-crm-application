@@ -14,4 +14,5 @@ public class TraineeRequestDTO {
     private final boolean isActive;
     private final LocalDate dateOfBirth;
     private final String address;
+    private final String password;
 }

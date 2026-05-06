@@ -14,4 +14,5 @@ public class TrainerRequestDTO {
     private final String lastName;
     private final boolean isActive;
     private final TrainingType specialization;
+    private final String password;
 }

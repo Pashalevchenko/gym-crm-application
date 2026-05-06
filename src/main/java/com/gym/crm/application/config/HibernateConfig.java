@@ -24,6 +24,7 @@ public class HibernateConfig {
         props.put(AvailableSettings.SHOW_SQL, "true");
         props.put(AvailableSettings.FORMAT_SQL, "true");
         props.put(AvailableSettings.HBM2DDL_AUTO, "validate");
+        props.put(AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS, "thread");
 
         return new org.hibernate.cfg.Configuration()
                 .setProperties(props)

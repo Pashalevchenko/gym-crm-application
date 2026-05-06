@@ -80,7 +80,7 @@ public class TraineeDaoImpl implements TraineeDao {
 
     @Override
     public void delete(Long id) {
-       transactionHandler.performWithinTransaction(session -> {
+        transactionHandler.performWithinTransaction(session -> {
             Trainee trainee = session.get(Trainee.class, id);
 
             if (trainee == null) {
@@ -96,8 +96,7 @@ public class TraineeDaoImpl implements TraineeDao {
     @Override
     public void deleteByUsername(String username) {
         transactionHandler.performWithinTransaction(session -> {
-            Trainee trainee = session.createQuery("from Trainee t where t.user.username = :username",
-                                                  Trainee.class)
+            Trainee trainee = session.createQuery("from Trainee t where t.user.username = :username", Trainee.class)
                     .setParameter("username", username)
                     .uniqueResult();
 
@@ -133,8 +132,7 @@ public class TraineeDaoImpl implements TraineeDao {
     @Override
     public Trainee updateTrainersList(String traineeUsername, Set<Trainer> trainers) {
         Trainee updatedTrainee = transactionHandler.performReturningWithinTransaction(session -> {
-            Trainee trainee = session.createQuery("from Trainee t where t.user.username = :username",
-                                                  Trainee.class)
+            Trainee trainee = session.createQuery("from Trainee t where t.user.username = :username", Trainee.class)
                     .setParameter("username", traineeUsername)
                     .uniqueResult();
 
