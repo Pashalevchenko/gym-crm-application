@@ -54,20 +54,24 @@ public class GymAppFacade {
         return traineeMapper.entityToDto(traineeService.createTrainee(trainee));
     }
 
+    @Authenticated
     public TraineeResponseDTO getTraineeById(Long id) {
         return traineeMapper.entityToDto(traineeService.getTraineeById(id));
     }
 
+    @Authenticated
     public TraineeResponseDTO getTraineeByUsername(String username) {
         return traineeMapper.entityToDto(traineeService.getTraineeByUsername(username));
     }
 
+    @Authenticated
     public List<TraineeResponseDTO> getAllTrainees() {
         return traineeService.getAllTrainees().stream()
                 .map(traineeMapper::entityToDto)
                 .toList();
     }
 
+    @Authenticated
     public TraineeResponseDTO updateTrainee(TraineeRequestDTO request) {
         Trainee trainee = traineeMapper.dtoToEntity(request);
 
@@ -75,90 +79,104 @@ public class GymAppFacade {
     }
 
     @Authenticated
-    @PersistenceTx
     public void changeTraineePassword(String username, String newPassword) {
         traineeService.changePassword(username, newPassword);
     }
 
+    @Authenticated
     public TraineeResponseDTO activateTrainee(String username) {
         return traineeMapper.entityToDto(traineeService.activateTrainee(username));
     }
 
+    @Authenticated
     public TraineeResponseDTO deactivateTrainee(String username) {
         return traineeMapper.entityToDto(traineeService.deactivateTrainee(username));
     }
 
+    @Authenticated
     public void deleteTrainee(Long id) {
         traineeService.deleteTrainee(id);
     }
 
+    @Authenticated
     public void deleteTraineeByUsername(String username) {
         traineeService.deleteTraineeByUsername(username);
     }
 
+    @Authenticated
     public List<TrainingResponseDTO> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingTypeName) {
         return traineeService.getTraineeTrainings(username, fromDate, toDate, trainerName, trainingTypeName).stream()
                 .map(trainingMapper::entityToDto)
                 .toList();
     }
 
+    @Authenticated
     public List<TrainerResponseDTO> getNotAssignedTrainers(String traineeUsername) {
         return traineeService.getNotAssignedTrainers(traineeUsername).stream()
                 .map(trainerMapper::entityToDto)
                 .toList();
     }
 
+    @Authenticated
     public TraineeResponseDTO updateTraineeTrainersList(String traineeUsername, Set<Trainer> trainers) {
         return traineeMapper.entityToDto(
                 traineeService.updateTrainersList(traineeUsername, trainers)
         );
     }
 
-    @PersistenceTx
     public TrainerResponseDTO createTrainer(TrainerRequestDTO request) {
         Trainer trainer = trainerMapper.dtoToEntity(request);
 
         return trainerMapper.entityToDto(trainerService.createTrainer(trainer));
     }
 
+    @Authenticated
     public TrainerResponseDTO getTrainerById(Long id) {
         return trainerMapper.entityToDto(trainerService.getTrainerById(id));
     }
 
+    @Authenticated
     public TrainerResponseDTO getTrainerByUsername(String username) {
         return trainerMapper.entityToDto(trainerService.getTrainerByUsername(username));
     }
 
+    @Authenticated
     public List<TrainerResponseDTO> getAllTrainers() {
         return trainerService.getAllTrainers().stream()
                 .map(trainerMapper::entityToDto)
                 .toList();
     }
 
+    @Authenticated
     public TrainerResponseDTO updateTrainer(TrainerRequestDTO request) {
         Trainer trainer = trainerMapper.dtoToEntity(request);
 
         return trainerMapper.entityToDto(trainerService.updateTrainer(trainer));
     }
 
+    @Authenticated
     public void changeTrainerPassword(String username, String newPassword) {
         trainerService.changePassword(username, newPassword);
     }
 
+    @Authenticated
     public TrainerResponseDTO activateTrainer(String username) {
         return trainerMapper.entityToDto(trainerService.activateTrainer(username));
     }
 
+    @Authenticated
     public TrainerResponseDTO deactivateTrainer(String username) {
         return trainerMapper.entityToDto(trainerService.deactivateTrainer(username));
     }
 
+    @Authenticated
     public List<TrainingResponseDTO> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
         return trainerService.getTrainerTrainings(username, fromDate, toDate, traineeName).stream()
                 .map(trainingMapper::entityToDto)
                 .toList();
     }
 
+    @Authenticated
     public TrainingResponseDTO createTraining(TrainingRequestDTO request) {
         Trainee trainee = traineeService.getTraineeById(request.getTraineeId());
         Trainer trainer = trainerService.getTrainerById(request.getTrainerId());
@@ -171,10 +189,12 @@ public class GymAppFacade {
         return trainingMapper.entityToDto(trainingService.createTraining(training));
     }
 
+    @Authenticated
     public TrainingResponseDTO getTrainingById(Long id) {
         return trainingMapper.entityToDto(trainingService.getTrainingById(id));
     }
 
+    @Authenticated
     public List<TrainingResponseDTO> getAllTrainings() {
         return trainingService.getAllTrainings().stream()
                 .map(trainingMapper::entityToDto)
