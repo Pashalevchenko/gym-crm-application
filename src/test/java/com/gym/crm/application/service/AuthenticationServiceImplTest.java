@@ -1,6 +1,7 @@
 package com.gym.crm.application.service;
 
 import com.gym.crm.application.entity.User;
+import com.gym.crm.application.service.impl.AuthenticationServiceImpl;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -10,9 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,7 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AuthenticationServiceTest {
+class AuthenticationServiceImplTest {
 
     private final String USERNAME = "borys.burpee";
     private final String PASSWORD = "correct_password";
@@ -37,7 +36,7 @@ class AuthenticationServiceTest {
     private Query<User> query;
 
     @InjectMocks
-    private AuthenticationService authService;
+    private AuthenticationServiceImpl authService;
 
     @Test
     @DisplayName("Should authenticate successfully when credentials are valid")
