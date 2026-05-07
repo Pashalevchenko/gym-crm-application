@@ -1,7 +1,7 @@
 package com.gym.crm.application.service;
 
 import com.gym.crm.application.entity.User;
-import com.gym.crm.application.service.impl.AuthenticationServiceImpl;
+import com.gym.crm.application.service.common.AuthenticationService;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AuthenticationServiceImplTest {
+class AuthenticationServiceTest {
 
     private final String USERNAME = "borys.burpee";
     private final String PASSWORD = "correct_password";
@@ -40,7 +40,7 @@ class AuthenticationServiceImplTest {
     PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private AuthenticationServiceImpl authService;
+    private AuthenticationService authService;
 
     @Test
     @DisplayName("Should authenticate successfully when credentials are valid")

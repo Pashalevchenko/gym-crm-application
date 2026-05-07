@@ -18,7 +18,7 @@ import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.TrainingType;
-import com.gym.crm.application.service.impl.AuthenticationServiceImpl;
+import com.gym.crm.application.service.common.AuthenticationService;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
@@ -39,7 +39,7 @@ public class GymAppFacade {
     private final TraineeMapper traineeMapper;
     private final TrainerMapper trainerMapper;
     private final TrainingMapper trainingMapper;
-    private final AuthenticationServiceImpl authService;
+    private final AuthenticationService authService;
 
     @Transactional
     public void login(String username, String password) {
