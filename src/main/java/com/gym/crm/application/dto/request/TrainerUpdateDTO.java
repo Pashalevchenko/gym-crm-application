@@ -1,17 +1,22 @@
 package com.gym.crm.application.dto.request;
 
+import com.gym.crm.application.entity.TrainingType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import java.time.LocalDate;
 
 @Getter
 @Builder
 @AllArgsConstructor
-public class TraineeRequestDTO {
+public class TrainerUpdateDTO {
+
+    @NotBlank(message = "Username is required")
+    @Size(max = 110, message = "Username cannot exceed characters")
+    private final String username;
+
     @NotBlank(message = "First name is required")
     @Size(max = 50, message = "First name cannot exceed characters")
     private final String firstName;
@@ -22,11 +27,8 @@ public class TraineeRequestDTO {
 
     private final boolean isActive;
 
-    @Past(message = "Date of birth must be in the past")
-    private final LocalDate dateOfBirth;
-
-    @Size(max = 150, message = "Address cannot be longer than 150 characters")
-    private final String address;
+    @NotNull(message = "Specialization is required")
+    private final TrainingType specialization;
 
     @Size(max = 50, message = "password cannot exceed characters")
     private final String password;

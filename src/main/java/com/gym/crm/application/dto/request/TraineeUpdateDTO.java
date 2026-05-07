@@ -11,7 +11,12 @@ import java.time.LocalDate;
 @Getter
 @Builder
 @AllArgsConstructor
-public class TraineeRequestDTO {
+public class TraineeUpdateDTO {
+
+    @NotBlank(message = "Username is required")
+    @Size(max = 110, message = "Username cannot exceed characters")
+    private final String username;
+
     @NotBlank(message = "First name is required")
     @Size(max = 50, message = "First name cannot exceed characters")
     private final String firstName;

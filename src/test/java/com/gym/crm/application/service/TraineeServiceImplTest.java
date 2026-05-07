@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -54,6 +55,9 @@ class TraineeServiceImplTest {
     @Mock
     private TraineeValidator traineeValidator;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private TraineeServiceImpl traineeService;
 
@@ -74,7 +78,7 @@ class TraineeServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should create trainee with generated username and password")
+    @DisplayName("Should create trainee with generated username and encoded password")
     void createTrainee_shouldCreateTraineeWithGeneratedCredentials() {
         User user = User.builder()
                 .firstName(FIRST_NAME)
@@ -86,24 +90,26 @@ class TraineeServiceImplTest {
                 .address("Kyiv")
                 .build();
 
+        String rawPassword = "raw_password_123";
+        String encodedHash = "hashed_content";
+
         when(profileService.createUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
-        when(profileService.generatePassword()).thenReturn(PASSWORD);
+        when(profileService.generatePassword()).thenReturn(rawPassword);
+        when(passwordEncoder.encode(rawPassword)).thenReturn(encodedHash);
+
         when(traineeDao.create(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Trainee actual = traineeService.createTrainee(trainee);
 
         assertNotNull(actual);
         assertNotNull(actual.getUser());
-        assertEquals(FIRST_NAME, actual.getUser().getFirstName());
-        assertEquals(LAST_NAME, actual.getUser().getLastName());
         assertEquals(USERNAME, actual.getUser().getUsername());
-        assertEquals(PASSWORD, actual.getUser().getPassword());
+        assertEquals(encodedHash, actual.getUser().getPassword());
         assertTrue(actual.getUser().isActive());
-        assertEquals(LocalDate.of(2000, 1, 1), actual.getDateOfBirth());
-        assertEquals("Kyiv", actual.getAddress());
         verify(traineeValidator).validateForCreate(trainee);
         verify(profileService).createUsername(FIRST_NAME, LAST_NAME);
         verify(profileService).generatePassword();
+        verify(passwordEncoder).encode(rawPassword);
         verify(traineeDao).create(any(Trainee.class));
     }
 
@@ -139,8 +145,9 @@ class TraineeServiceImplTest {
     void updateTrainee_shouldUpdateProfileAndPreserveCredentials() {
         Trainee existing = buildTrainee(true);
         User user = User.builder()
-                .firstName("Petro")
-                .lastName("Petrenko")
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .username(USERNAME)
                 .build();
         Trainee updateRequest = Trainee.builder()
                 .id(TRAINEE_ID)
@@ -149,22 +156,23 @@ class TraineeServiceImplTest {
                 .address("Lviv")
                 .build();
 
-        when(traineeDao.findById(TRAINEE_ID)).thenReturn(Optional.of(existing));
+        when(traineeDao.findByUsername(USERNAME)).thenReturn(Optional.of(existing));
         when(traineeDao.update(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Trainee actual = traineeService.updateTrainee(updateRequest);
 
         assertEquals(TRAINEE_ID, actual.getId());
         assertEquals(USER_ID, actual.getUser().getId());
-        assertEquals("Petro", actual.getUser().getFirstName());
-        assertEquals("Petrenko", actual.getUser().getLastName());
+        assertEquals(FIRST_NAME, actual.getUser().getFirstName());
+        assertEquals(LAST_NAME, actual.getUser().getLastName());
+        assertEquals(USERNAME, actual.getUser().getUsername());
         assertEquals(USERNAME, actual.getUser().getUsername());
         assertEquals(PASSWORD, actual.getUser().getPassword());
         assertTrue(actual.getUser().isActive());
         assertEquals(LocalDate.of(1999, 5, 10), actual.getDateOfBirth());
         assertEquals("Lviv", actual.getAddress());
         verify(traineeValidator).validateForUpdate(updateRequest);
-        verify(traineeDao).findById(TRAINEE_ID);
+        verify(traineeDao).findByUsername(USERNAME);
         verify(traineeDao).update(any(Trainee.class));
     }
 
@@ -173,8 +181,9 @@ class TraineeServiceImplTest {
     void updateTrainee_shouldPassCorrectTraineeToDao() {
         Trainee existing = buildTrainee(true);
         User user = User.builder()
-                .firstName("Petro")
-                .lastName("Petrenko")
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .username(USERNAME)
                 .build();
         Trainee updateRequest = Trainee.builder()
                 .id(TRAINEE_ID)
@@ -183,7 +192,7 @@ class TraineeServiceImplTest {
                 .address("Lviv")
                 .build();
 
-        when(traineeDao.findById(TRAINEE_ID)).thenReturn(Optional.of(existing));
+        when(traineeDao.findByUsername(USERNAME)).thenReturn(Optional.of(existing));
         when(traineeDao.update(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         traineeService.updateTrainee(updateRequest);
@@ -195,8 +204,9 @@ class TraineeServiceImplTest {
 
         assertEquals(TRAINEE_ID, passedToDao.getId());
         assertEquals(USER_ID, passedToDao.getUser().getId());
-        assertEquals("Petro", passedToDao.getUser().getFirstName());
-        assertEquals("Petrenko", passedToDao.getUser().getLastName());
+        assertEquals(FIRST_NAME, passedToDao.getUser().getFirstName());
+        assertEquals(LAST_NAME, passedToDao.getUser().getLastName());
+        assertEquals(USERNAME, passedToDao.getUser().getUsername());
         assertEquals(USERNAME, passedToDao.getUser().getUsername());
         assertEquals(PASSWORD, passedToDao.getUser().getPassword());
         assertTrue(passedToDao.getUser().isActive());

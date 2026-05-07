@@ -12,6 +12,7 @@ import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.validation.TraineeValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +27,7 @@ public class TraineeServiceImpl implements TraineeService {
     private final TraineeDao traineeDao;
     private final ProfileService profileService;
     private final TraineeValidator validator;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -40,7 +42,7 @@ public class TraineeServiceImpl implements TraineeService {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .username(username)
-                .password(password)
+                .password(passwordEncoder.encode(password))
                 .isActive(true)
                 .build();
         Trainee traineeToCreate = Trainee.builder()
@@ -76,7 +78,7 @@ public class TraineeServiceImpl implements TraineeService {
     public Trainee updateTrainee(Trainee trainee) {
         validator.validateForUpdate(trainee);
 
-        Trainee existing = getTraineeById(trainee.getId());
+        Trainee existing = getTraineeByUsername(trainee.getUser().getUsername());
         User userToUpdate = existing.getUser().toBuilder()
                 .firstName(trainee.getUser().getFirstName())
                 .lastName(trainee.getUser().getLastName())
@@ -98,7 +100,7 @@ public class TraineeServiceImpl implements TraineeService {
 
         Trainee existing = getTraineeByUsername(username);
         User userToUpdate = existing.getUser().toBuilder()
-                .password(newPassword)
+                .password(passwordEncoder.encode(newPassword))
                 .build();
         Trainee traineeToUpdate = existing.toBuilder()
                 .user(userToUpdate)
