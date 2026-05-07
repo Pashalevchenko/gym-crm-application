@@ -37,10 +37,10 @@ public class Trainee {
     @Column
     private Long id;
 
-    @Column(name = "date_of_birth")
+    @Column(name = "date_of_birth", nullable = true)
     private LocalDate dateOfBirth;
 
-    @Column(length = 150)
+    @Column(name = "address", length = 150, nullable = true)
     private String address;
 
     @OneToOne(optional = false, cascade = CascadeType.ALL)

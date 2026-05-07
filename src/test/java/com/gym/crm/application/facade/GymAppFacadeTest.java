@@ -4,7 +4,9 @@ import com.gym.crm.application.dto.mapper.TraineeMapper;
 import com.gym.crm.application.dto.mapper.TrainerMapper;
 import com.gym.crm.application.dto.mapper.TrainingMapper;
 import com.gym.crm.application.dto.request.TraineeRequestDTO;
+import com.gym.crm.application.dto.request.TraineeUpdateDTO;
 import com.gym.crm.application.dto.request.TrainerRequestDTO;
+import com.gym.crm.application.dto.request.TrainerUpdateDTO;
 import com.gym.crm.application.dto.request.TrainingRequestDTO;
 import com.gym.crm.application.dto.response.TraineeResponseDTO;
 import com.gym.crm.application.dto.response.TrainerResponseDTO;
@@ -158,7 +160,7 @@ class GymAppFacadeTest {
     @Test
     @DisplayName("Should successfully update trainee by mapping request DTO to entity and returning response DTO")
     void updateTrainee_Test() {
-        TraineeRequestDTO request = TraineeRequestDTO.builder().build();
+        TraineeUpdateDTO request = TraineeUpdateDTO.builder().build();
         Trainee trainee = Trainee.builder().id(TRAINEE_ID).build();
         Trainee updated = Trainee.builder().id(TRAINEE_ID).build();
 
@@ -417,7 +419,7 @@ class GymAppFacadeTest {
     @Test
     @DisplayName("Should update trainer")
     void updateTrainer_shouldMapRequestCallServiceAndMapResponse() {
-        TrainerRequestDTO request = TrainerRequestDTO.builder().build();
+        TrainerUpdateDTO request = TrainerUpdateDTO.builder().build();
         Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
         Trainer updated = Trainer.builder().id(TRAINER_ID).build();
 

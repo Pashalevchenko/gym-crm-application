@@ -7,7 +7,9 @@ import com.gym.crm.application.dto.mapper.TraineeMapper;
 import com.gym.crm.application.dto.mapper.TrainerMapper;
 import com.gym.crm.application.dto.mapper.TrainingMapper;
 import com.gym.crm.application.dto.request.TraineeRequestDTO;
+import com.gym.crm.application.dto.request.TraineeUpdateDTO;
 import com.gym.crm.application.dto.request.TrainerRequestDTO;
+import com.gym.crm.application.dto.request.TrainerUpdateDTO;
 import com.gym.crm.application.dto.request.TrainingRequestDTO;
 import com.gym.crm.application.dto.response.TraineeResponseDTO;
 import com.gym.crm.application.dto.response.TrainerResponseDTO;
@@ -16,10 +18,11 @@ import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.TrainingType;
-import com.gym.crm.application.service.impl.AuthenticationServiceImpl;
+import com.gym.crm.application.service.common.AuthenticationService;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
@@ -36,7 +39,7 @@ public class GymAppFacade {
     private final TraineeMapper traineeMapper;
     private final TrainerMapper trainerMapper;
     private final TrainingMapper trainingMapper;
-    private final AuthenticationServiceImpl authService;
+    private final AuthenticationService authService;
 
     @Transactional
     public void login(String username, String password) {
@@ -48,7 +51,7 @@ public class GymAppFacade {
         SecurityContextHolder.clear();
     }
 
-    public TraineeResponseDTO createTrainee(TraineeRequestDTO request) {
+    public TraineeResponseDTO createTrainee(@Valid TraineeRequestDTO request) {
         Trainee trainee = traineeMapper.dtoToEntity(request);
 
         return traineeMapper.entityToDto(traineeService.createTrainee(trainee));
@@ -72,7 +75,7 @@ public class GymAppFacade {
     }
 
     @Authenticated
-    public TraineeResponseDTO updateTrainee(TraineeRequestDTO request) {
+    public TraineeResponseDTO updateTrainee(@Valid TraineeUpdateDTO request) {
         Trainee trainee = traineeMapper.dtoToEntity(request);
 
         return traineeMapper.entityToDto(traineeService.updateTrainee(trainee));
@@ -124,7 +127,7 @@ public class GymAppFacade {
         );
     }
 
-    public TrainerResponseDTO createTrainer(TrainerRequestDTO request) {
+    public TrainerResponseDTO createTrainer(@Valid TrainerRequestDTO request) {
         Trainer trainer = trainerMapper.dtoToEntity(request);
 
         return trainerMapper.entityToDto(trainerService.createTrainer(trainer));
@@ -148,7 +151,7 @@ public class GymAppFacade {
     }
 
     @Authenticated
-    public TrainerResponseDTO updateTrainer(TrainerRequestDTO request) {
+    public TrainerResponseDTO updateTrainer(@Valid TrainerUpdateDTO request) {
         Trainer trainer = trainerMapper.dtoToEntity(request);
 
         return trainerMapper.entityToDto(trainerService.updateTrainer(trainer));
@@ -177,7 +180,7 @@ public class GymAppFacade {
     }
 
     @Authenticated
-    public TrainingResponseDTO createTraining(TrainingRequestDTO request) {
+    public TrainingResponseDTO createTraining(@Valid TrainingRequestDTO request) {
         Trainee trainee = traineeService.getTraineeById(request.getTraineeId());
         Trainer trainer = trainerService.getTrainerById(request.getTrainerId());
 

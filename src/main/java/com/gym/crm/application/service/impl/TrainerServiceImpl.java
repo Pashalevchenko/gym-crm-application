@@ -11,6 +11,7 @@ import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.validation.TrainerValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
@@ -24,6 +25,7 @@ public class TrainerServiceImpl implements TrainerService {
     private final TrainerDao trainerDao;
     private final ProfileService profileService;
     private final TrainerValidator validator;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -35,7 +37,7 @@ public class TrainerServiceImpl implements TrainerService {
         String password = profileService.generatePassword();
         User userWithCredentials = user.toBuilder()
                 .username(username)
-                .password(password)
+                .password(passwordEncoder.encode(password))
                 .isActive(true)
                 .build();
         Trainer trainerToCreate = trainer.toBuilder()
@@ -70,7 +72,7 @@ public class TrainerServiceImpl implements TrainerService {
     public Trainer updateTrainer(Trainer trainer) {
         validator.validateForUpdate(trainer);
 
-        Trainer existing = getTrainerById(trainer.getId());
+        Trainer existing = getTrainerByUsername(trainer.getUser().getUsername());
         User userToUpdate = existing.getUser().toBuilder()
                 .firstName(trainer.getUser().getFirstName())
                 .lastName(trainer.getUser().getLastName())

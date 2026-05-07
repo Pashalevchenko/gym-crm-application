@@ -1,6 +1,7 @@
 package com.gym.crm.application.dto.mapper;
 
 import com.gym.crm.application.dto.request.TraineeRequestDTO;
+import com.gym.crm.application.dto.request.TraineeUpdateDTO;
 import com.gym.crm.application.dto.response.TraineeResponseDTO;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.User;
@@ -20,6 +21,21 @@ public class TraineeMapper {
                 .user(user)
                 .dateOfBirth(traineeRequestDTO.getDateOfBirth())
                 .address(traineeRequestDTO.getAddress())
+                .build();
+    }
+
+    public Trainee dtoToEntity(TraineeUpdateDTO traineeUpdateDTO) {
+        User user = User.builder()
+                .firstName(traineeUpdateDTO.getFirstName())
+                .lastName(traineeUpdateDTO.getLastName())
+                .username(traineeUpdateDTO.getUsername())
+                .isActive(traineeUpdateDTO.isActive())
+                .build();
+
+        return Trainee.builder()
+                .user(user)
+                .dateOfBirth(traineeUpdateDTO.getDateOfBirth())
+                .address(traineeUpdateDTO.getAddress())
                 .build();
     }
 
