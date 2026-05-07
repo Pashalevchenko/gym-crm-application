@@ -94,8 +94,8 @@ class TrainerServiceImplTest {
         String encodedPassword = "encodedPassword123";
 
         when(profileService.createUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
-        when(profileService.generatePassword()).thenReturn(PASSWORD); // Повертаємо сирий пароль, як це зазвичай робить генератор
-        when(passwordEncoder.encode(PASSWORD)).thenReturn(encodedPassword); // Окремо стабімо енкодер
+        when(profileService.generatePassword()).thenReturn(PASSWORD);
+        when(passwordEncoder.encode(PASSWORD)).thenReturn(encodedPassword);
 
         when(trainerDao.create(any(Trainer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
