@@ -1,6 +1,5 @@
 package com.gym.crm.application.service;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
@@ -102,9 +101,17 @@ class TrainerServiceImplTest {
         Trainer actual = trainerService.createTrainer(trainer);
 
         assertNotNull(actual);
+        assertEquals(FIRST_NAME, actual.getUser().getFirstName());
+        assertEquals(LAST_NAME, actual.getUser().getLastName());
         assertEquals(USERNAME, actual.getUser().getUsername());
+        assertEquals(encodedPassword, actual.getUser().getPassword());
+        assertTrue(actual.getUser().isActive());
+        assertEquals("Yoga", actual.getSpecialization().getTrainingTypeName());
+        verify(trainerValidator).validateForCreate(trainer);
         verify(profileService).createUsername(FIRST_NAME, LAST_NAME);
         verify(profileService).generatePassword();
+        verify(trainerDao).create(any(Trainer.class));
+
     }
 
     @Test
