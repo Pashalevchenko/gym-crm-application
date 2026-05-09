@@ -70,14 +70,12 @@ class TraineeMapperTest {
 
         assertNotNull(actual);
         assertNotNull(actual.getUser());
-
         assertEquals(expected.getFirstName(), actual.getUser().getFirstName());
         assertEquals(expected.getLastName(), actual.getUser().getLastName());
         assertEquals(expected.getUsername(), actual.getUser().getUsername());
         assertEquals(expected.isActive(), actual.getUser().isActive());
         assertEquals(expected.getDateOfBirth(), actual.getDateOfBirth());
         assertEquals(expected.getAddress(), actual.getAddress());
-
         assertNull(actual.getId());
         assertNull(actual.getUser().getPassword());
     }

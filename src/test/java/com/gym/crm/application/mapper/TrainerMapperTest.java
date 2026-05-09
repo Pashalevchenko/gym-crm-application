@@ -55,7 +55,6 @@ class TrainerMapperTest {
         TrainingType specialization = TrainingType.builder()
                 .trainingTypeName("Strength")
                 .build();
-
         TrainerUpdateDTO expected = TrainerUpdateDTO.builder()
                 .firstName(USER_FIRST_NAME)
                 .lastName(USER_LAST_NAME)
@@ -69,7 +68,6 @@ class TrainerMapperTest {
         assertNotNull(actual);
         assertNotNull(actual.getUser());
         assertNotNull(actual.getSpecialization());
-
         assertEquals(expected.getFirstName(), actual.getUser().getFirstName());
         assertEquals(expected.getLastName(), actual.getUser().getLastName());
         assertEquals(expected.getUsername(), actual.getUser().getUsername());
