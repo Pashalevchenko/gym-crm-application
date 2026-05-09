@@ -23,7 +23,6 @@ public class ProfileServiceImpl implements ProfileService {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int PASSWORD_LENGTH = 10;
-//    private final Random random = new Random();
     private final TraineeDao traineeDao;
     private final TrainerDao trainerDao;
     private final SecureRandom random = new SecureRandom();
