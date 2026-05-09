@@ -13,8 +13,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @ComponentScan(
         basePackages = "com.gym.crm.application",
         excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = GymAppConfig.class),
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LiquibaseConfig.class)
+                @ComponentScan.Filter(
+                        type = FilterType.ASSIGNABLE_TYPE,
+                        classes = GymAppConfig.class
+                )
         }
 )
 @PropertySource("classpath:application-test.properties")
@@ -29,10 +31,5 @@ public class TestAppConfig {
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean(name = "liquibase")
-    public Object liquibase() {
-        return new Object();
     }
 }
