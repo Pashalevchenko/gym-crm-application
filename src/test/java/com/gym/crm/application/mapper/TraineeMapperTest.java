@@ -2,6 +2,7 @@ package com.gym.crm.application.mapper;
 
 import com.gym.crm.application.dto.mapper.TraineeMapper;
 import com.gym.crm.application.dto.request.TraineeRequestDTO;
+import com.gym.crm.application.dto.request.TraineeUpdateDTO;
 import com.gym.crm.application.dto.response.TraineeResponseDTO;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.User;
@@ -50,6 +51,34 @@ class TraineeMapperTest {
 
         assertNull(actual.getId());
         assertNull(actual.getUser().getUsername());
+        assertNull(actual.getUser().getPassword());
+    }
+
+    @Test
+    @DisplayName("Should correctly map all provided fields from TraineeUpdateDTO to Trainee entity")
+    void dtoToEntity_ShouldMapAllFieldsFromUpdateDtoCorrectly() {
+        TraineeUpdateDTO expected = TraineeUpdateDTO.builder()
+                .firstName(USER_FIRST_NAME)
+                .lastName(USER_LAST_NAME)
+                .username(USERNAME)
+                .isActive(true)
+                .dateOfBirth(LocalDate.of(1995, 1, 1))
+                .address("Kyiv")
+                .build();
+
+        Trainee actual = traineeMapper.dtoToEntity(expected);
+
+        assertNotNull(actual);
+        assertNotNull(actual.getUser());
+
+        assertEquals(expected.getFirstName(), actual.getUser().getFirstName());
+        assertEquals(expected.getLastName(), actual.getUser().getLastName());
+        assertEquals(expected.getUsername(), actual.getUser().getUsername());
+        assertEquals(expected.isActive(), actual.getUser().isActive());
+        assertEquals(expected.getDateOfBirth(), actual.getDateOfBirth());
+        assertEquals(expected.getAddress(), actual.getAddress());
+
+        assertNull(actual.getId());
         assertNull(actual.getUser().getPassword());
     }
 

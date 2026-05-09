@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.security.SecureRandom;
 
 @Slf4j
 @Component
@@ -22,9 +23,10 @@ public class ProfileServiceImpl implements ProfileService {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int PASSWORD_LENGTH = 10;
-    private final Random random = new Random();
+//    private final Random random = new Random();
     private final TraineeDao traineeDao;
     private final TrainerDao trainerDao;
+    private final SecureRandom random = new SecureRandom();
 
     @Override
     public String createUsername(String firstName, String lastName) {
