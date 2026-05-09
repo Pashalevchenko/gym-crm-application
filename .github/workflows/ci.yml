@@ -38,3 +38,8 @@ jobs:
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
             -Dsonar.qualitygate.wait=true
+
+      - name: Print surefire reports
+        if: failure()
+        run: |
+          find target/surefire-reports -type f -name "*.txt" -exec cat {} \;
