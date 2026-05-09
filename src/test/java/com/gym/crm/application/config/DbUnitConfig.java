@@ -23,7 +23,7 @@ public class DbUnitConfig {
                                                                             DatabaseConfigBean dbUnitDatabaseConfig) {
         DatabaseDataSourceConnectionFactoryBean bean = new DatabaseDataSourceConnectionFactoryBean();
         bean.setDataSource(dataSource);
-        bean.setSchema("public");
+        bean.setSchema("PUBLIC");
         bean.setDatabaseConfig(dbUnitDatabaseConfig);
 
         return bean;

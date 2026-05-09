@@ -34,12 +34,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn clean verify sonar:sonar -e \
-            -Dspring.profiles.active=test \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
             -Dsonar.qualitygate.wait=true
-
-      - name: Print surefire reports
-        if: failure()
-        run: |
-          find target/surefire-reports -type f -name "*.txt" -exec cat {} \;

@@ -1,5 +1,6 @@
 package com.gym.crm.application.database;
 
+import com.gym.crm.application.config.GymAppConfig;
 import com.gym.crm.application.config.TestAppConfig;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
