@@ -74,8 +74,7 @@ class TrainerMapperTest {
         assertEquals(expected.getLastName(), actual.getUser().getLastName());
         assertEquals(expected.getUsername(), actual.getUser().getUsername());
         assertEquals(expected.isActive(), actual.getUser().isActive());
-        assertEquals(expected.getSpecialization().getTrainingTypeName(),
-                actual.getSpecialization().getTrainingTypeName());
+        assertEquals(expected.getSpecialization().getTrainingTypeName(), actual.getSpecialization().getTrainingTypeName());
     }
 
     @Test
