@@ -1,6 +1,6 @@
 package com.gym.crm.application.aspect;
 
-import com.gym.crm.application.annotation.Transactional;
+import com.gym.crm.application.aspect.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

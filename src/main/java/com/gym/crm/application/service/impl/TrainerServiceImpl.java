@@ -1,6 +1,6 @@
 package com.gym.crm.application.service.impl;
 
-import com.gym.crm.application.annotation.Transactional;
+import com.gym.crm.application.aspect.annotation.Transactional;
 import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
