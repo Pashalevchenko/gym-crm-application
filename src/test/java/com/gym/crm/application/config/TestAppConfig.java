@@ -38,6 +38,7 @@ public class TestAppConfig {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog(changeLog);
+
         return liquibase;
     }
 

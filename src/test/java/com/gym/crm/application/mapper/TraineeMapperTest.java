@@ -65,6 +65,7 @@ class TraineeMapperTest {
                 .dateOfBirth(LocalDate.of(1995, 1, 1))
                 .address("Kyiv")
                 .build();
+
         Trainee actual = traineeMapper.dtoToEntity(expected);
 
         assertNotNull(actual);

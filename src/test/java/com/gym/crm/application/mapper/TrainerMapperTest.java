@@ -62,6 +62,7 @@ class TrainerMapperTest {
                 .isActive(true)
                 .specialization(specialization)
                 .build();
+
         Trainer actual = trainerMapper.dtoToEntity(expected);
 
         assertNotNull(actual);

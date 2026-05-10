@@ -4,12 +4,12 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Pashalevchenko_gym-crm-application&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Pashalevchenko_gym-crm-application)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Pashalevchenko_gym-crm-application&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Pashalevchenko_gym-crm-application)
 
-1. ## Database Setup (MySQL)
+1. ## Database Setup (Postgresql)
 Before the first run, make sure to create a database and user with proper privileges:
 ```
-CREATE DATABASE gym_crm_application;
+CREATE DATABASE gym_db;
 CREATE USER gym WITH PASSWORD 'gym';
-GRANT ALL PRIVILEGES ON DATABASE gym_crm_application TO gym;
+GRANT ALL PRIVILEGES ON DATABASE gym_db TO gym;
 ```
 
 2. ## Environment Variables
@@ -18,7 +18,7 @@ Create a .env file in the root directory of the project with the following confi
 # Database Configuration
 DB_USERNAME=gym
 DB_PASSWORD=gym
-DB_URL=jdbc:postgresql://localhost:5432/gym-crm-application
+DB_URL=jdbc:postgresql://localhost:5432/gym_db
 
 
 3. ## Run the Application
