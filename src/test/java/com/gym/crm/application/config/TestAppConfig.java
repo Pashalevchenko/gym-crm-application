@@ -14,13 +14,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import javax.sql.DataSource;
 
 @Configuration
-@ComponentScan(
-        basePackages = "com.gym.crm.application",
-        excludeFilters = {
+@ComponentScan(basePackages = "com.gym.crm.application",
+               excludeFilters = {
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = GymAppConfig.class),
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LiquibaseConfig.class)
-        }
-)
+        })
 @PropertySource("classpath:application-test.properties")
 @EnableAspectJAutoProxy
 public class TestAppConfig {
