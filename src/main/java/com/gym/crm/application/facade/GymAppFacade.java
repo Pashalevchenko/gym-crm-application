@@ -1,7 +1,7 @@
 package com.gym.crm.application.facade;
 
-import com.gym.crm.application.annotation.Authenticated;
-import com.gym.crm.application.annotation.Transactional;
+import com.gym.crm.application.aspect.annotation.Authenticated;
+import com.gym.crm.application.aspect.annotation.Transactional;
 import com.gym.crm.application.context.SecurityContextHolder;
 import com.gym.crm.application.dto.mapper.TraineeMapper;
 import com.gym.crm.application.dto.mapper.TrainerMapper;

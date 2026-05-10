@@ -1,12 +1,10 @@
-package com.gym.crm.application.annotation;
+package com.gym.crm.application.aspect.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Transactional {
-    boolean readOnly() default false;
-}
+public @interface Authenticated {}

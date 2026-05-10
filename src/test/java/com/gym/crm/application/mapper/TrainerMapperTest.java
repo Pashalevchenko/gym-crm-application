@@ -2,6 +2,7 @@ package com.gym.crm.application.mapper;
 
 import com.gym.crm.application.dto.mapper.TrainerMapper;
 import com.gym.crm.application.dto.request.TrainerRequestDTO;
+import com.gym.crm.application.dto.request.TrainerUpdateDTO;
 import com.gym.crm.application.dto.response.TrainerResponseDTO;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.TrainingType;
@@ -46,6 +47,32 @@ class TrainerMapperTest {
         assertTrue(actual.getUser().isActive());
         assertNotNull(actual.getSpecialization());
         assertEquals("Boxing", actual.getSpecialization().getTrainingTypeName());
+    }
+
+    @Test
+    @DisplayName("Should correctly map all provided fields from TrainerUpdateDTO to Trainer entity")
+    void dtoToEntity_ShouldMapAllFieldsCorrectly() {
+        TrainingType specialization = TrainingType.builder()
+                .trainingTypeName("Strength")
+                .build();
+        TrainerUpdateDTO expected = TrainerUpdateDTO.builder()
+                .firstName(USER_FIRST_NAME)
+                .lastName(USER_LAST_NAME)
+                .username(USERNAME)
+                .isActive(true)
+                .specialization(specialization)
+                .build();
+
+        Trainer actual = trainerMapper.dtoToEntity(expected);
+
+        assertNotNull(actual);
+        assertNotNull(actual.getUser());
+        assertNotNull(actual.getSpecialization());
+        assertEquals(expected.getFirstName(), actual.getUser().getFirstName());
+        assertEquals(expected.getLastName(), actual.getUser().getLastName());
+        assertEquals(expected.getUsername(), actual.getUser().getUsername());
+        assertEquals(expected.isActive(), actual.getUser().isActive());
+        assertEquals(expected.getSpecialization().getTrainingTypeName(), actual.getSpecialization().getTrainingTypeName());
     }
 
     @Test

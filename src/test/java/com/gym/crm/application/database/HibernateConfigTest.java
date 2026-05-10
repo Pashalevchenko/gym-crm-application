@@ -1,6 +1,7 @@
 package com.gym.crm.application.database;
 
 import com.gym.crm.application.config.GymAppConfig;
+import com.gym.crm.application.config.TestAppConfig;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = GymAppConfig.class)
+@ContextConfiguration(classes = TestAppConfig.class)
 public class HibernateConfigTest {
 
     @Autowired
