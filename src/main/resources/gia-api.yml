@@ -207,51 +207,6 @@ paths:
         default:
           description: Unexpected error
 
-  /trainees/{username}/activation:
-    patch:
-      tags:
-        - Trainee
-      summary: Change trainee activation status
-      description: Activates or deactivates a trainee profile
-      operationId: changeTraineeActivationStatus
-      parameters:
-        - $ref: '#/components/parameters/Username'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ActivationStatusRequest'
-      responses:
-        '200':
-          description: Activation status updated successfully
-        '400':
-          description: Invalid input data
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Unauthorized access
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Trainee not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        default:
-          description: Unexpected error
-
   /trainees/{username}/trainers:
     put:
       tags:
@@ -300,7 +255,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         default:
           description: Unexpected error
-
 
   /trainers/register:
     post:
@@ -434,50 +388,6 @@ paths:
         default:
           description: Unexpected error
 
-  /trainers/{username}/activation:
-    patch:
-      tags:
-        - Trainer
-      summary: Change trainer activation status
-      description: Activates or deactivates a trainer profile
-      operationId: changeTrainerActivationStatus
-      parameters:
-        - $ref: '#/components/parameters/Username'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ActivationStatusRequest'
-      responses:
-        '200':
-          description: Activation status updated successfully
-        '400':
-          description: Invalid input data
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Unauthorized access
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Trainer not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        default:
-          description: Unexpected error
   /trainers/{username}/trainings:
     get:
       tags:
@@ -683,6 +593,96 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Invalid user credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        default:
+          description: Unexpected error
+
+  /trainers/{username}/activation:
+    patch:
+      tags:
+        - User Profile
+      summary: Change trainer activation status
+      description: Activates or deactivates a trainer profile
+      operationId: changeTrainerActivationStatus
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationStatusRequest'
+      responses:
+        '200':
+          description: Activation status updated successfully
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Trainer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        default:
+          description: Unexpected error
+
+  /trainees/{username}/activation:
+    patch:
+      tags:
+        - User Profile
+      summary: Change trainee activation status
+      description: Activates or deactivates a trainee profile
+      operationId: changeTraineeActivationStatus
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationStatusRequest'
+      responses:
+        '200':
+          description: Activation status updated successfully
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Trainee not found
           content:
             application/json:
               schema:
