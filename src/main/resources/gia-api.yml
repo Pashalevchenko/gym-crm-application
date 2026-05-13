@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: GCA API
+  title: GIA API
   description: API for managing trainees, their profiles, trainers, and training schedules
   version: '1.0'
 
@@ -210,7 +210,7 @@ paths:
   /trainees/{username}/activation:
     patch:
       tags:
-        - User Profile
+        - Trainee
       summary: Change trainee activation status
       description: Activates or deactivates a trainee profile
       operationId: changeTraineeActivationStatus
@@ -434,6 +434,50 @@ paths:
         default:
           description: Unexpected error
 
+  /trainers/{username}/activation:
+    patch:
+      tags:
+        - Trainer
+      summary: Change trainer activation status
+      description: Activates or deactivates a trainer profile
+      operationId: changeTrainerActivationStatus
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationStatusRequest'
+      responses:
+        '200':
+          description: Activation status updated successfully
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Trainer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        default:
+          description: Unexpected error
   /trainers/{username}/trainings:
     get:
       tags:
@@ -887,8 +931,6 @@ components:
       type: object
       required:
         - trainingName
-        - trainingDate
-        - trainingDuration
       properties:
         trainingName:
           type: string
@@ -911,39 +953,23 @@ components:
               type: string
               description: Training type name
               example: Cardio
-            traineeName:
-              type: string
-              description: Trainee's username
-              example: ricardo.milos
-            trainerName:
-              type: string
-              description: Trainer username
-              example: ronnie.coleman
     GetTraineeTrainingResponse:
       allOf:
-        - $ref: '#/components/schemas/TrainingKeys'
+        - $ref: '#/components/schemas/TrainingDefinition'
         - type: object
       properties:
-        trainingType:
-          type: string
-          description: Training type name
-          example: Cardio
         trainerName:
           type: string
           description: Trainer username
           example: vasyl.virastyk
     GetTrainerTrainingResponse:
       allOf:
-        - $ref: '#/components/schemas/TrainingKeys'
+        - $ref: '#/components/schemas/TrainingDefinition'
         - type: object
       properties:
-        trainingType:
-          type: string
-          description: Training type name
-          example: Cardio
         traineeName:
           type: string
-          description: Trainer username
+          description: Trainee username
           example: vasyl.virastyk
     TrainerCreateRequest:
       allOf:
