@@ -17,7 +17,8 @@ import javax.sql.DataSource;
 @ComponentScan(basePackages = "com.gym.crm.application",
                excludeFilters = {
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = GymAppConfig.class),
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LiquibaseConfig.class)
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LiquibaseConfig.class),
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebConfig.class)
         })
 @PropertySource("classpath:application-test.properties")
 @EnableAspectJAutoProxy

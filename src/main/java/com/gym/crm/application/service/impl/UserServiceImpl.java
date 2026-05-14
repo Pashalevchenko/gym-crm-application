@@ -1,7 +1,6 @@
 package com.gym.crm.application.service.impl;
 
 import com.gym.crm.application.dao.UserDao;
-import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.User;
 import com.gym.crm.application.openapi.LoginChangeRequest;
 import com.gym.crm.application.service.UserService;

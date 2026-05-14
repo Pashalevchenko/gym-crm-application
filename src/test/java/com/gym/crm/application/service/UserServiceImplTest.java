@@ -1,8 +1,9 @@
-package com.gym.crm.application.service.impl;
+package com.gym.crm.application.service;
 
 import com.gym.crm.application.dao.UserDao;
 import com.gym.crm.application.entity.User;
 import com.gym.crm.application.openapi.LoginChangeRequest;
+import com.gym.crm.application.service.impl.UserServiceImpl;
 import com.gym.crm.application.validation.TrainingValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -47,18 +48,14 @@ class UserServiceImplTest {
                 .isActive(true)
                 .build();
 
-        when(userDao.findByUsername("ricardo.milos"))
-                .thenReturn(Optional.of(existingUser));
-        when(passwordEncoder.matches("old-password", "encoded-old-password"))
-                .thenReturn(true);
-        when(passwordEncoder.encode("new-password"))
-                .thenReturn("encoded-new-password");
+        when(userDao.findByUsername("ricardo.milos")).thenReturn(Optional.of(existingUser));
+        when(passwordEncoder.matches("old-password", "encoded-old-password")).thenReturn(true);
+        when(passwordEncoder.encode("new-password")).thenReturn("encoded-new-password");
 
         userService.changePassword(request);
 
         verify(userDao).update(argThat(updatedUser ->
-                updatedUser.getUsername().equals("ricardo.milos")
-                        && updatedUser.getPassword().equals("encoded-new-password")));
+                updatedUser.getUsername().equals("ricardo.milos") && updatedUser.getPassword().equals("encoded-new-password")));
     }
 
     @Test
@@ -94,10 +91,8 @@ class UserServiceImplTest {
                 .isActive(true)
                 .build();
 
-        when(userDao.findByUsername("ricardo.milos"))
-                .thenReturn(Optional.of(existingUser));
-        when(passwordEncoder.matches("wrong-password", "encoded-old-password"))
-                .thenReturn(false);
+        when(userDao.findByUsername("ricardo.milos")).thenReturn(Optional.of(existingUser));
+        when(passwordEncoder.matches("wrong-password", "encoded-old-password")).thenReturn(false);
 
         assertThatThrownBy(() -> userService.changePassword(request))
                 .isInstanceOf(IllegalArgumentException.class)

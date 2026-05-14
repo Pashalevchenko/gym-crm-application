@@ -9,6 +9,9 @@ import javax.sql.DataSource;
 @Configuration
 public class DatabaseConfig {
 
+    @Value("${db.driver}")
+    private String driver;
+
     @Value("${db.url}")
     private String url;
 
@@ -24,6 +27,7 @@ public class DatabaseConfig {
         dataSource.setUrl(url);
         dataSource.setUsername(username);
         dataSource.setPassword(password);
+        dataSource.setDriverClassName(driver);
 
         return dataSource;
     }
