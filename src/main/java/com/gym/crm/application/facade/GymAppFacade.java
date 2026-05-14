@@ -207,6 +207,7 @@ public class GymAppFacade {
                 .toList();
     }
 
+    @Authenticated
     public void changePassword(LoginChangeRequest request){
         userService.changePassword(request);
     }

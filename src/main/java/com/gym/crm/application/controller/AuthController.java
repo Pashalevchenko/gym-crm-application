@@ -28,6 +28,4 @@ public class AuthController implements AuthApi {
 
         return ResponseEntity.ok().build();
     }
-
-
 }
