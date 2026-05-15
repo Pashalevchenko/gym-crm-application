@@ -16,7 +16,14 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -97,7 +104,6 @@ class UserServiceImplTest {
 
         when(userDao.findByUsername("ricardo.milos"))
                 .thenReturn(Optional.of(existingUser));
-
         doThrow(new IllegalArgumentException("The provided old password does not match the current password"))
                 .when(authentication)
                 .verifyPassword("wrong-password", "encoded-old-password",

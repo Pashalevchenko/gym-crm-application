@@ -103,17 +103,19 @@ class GymAppFacadeTest {
         doThrow(new IllegalArgumentException("Invalid username or password"))
                 .when(authService)
                 .authenticate(username, password);
+
         assertThatThrownBy(() -> facade.login(username, password))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Invalid username or password");
-        assertThat(SecurityContextHolder.getContext()).isNull();
 
+        assertThat(SecurityContextHolder.getContext()).isNull();
         verify(authService).authenticate(username, password);
     }
 
     @Test
     void logoutShouldClearSecurityContext() {
         SecurityContextHolder.setContext("test.user");
+
         facade.logout();
 
         assertThat(SecurityContextHolder.getContext()).isNull();

@@ -34,12 +34,10 @@ class UserDaoImplTest extends AbstractDaoTest<UserDao> {
                     .build();
 
             User actual = dao.save(user);
-
             assertThat(actual).isNotNull();
             assertThat(actual.getId()).isNotNull();
 
             Optional<User> found = dao.findByUsername("new.user");
-
             assertThat(found).isPresent();
             assertThat(found.get().getUsername()).isEqualTo("new.user");
             assertThat(found.get().getFirstName()).isEqualTo("New");
