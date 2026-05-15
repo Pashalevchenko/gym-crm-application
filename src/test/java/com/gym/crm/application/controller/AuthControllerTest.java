@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
@@ -27,7 +26,6 @@ class AuthControllerTest {
         LoginRequest request = new LoginRequest()
                 .username("test.user")
                 .password("12345");
-
         ResponseEntity<Void> response = authController.login(request);
 
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
@@ -42,7 +40,6 @@ class AuthControllerTest {
                 .username("test.user")
                 .oldPassword("old-password")
                 .newPassword("new-password");
-
         ResponseEntity<Void> response = authController.changePassword(request);
 
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
