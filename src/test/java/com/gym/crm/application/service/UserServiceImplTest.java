@@ -3,8 +3,8 @@ package com.gym.crm.application.service;
 import com.gym.crm.application.dao.UserDao;
 import com.gym.crm.application.entity.User;
 import com.gym.crm.application.openapi.LoginChangeRequest;
+import com.gym.crm.application.service.common.AuthenticationService;
 import com.gym.crm.application.service.impl.UserServiceImpl;
-import com.gym.crm.application.validation.TrainingValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,10 +25,10 @@ class UserServiceImplTest {
     private UserDao userDao;
 
     @Mock
-    private TrainingValidator validator;
+    private PasswordEncoder passwordEncoder;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private AuthenticationService authentication;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -39,6 +39,7 @@ class UserServiceImplTest {
                 .username("ricardo.milos")
                 .oldPassword("old-password")
                 .newPassword("new-password");
+
         User existingUser = User.builder()
                 .id(1L)
                 .firstName("Ricardo")
@@ -48,14 +49,23 @@ class UserServiceImplTest {
                 .isActive(true)
                 .build();
 
-        when(userDao.findByUsername("ricardo.milos")).thenReturn(Optional.of(existingUser));
-        when(passwordEncoder.matches("old-password", "encoded-old-password")).thenReturn(true);
-        when(passwordEncoder.encode("new-password")).thenReturn("encoded-new-password");
+        when(userDao.findByUsername("ricardo.milos"))
+                .thenReturn(Optional.of(existingUser));
+
+        when(authentication.encodePassword("new-password"))
+                .thenReturn("encoded-new-password");
 
         userService.changePassword(request);
 
-        verify(userDao).update(argThat(updatedUser ->
-                updatedUser.getUsername().equals("ricardo.milos") && updatedUser.getPassword().equals("encoded-new-password")));
+        verify(authentication).verifyPassword("old-password", "encoded-old-password",
+                "The provided old password does not match the current password");
+
+        verify(authentication).encodePassword("new-password");
+
+        verify(userDao).update(argThat(actual ->
+                actual.getUsername().equals("ricardo.milos") &&
+                actual.getPassword().equals("encoded-new-password") &&
+                actual.getId().equals(1L)));
     }
 
     @Test
@@ -91,15 +101,20 @@ class UserServiceImplTest {
                 .isActive(true)
                 .build();
 
-        when(userDao.findByUsername("ricardo.milos")).thenReturn(Optional.of(existingUser));
-        when(passwordEncoder.matches("wrong-password", "encoded-old-password")).thenReturn(false);
+        when(userDao.findByUsername("ricardo.milos"))
+                .thenReturn(Optional.of(existingUser));
+
+        doThrow(new IllegalArgumentException("The provided old password does not match the current password"))
+                .when(authentication)
+                .verifyPassword("wrong-password", "encoded-old-password",
+                                "The provided old password does not match the current password");
 
         assertThatThrownBy(() -> userService.changePassword(request))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Invalid password");
+                .hasMessage("The provided old password does not match the current password");
 
         verify(userDao, never()).update(any());
-        verify(passwordEncoder, never()).encode(anyString());
+        verify(authentication, never()).encodePassword(anyString());
     }
 
     @Test

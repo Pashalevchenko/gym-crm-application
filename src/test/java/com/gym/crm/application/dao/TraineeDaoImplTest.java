@@ -22,6 +22,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 @DisplayName("Trainee DAO DBUnit integration tests")
 class TraineeDaoImplTest extends AbstractDaoTest<TraineeDao> {
 
@@ -31,6 +34,9 @@ class TraineeDaoImplTest extends AbstractDaoTest<TraineeDao> {
     private static final Long SECOND_TRAINER_ID = 2L;
     private static final Long THIRD_TRAINER_ID = 3L;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Nested
     @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
     @DisplayName("create")
@@ -39,8 +45,8 @@ class TraineeDaoImplTest extends AbstractDaoTest<TraineeDao> {
         @Test
         @DisplayName("Should save trainee")
         void create_success() {
-            dao.delete(2L);
-            dao.delete(1L);
+            jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN id RESTART WITH 100");
+            jdbcTemplate.execute("ALTER TABLE trainees ALTER COLUMN id RESTART WITH 100");
 
             Trainee trainee = buildTrainee("New", "Trainee", "new.trainee");
             Trainee actual = dao.create(trainee);

@@ -1,30 +1,33 @@
 package com.gym.crm.application.controller;
 
-import com.gym.crm.application.AuthApi;
 import com.gym.crm.application.facade.GymAppFacade;
 import com.gym.crm.application.openapi.LoginChangeRequest;
 import com.gym.crm.application.openapi.LoginRequest;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthController implements AuthApi {
+public class AuthController {
 
-    private final GymAppFacade gymAppFacade;
+    private final GymAppFacade facade;
 
-    @Override
-    public ResponseEntity<Void> login(LoginRequest request) {
-        gymAppFacade.login(request.getUsername(), request.getPassword());
+    @PostMapping("/login")
+    public ResponseEntity<Void> login(@RequestBody LoginRequest request) {
+        facade.login(request.getUsername(), request.getPassword());
 
         return ResponseEntity.ok().build();
     }
 
-    @Override
-    public ResponseEntity<Void> changePassword(LoginChangeRequest request) {
-        gymAppFacade.changePassword(request);
+    @PutMapping("/password")
+    public ResponseEntity<Void> changePassword(@RequestBody LoginChangeRequest request) {
+        facade.changePassword(request);
 
         return ResponseEntity.ok().build();
     }

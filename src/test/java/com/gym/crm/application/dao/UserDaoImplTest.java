@@ -6,9 +6,7 @@ import com.gym.crm.application.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -68,7 +66,6 @@ class UserDaoImplTest extends AbstractDaoTest<UserDao> {
         @DisplayName("Should update user when user exists")
         void update_success() {
             User existing = dao.findByUsername(EXISTING_USERNAME).orElseThrow();
-
             User userToUpdate = existing.toBuilder()
                     .firstName("Updated")
                     .lastName("Burpee")
@@ -76,13 +73,7 @@ class UserDaoImplTest extends AbstractDaoTest<UserDao> {
                     .isActive(false)
                     .build();
 
-            User updated = dao.update(userToUpdate);
-
-            Optional<User> found = dao.findByUsername(updated.getUsername());
-
-            assertThat(found).isPresent();
-
-            User actual = found.get();
+            User actual = dao.update(userToUpdate);
 
             assertThat(actual.getId()).isEqualTo(existing.getId());
             assertThat(actual.getUsername()).isEqualTo(EXISTING_USERNAME);

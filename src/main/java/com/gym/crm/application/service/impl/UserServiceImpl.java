@@ -4,15 +4,12 @@ import com.gym.crm.application.dao.UserDao;
 import com.gym.crm.application.entity.User;
 import com.gym.crm.application.openapi.LoginChangeRequest;
 import com.gym.crm.application.service.UserService;
-import com.gym.crm.application.validation.TrainingValidator;
+import com.gym.crm.application.service.common.AuthenticationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -20,24 +17,21 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
-    private final TrainingValidator validator;
-    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationService authentication;
 
     @Override
     public void changePassword(LoginChangeRequest request) {
         User existingUser = userDao.findByUsername(request.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        if (!passwordEncoder.matches(request.getOldPassword(), existingUser.getPassword())) {
-            throw new IllegalArgumentException("Invalid password");
-        }
+        authentication.verifyPassword(request.getOldPassword(), existingUser.getPassword(), "The provided old password does not match the current password");
 
         User userToUpdate = existingUser.toBuilder()
-                .password(passwordEncoder.encode(request.getNewPassword()))
+                .password(authentication.encodePassword(request.getNewPassword()))
                 .build();
 
         userDao.update(userToUpdate);
-        log.info("Password changed for trainee username: {}", request.getUsername());
+        log.info("Password changed for username: {}", request.getUsername());
     }
 
     @Override
