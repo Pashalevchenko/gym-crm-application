@@ -15,9 +15,11 @@ import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.openapi.LoginChangeRequest;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
+import com.gym.crm.application.service.UserService;
 import com.gym.crm.application.service.common.AuthenticationService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -70,6 +72,9 @@ class GymAppFacadeTest {
 
     @Mock
     private AuthenticationService authService;
+
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private GymAppFacade facade;
@@ -663,5 +668,17 @@ class GymAppFacadeTest {
         assertEquals("Boxing", actual.get(0).getTrainingName());
         verify(trainingService).getAllTrainings();
         verify(trainingMapper).entityToDto(training);
+    }
+
+    @Test
+    void changePasswordShouldCallUserService() {
+        LoginChangeRequest request = new LoginChangeRequest()
+                .username("test.user")
+                .oldPassword("old-password")
+                .newPassword("new-password");
+
+        facade.changePassword(request);
+
+        verify(userService).changePassword(request);
     }
 }
