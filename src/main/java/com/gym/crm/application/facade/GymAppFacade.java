@@ -18,6 +18,8 @@ import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.openapi.LoginChangeRequest;
+import com.gym.crm.application.service.UserService;
 import com.gym.crm.application.service.common.AuthenticationService;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
@@ -36,6 +38,7 @@ public class GymAppFacade {
     private final TraineeService traineeService;
     private final TrainerService trainerService;
     private final TrainingService trainingService;
+    private final UserService userService;
     private final TraineeMapper traineeMapper;
     private final TrainerMapper trainerMapper;
     private final TrainingMapper trainingMapper;
@@ -202,5 +205,10 @@ public class GymAppFacade {
         return trainingService.getAllTrainings().stream()
                 .map(trainingMapper::entityToDto)
                 .toList();
+    }
+
+    @Authenticated
+    public void changePassword(LoginChangeRequest request){
+        userService.changePassword(request);
     }
 }

@@ -15,9 +15,13 @@ import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.openapi.LoginChangeRequest;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
+import com.gym.crm.application.service.UserService;
+import com.gym.crm.application.service.common.AuthenticationService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +36,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import com.gym.crm.application.context.SecurityContextHolder;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 class GymAppFacadeTest {
@@ -62,8 +70,56 @@ class GymAppFacadeTest {
     @Mock
     private TrainingMapper trainingMapper;
 
+    @Mock
+    private AuthenticationService authService;
+
+    @Mock
+    private UserService userService;
+
     @InjectMocks
     private GymAppFacade facade;
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clear();
+    }
+
+    @Test
+    void loginShouldAuthenticateUserAndSetSecurityContext() {
+        String username = "test.user";
+        String password = "12345";
+
+        facade.login(username, password);
+
+        verify(authService).authenticate(username, password);
+        assertThat(SecurityContextHolder.getContext()).isEqualTo(username);
+    }
+
+    @Test
+    void loginShouldNotSetSecurityContextWhenAuthenticationFails() {
+        String username = "test.user";
+        String password = "wrong-password";
+
+        doThrow(new IllegalArgumentException("Invalid username or password"))
+                .when(authService)
+                .authenticate(username, password);
+
+        assertThatThrownBy(() -> facade.login(username, password))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Invalid username or password");
+
+        assertThat(SecurityContextHolder.getContext()).isNull();
+        verify(authService).authenticate(username, password);
+    }
+
+    @Test
+    void logoutShouldClearSecurityContext() {
+        SecurityContextHolder.setContext("test.user");
+
+        facade.logout();
+
+        assertThat(SecurityContextHolder.getContext()).isNull();
+    }
 
     @Test
     @DisplayName("Verify that facade calls trainee service and uses mappers for create operation")
@@ -614,5 +670,17 @@ class GymAppFacadeTest {
         assertEquals("Boxing", actual.get(0).getTrainingName());
         verify(trainingService).getAllTrainings();
         verify(trainingMapper).entityToDto(training);
+    }
+
+    @Test
+    void changePasswordShouldCallUserService() {
+        LoginChangeRequest request = new LoginChangeRequest()
+                .username("test.user")
+                .oldPassword("old-password")
+                .newPassword("new-password");
+
+        facade.changePassword(request);
+
+        verify(userService).changePassword(request);
     }
 }

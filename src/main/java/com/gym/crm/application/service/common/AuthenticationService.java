@@ -21,8 +21,16 @@ public class AuthenticationService {
                 .uniqueResultOptional()
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IllegalArgumentException("Invalid password");
+        verifyPassword(password, user.getPassword(), "Invalid username or password");
+    }
+
+    public void verifyPassword(String rawPassword, String encodedPassword, String errorMessage) {
+        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+            throw new IllegalArgumentException(errorMessage);
         }
+    }
+
+    public String encodePassword(String rawPassword) {
+        return passwordEncoder.encode(rawPassword);
     }
 }

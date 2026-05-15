@@ -99,6 +99,6 @@ class AuthenticationServiceTest {
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.authenticate(USERNAME, "wrong_password"));
 
-        assertEquals("Invalid password", exception.getMessage());
+        assertEquals("Invalid username or password", exception.getMessage());
     }
 }
