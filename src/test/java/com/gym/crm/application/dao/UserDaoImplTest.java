@@ -100,11 +100,7 @@ class UserDaoImplTest extends AbstractDaoTest<UserDao> {
         @Test
         @DisplayName("Should return user when user with requested username exists")
         void findByUsername_found() {
-            Optional<User> found = dao.findByUsername(SECOND_EXISTING_USERNAME);
-
-            assertThat(found).isPresent();
-
-            User actual = found.get();
+            User actual = dao.findByUsername(SECOND_EXISTING_USERNAME).get();
 
             assertThat(actual.getId()).isEqualTo(12L);
             assertThat(actual.getUsername()).isEqualTo("marta.muscle");

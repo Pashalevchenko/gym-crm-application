@@ -39,7 +39,6 @@ class UserServiceImplTest {
                 .username("ricardo.milos")
                 .oldPassword("old-password")
                 .newPassword("new-password");
-
         User existingUser = User.builder()
                 .id(1L)
                 .firstName("Ricardo")
@@ -49,19 +48,14 @@ class UserServiceImplTest {
                 .isActive(true)
                 .build();
 
-        when(userDao.findByUsername("ricardo.milos"))
-                .thenReturn(Optional.of(existingUser));
-
-        when(authentication.encodePassword("new-password"))
-                .thenReturn("encoded-new-password");
+        when(userDao.findByUsername("ricardo.milos")).thenReturn(Optional.of(existingUser));
+        when(authentication.encodePassword("new-password")).thenReturn("encoded-new-password");
 
         userService.changePassword(request);
 
         verify(authentication).verifyPassword("old-password", "encoded-old-password",
                 "The provided old password does not match the current password");
-
         verify(authentication).encodePassword("new-password");
-
         verify(userDao).update(argThat(actual ->
                 actual.getUsername().equals("ricardo.milos") &&
                 actual.getPassword().equals("encoded-new-password") &&
@@ -128,8 +122,7 @@ class UserServiceImplTest {
                 .isActive(true)
                 .build();
 
-        when(userDao.findByUsername("ricardo.milos"))
-                .thenReturn(Optional.of(user));
+        when(userDao.findByUsername("ricardo.milos")).thenReturn(Optional.of(user));
 
         User result = userService.findByUsername("ricardo.milos");
 
@@ -138,8 +131,7 @@ class UserServiceImplTest {
 
     @Test
     void findByUsernameShouldThrowNoSuchElementExceptionWhenUserDoesNotExist() {
-        when(userDao.findByUsername("unknown.user"))
-                .thenReturn(Optional.empty());
+        when(userDao.findByUsername("unknown.user")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.findByUsername("unknown.user"))
                 .isInstanceOf(NoSuchElementException.class)
