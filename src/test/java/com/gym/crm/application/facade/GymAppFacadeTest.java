@@ -3,7 +3,7 @@ package com.gym.crm.application.facade;
 import com.gym.crm.application.dto.mapper.TraineeMapper;
 import com.gym.crm.application.dto.mapper.TrainerMapper;
 import com.gym.crm.application.dto.mapper.TrainingMapper;
-import com.gym.crm.application.dto.request.TraineeRequestDTO;
+import com.gym.crm.application.dto.mapper.rest.TraineeRestMapper;
 import com.gym.crm.application.dto.request.TraineeUpdateDTO;
 import com.gym.crm.application.dto.request.TrainerRequestDTO;
 import com.gym.crm.application.dto.request.TrainerUpdateDTO;
@@ -15,7 +15,18 @@ import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.entity.User;
+import com.gym.crm.application.openapi.ActivationStatusRequest;
+import com.gym.crm.application.openapi.AssignedTrainerResponse;
+import com.gym.crm.application.openapi.GetTraineeTrainingResponse;
 import com.gym.crm.application.openapi.LoginChangeRequest;
+import com.gym.crm.application.openapi.TraineeAssignedTrainersUpdateRequest;
+import com.gym.crm.application.openapi.TraineeAssignedTrainersUpdateResponse;
+import com.gym.crm.application.openapi.TraineeCreateRequest;
+import com.gym.crm.application.openapi.TraineeCreateResponse;
+import com.gym.crm.application.openapi.TraineeGetResponse;
+import com.gym.crm.application.openapi.TraineeUpdateRequest;
+import com.gym.crm.application.openapi.TraineeUpdateResponse;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
@@ -63,6 +74,9 @@ class GymAppFacadeTest {
 
     @Mock
     private TraineeMapper traineeMapper;
+
+    @Mock
+    private TraineeRestMapper traineeRestMapper;
 
     @Mock
     private TrainerMapper trainerMapper;
@@ -122,34 +136,34 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Verify that facade calls trainee service and uses mappers for create operation")
+    @DisplayName("Verify that facade calls trainee service and uses rest mapper for create operation")
     void createTrainee_Test() {
-        TraineeRequestDTO request = TraineeRequestDTO.builder().build();
-        Trainee trainee = Trainee.builder().build();
-        Trainee createdTrainee = Trainee.builder().id(TRAINEE_ID).build();
-
-        TraineeResponseDTO expected = TraineeResponseDTO.builder()
-                .id(TRAINEE_ID)
+        TraineeCreateRequest request = new TraineeCreateRequest()
                 .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
+                .lastName(LAST_NAME);
+        Trainee trainee = Trainee.builder().build();
+        User user = User.builder()
                 .username(USERNAME)
-                .isActive(true)
-                .dateOfBirth(LocalDate.of(2000, 5, 10))
-                .address("Kyiv")
+                .password("generated-password")
                 .build();
+        Trainee createdTrainee = Trainee.builder()
+                .id(TRAINEE_ID)
+                .user(user)
+                .build();
+        TraineeCreateResponse expected = new TraineeCreateResponse()
+                .username(USERNAME)
+                .password("generated-password");
 
-        when(traineeMapper.dtoToEntity(request)).thenReturn(trainee);
+        when(traineeRestMapper.toEntity(request)).thenReturn(trainee);
         when(traineeService.createTrainee(trainee)).thenReturn(createdTrainee);
-        when(traineeMapper.entityToDto(createdTrainee)).thenReturn(expected);
+        when(traineeRestMapper.toCreateResponse(createdTrainee)).thenReturn(expected);
 
-        TraineeResponseDTO actual = facade.createTrainee(request);
+        TraineeCreateResponse actual = facade.createTrainee(request);
 
         assertEquals(expected, actual);
-        assertEquals(USERNAME, actual.getUsername());
-
-        verify(traineeMapper).dtoToEntity(request);
+        verify(traineeRestMapper).toEntity(request);
         verify(traineeService).createTrainee(trainee);
-        verify(traineeMapper).entityToDto(createdTrainee);
+        verify(traineeRestMapper).toCreateResponse(createdTrainee);
     }
 
     @Test
@@ -167,7 +181,6 @@ class GymAppFacadeTest {
         TraineeResponseDTO actual = facade.getTraineeById(TRAINEE_ID);
 
         assertEquals(expected, actual);
-
         verify(traineeService).getTraineeById(TRAINEE_ID);
         verify(traineeMapper).entityToDto(trainee);
     }
@@ -176,20 +189,19 @@ class GymAppFacadeTest {
     @DisplayName("Should get trainee by username")
     void getTraineeByUsername_shouldReturnMappedDto() {
         Trainee trainee = Trainee.builder().id(TRAINEE_ID).build();
-        TraineeResponseDTO expected = TraineeResponseDTO.builder()
-                .id(TRAINEE_ID)
-                .username(USERNAME)
-                .build();
+        TraineeGetResponse expected = new TraineeGetResponse()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .isActive(true);
 
         when(traineeService.getTraineeByUsername(USERNAME)).thenReturn(trainee);
-        when(traineeMapper.entityToDto(trainee)).thenReturn(expected);
+        when(traineeRestMapper.toGetResponse(trainee)).thenReturn(expected);
 
-        TraineeResponseDTO actual = facade.getTraineeByUsername(USERNAME);
+        TraineeGetResponse actual = facade.getTraineeByUsername(USERNAME);
 
         assertEquals(expected, actual);
-
         verify(traineeService).getTraineeByUsername(USERNAME);
-        verify(traineeMapper).entityToDto(trainee);
+        verify(traineeRestMapper).toGetResponse(trainee);
     }
 
     @Test
@@ -208,7 +220,6 @@ class GymAppFacadeTest {
 
         assertEquals(1, actual.size());
         assertEquals(USERNAME, actual.get(0).getUsername());
-
         verify(traineeService).getAllTrainees();
         verify(traineeMapper).entityToDto(trainee);
     }
@@ -216,26 +227,40 @@ class GymAppFacadeTest {
     @Test
     @DisplayName("Should successfully update trainee by mapping request DTO to entity and returning response DTO")
     void updateTrainee_Test() {
-        TraineeUpdateDTO request = TraineeUpdateDTO.builder().build();
-        Trainee trainee = Trainee.builder().id(TRAINEE_ID).build();
-        Trainee updated = Trainee.builder().id(TRAINEE_ID).build();
-
-        TraineeResponseDTO expected = TraineeResponseDTO.builder()
-                .id(TRAINEE_ID)
+        TraineeUpdateRequest request = new TraineeUpdateRequest()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .isActive(false);
+        TraineeUpdateDTO dto = TraineeUpdateDTO.builder()
+                .username(USERNAME)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
                 .isActive(false)
                 .build();
+        Trainee trainee = Trainee.builder()
+                .id(TRAINEE_ID)
+                .build();
+        Trainee updated = Trainee.builder()
+                .id(TRAINEE_ID)
+                .build();
+        TraineeUpdateResponse expected = new TraineeUpdateResponse()
+                .username(USERNAME)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .isActive(false);
 
-        when(traineeMapper.dtoToEntity(request)).thenReturn(trainee);
+        when(traineeRestMapper.toUpdateDto(USERNAME, request)).thenReturn(dto);
+        when(traineeMapper.dtoToEntity(dto)).thenReturn(trainee);
         when(traineeService.updateTrainee(trainee)).thenReturn(updated);
-        when(traineeMapper.entityToDto(updated)).thenReturn(expected);
+        when(traineeRestMapper.toUpdateResponse(updated)).thenReturn(expected);
 
-        TraineeResponseDTO actual = facade.updateTrainee(request);
+        TraineeUpdateResponse actual = facade.updateTrainee(request, USERNAME);
 
         assertEquals(expected, actual);
-
-        verify(traineeMapper).dtoToEntity(request);
+        verify(traineeRestMapper).toUpdateDto(USERNAME, request);
+        verify(traineeMapper).dtoToEntity(dto);
         verify(traineeService).updateTrainee(trainee);
-        verify(traineeMapper).entityToDto(updated);
+        verify(traineeRestMapper).toUpdateResponse(updated);
     }
 
     @Test
@@ -247,42 +272,25 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should activate trainee")
-    void activateTrainee_shouldActivateAndMapResponse() {
-        Trainee trainee = Trainee.builder().id(TRAINEE_ID).build();
-        TraineeResponseDTO expected = TraineeResponseDTO.builder()
-                .id(TRAINEE_ID)
-                .isActive(true)
-                .build();
+    @DisplayName("Should change trainee active status to active")
+    void changeActiveStatus_shouldActivateTrainee() {
+        ActivationStatusRequest request = new ActivationStatusRequest()
+                .isActive(true);
 
-        when(traineeService.activateTrainee(USERNAME)).thenReturn(trainee);
-        when(traineeMapper.entityToDto(trainee)).thenReturn(expected);
+        facade.changeActiveStatus(USERNAME, request);
 
-        TraineeResponseDTO actual = facade.activateTrainee(USERNAME);
-
-        assertEquals(expected, actual);
-        verify(traineeService).activateTrainee(USERNAME);
-        verify(traineeMapper).entityToDto(trainee);
+        verify(traineeService).changeActiveStatus(USERNAME, true);
     }
 
     @Test
-    @DisplayName("Should deactivate trainee")
-    void deactivateTrainee_shouldDeactivateAndMapResponse() {
-        Trainee trainee = Trainee.builder().id(TRAINEE_ID).build();
-        TraineeResponseDTO expected = TraineeResponseDTO.builder()
-                .id(TRAINEE_ID)
-                .isActive(false)
-                .build();
+    @DisplayName("Should change trainee active status to inactive")
+    void changeActiveStatus_shouldDeactivateTrainee() {
+        ActivationStatusRequest request = new ActivationStatusRequest()
+                .isActive(false);
 
-        when(traineeService.deactivateTrainee(USERNAME)).thenReturn(trainee);
-        when(traineeMapper.entityToDto(trainee)).thenReturn(expected);
+        facade.changeActiveStatus(USERNAME, request);
 
-        TraineeResponseDTO actual = facade.deactivateTrainee(USERNAME);
-
-        assertEquals(expected, actual);
-
-        verify(traineeService).deactivateTrainee(USERNAME);
-        verify(traineeMapper).entityToDto(trainee);
+        verify(traineeService).changeActiveStatus(USERNAME, false);
     }
 
     @Test
@@ -313,67 +321,90 @@ class GymAppFacadeTest {
                 .id(TRAINING_ID)
                 .trainingName("Morning Yoga")
                 .build();
-        TrainingResponseDTO response = TrainingResponseDTO.builder()
-                .trainingName("Morning Yoga")
-                .build();
 
-        when(traineeService.getTraineeTrainings(USERNAME, fromDate, toDate, trainerName, trainingTypeName)).
-                thenReturn(List.of(training));
+        GetTraineeTrainingResponse response = new GetTraineeTrainingResponse()
+                .trainingName("Morning Yoga");
 
-        when(trainingMapper.entityToDto(training)).thenReturn(response);
+        when(traineeService.getTraineeTrainings(USERNAME, fromDate, toDate, trainerName, trainingTypeName))
+                .thenReturn(List.of(training));
+        when(traineeRestMapper.toTrainingResponses(List.of(training)))
+                .thenReturn(List.of(response));
 
-        List<TrainingResponseDTO> actual = facade.getTraineeTrainings(USERNAME, fromDate, toDate, trainerName, trainingTypeName);
+        List<GetTraineeTrainingResponse> actual =
+                facade.getTraineeTrainings(USERNAME, fromDate, toDate, trainerName, trainingTypeName);
 
         assertEquals(1, actual.size());
         assertEquals("Morning Yoga", actual.get(0).getTrainingName());
 
         verify(traineeService).getTraineeTrainings(USERNAME, fromDate, toDate, trainerName, trainingTypeName);
-        verify(trainingMapper).entityToDto(training);
+        verify(traineeRestMapper).toTrainingResponses(List.of(training));
     }
 
     @Test
     @DisplayName("Should get not assigned trainers")
     void getNotAssignedTrainers_shouldReturnMappedTrainerList() {
-        Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
-
-        TrainerResponseDTO response = TrainerResponseDTO.builder()
+        Trainer trainer = Trainer.builder()
                 .id(TRAINER_ID)
-                .username("trainer.username")
                 .build();
+        AssignedTrainerResponse response = new AssignedTrainerResponse()
+                .username("trainer.username")
+                .firstName("Trainer")
+                .lastName("Test");
 
         when(traineeService.getNotAssignedTrainers(USERNAME)).thenReturn(List.of(trainer));
-        when(trainerMapper.entityToDto(trainer)).thenReturn(response);
+        when(traineeRestMapper.toAssignedTrainerResponses(List.of(trainer))).thenReturn(List.of(response));
 
-        List<TrainerResponseDTO> actual = facade.getNotAssignedTrainers(USERNAME);
+        List<AssignedTrainerResponse> actual = facade.getNotAssignedTrainers(USERNAME);
 
         assertEquals(1, actual.size());
         assertEquals("trainer.username", actual.get(0).getUsername());
         verify(traineeService).getNotAssignedTrainers(USERNAME);
-        verify(trainerMapper).entityToDto(trainer);
+        verify(traineeRestMapper).toAssignedTrainerResponses(List.of(trainer));
     }
 
     @Test
     @DisplayName("Should update trainee trainers list")
     void updateTraineeTrainersList_shouldDelegateToServiceAndMapResponse() {
-        Set<Trainer> trainers = Set.of(Trainer.builder()
+        String trainerUsername = "trainer.test";
+        User user = User.builder()
+                .username(trainerUsername)
+                .firstName("Trainer")
+                .lastName("Test")
+                .build();
+        TraineeAssignedTrainersUpdateRequest request =
+                new TraineeAssignedTrainersUpdateRequest()
+                        .trainerUsernames(List.of(trainerUsername));
+
+        Trainer trainer = Trainer.builder()
                 .id(TRAINER_ID)
-                .build());
-        Trainee trainee = Trainee.builder()
-                .id(TRAINEE_ID)
+                .user(user)
                 .build();
-        TraineeResponseDTO expected = TraineeResponseDTO.builder()
+        Set<Trainer> trainers = Set.of(trainer);
+        Trainee updatedTrainee = Trainee.builder()
                 .id(TRAINEE_ID)
+                .trainers(trainers)
                 .build();
+        AssignedTrainerResponse trainerResponse = new AssignedTrainerResponse()
+                .username(trainerUsername)
+                .firstName("Trainer")
+                .lastName("Test");
+        TraineeAssignedTrainersUpdateResponse expected =
+                new TraineeAssignedTrainersUpdateResponse()
+                        .trainers(List.of(trainerResponse));
 
-        when(traineeService.updateTrainersList(USERNAME, trainers)).thenReturn(trainee);
-        when(traineeMapper.entityToDto(trainee)).thenReturn(expected);
+        when(trainerService.getTrainerByUsername(trainerUsername)).thenReturn(trainer);
+        when(traineeService.updateTrainersList(USERNAME, trainers)).thenReturn(updatedTrainee);
+        when(traineeRestMapper.toAssignedTrainerResponse(trainer)).thenReturn(trainerResponse);
+        when(traineeRestMapper.toAssignedTrainersUpdateResponse(List.of(trainerResponse))).thenReturn(expected);
 
-        TraineeResponseDTO actual = facade.updateTraineeTrainersList(USERNAME, trainers);
+        TraineeAssignedTrainersUpdateResponse actual = facade.updateTraineeTrainersList(USERNAME, request);
 
         assertEquals(expected, actual);
 
+        verify(trainerService).getTrainerByUsername(trainerUsername);
         verify(traineeService).updateTrainersList(USERNAME, trainers);
-        verify(traineeMapper).entityToDto(trainee);
+        verify(traineeRestMapper).toAssignedTrainerResponse(trainer);
+        verify(traineeRestMapper).toAssignedTrainersUpdateResponse(List.of(trainerResponse));
     }
 
     @Test
