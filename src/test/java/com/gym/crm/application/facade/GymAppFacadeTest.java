@@ -371,10 +371,8 @@ class GymAppFacadeTest {
                 .firstName("Trainer")
                 .lastName("Test")
                 .build();
-        TraineeAssignedTrainersUpdateRequest request =
-                new TraineeAssignedTrainersUpdateRequest()
+        TraineeAssignedTrainersUpdateRequest request = new TraineeAssignedTrainersUpdateRequest()
                         .trainerUsernames(List.of(trainerUsername));
-
         Trainer trainer = Trainer.builder()
                 .id(TRAINER_ID)
                 .user(user)
