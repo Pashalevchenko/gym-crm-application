@@ -33,6 +33,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -394,5 +395,28 @@ class TraineeServiceImplTest {
         verify(traineeValidator).validateUsername(username);
         verify(traineeValidator).validateTrainersList(trainers);
         verify(traineeDao).updateTrainersList(username, trainers);
+    }
+
+    @Test
+    @DisplayName("Should activate inactive trainee")
+    void changeActiveStatus_shouldActivateInactiveTrainee() {
+        User user = User.builder()
+                .username(USERNAME)
+                .isActive(false)
+                .build();
+        Trainee trainee = Trainee.builder()
+                .id(TRAINEE_ID)
+                .user(user)
+                .build();
+
+        when(traineeDao.findByUsername(USERNAME)).thenReturn(Optional.of(trainee));
+        when(traineeDao.update(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Trainee actual = traineeService.changeActiveStatus(USERNAME, true);
+
+        assertTrue(actual.getUser().isActive());
+
+        verify(traineeDao).findByUsername(USERNAME);
+        verify(traineeDao).update(argThat(updated -> updated.getUser().isActive() && updated.getUser().getUsername().equals(USERNAME)));
     }
 }
