@@ -33,6 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -272,5 +274,39 @@ class TraineeServiceImplTest {
                 .dateOfBirth(LocalDate.of(2000, 1, 1))
                 .address("Kyiv")
                 .build();
+    }
+
+    @Test
+    @DisplayName("Should change trainee password")
+    void changePassword_shouldEncodePasswordAndUpdateTrainee() {
+        String username = "test.user";
+        String newPassword = "new-password";
+        String encodedPassword = "encoded-new-password";
+        User existingUser = User.builder()
+                .id(1L)
+                .firstName("Test")
+                .lastName("User")
+                .username(username)
+                .password("old-password")
+                .isActive(true)
+                .build();
+        Trainee existingTrainee = Trainee.builder()
+                .id(1L)
+                .user(existingUser)
+                .build();
+
+        when(traineeDao.findByUsername(username)).thenReturn(Optional.of(existingTrainee));
+        when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
+
+        traineeService.changePassword(username, newPassword);
+
+        verify(traineeValidator, times(2)).validateUsername(username);
+        verify(traineeValidator).validateNewPassword(newPassword);
+        verify(traineeDao).findByUsername(username);
+        verify(passwordEncoder).encode(newPassword);
+        verify(traineeDao).update(argThat(updatedTrainee ->
+                        updatedTrainee.getId().equals(existingTrainee.getId()) &&
+                        updatedTrainee.getUser().getUsername().equals(username) &&
+                        updatedTrainee.getUser().getPassword().equals(encodedPassword)));
     }
 }
