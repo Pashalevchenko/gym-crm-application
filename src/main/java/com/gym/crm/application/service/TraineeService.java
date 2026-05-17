@@ -21,10 +21,6 @@ public interface TraineeService {
 
     void changePassword(String username, String newPassword);
 
-    Trainee activateTrainee(String username);
-
-    Trainee deactivateTrainee(String username);
-
     void deleteTrainee(Long id);
 
     void deleteTraineeByUsername(String username);
@@ -34,4 +30,6 @@ public interface TraineeService {
     List<Trainer> getNotAssignedTrainers(String traineeUsername);
 
     Trainee updateTrainersList(String traineeUsername, Set<Trainer> trainers);
+
+    Trainee changeActiveStatus(String username, boolean status);
 }

@@ -112,25 +112,15 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
-    public Trainee activateTrainee(String username) {
+    public Trainee changeActiveStatus(String username, boolean status){
         Trainee trainee = getTraineeByUsername(username);
+        String errorMessage = trainee.getUser().isActive() ? "Trainee is already active" : "Trainee is already inactive";
 
         if (trainee.getUser().isActive()) {
-            throw new IllegalStateException("Trainee is already active");
+            throw new IllegalStateException(errorMessage);
         }
 
-        return updateActiveStatus(trainee, true);
-    }
-
-    @Override
-    public Trainee deactivateTrainee(String username) {
-        Trainee trainee = getTraineeByUsername(username);
-
-        if (!trainee.getUser().isActive()) {
-            throw new IllegalStateException("Trainee is already inactive");
-        }
-
-        return updateActiveStatus(trainee, false);
+        return updateActiveStatus(trainee, status);
     }
 
     @Override

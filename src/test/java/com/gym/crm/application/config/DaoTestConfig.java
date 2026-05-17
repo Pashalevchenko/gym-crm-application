@@ -4,23 +4,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.TestPropertySource;
 import javax.sql.DataSource;
 
 @Import({
         DatabaseConfig.class,
         LiquibaseConfig.class,
         HibernateConfig.class,
-        DbUnitConfig.class
+        DbUnitConfig.class,
+        TestAppConfig.class
 })
 @ComponentScan({"com.gym.crm.application.dao.impl", "com.gym.crm.application.search"})
 @ComponentScan(basePackageClasses = TransactionHandler.class,
                useDefaultFilters = false,
                includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
                classes = TransactionHandler.class))
-@PropertySource("classpath:application-test.properties")
+@TestPropertySource("classpath:application-test.yml")
 public class DaoTestConfig {
 
     @Bean

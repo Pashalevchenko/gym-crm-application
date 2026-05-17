@@ -1,0 +1,9 @@
+db:
+  driver: org.postgresql.Driver
+  url: jdbc:postgresql://localhost:5432/gym-crm-application
+  username: gym
+  password: gym
+
+app:
+  api:
+    base-path: /api/v1

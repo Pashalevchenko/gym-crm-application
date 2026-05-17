@@ -20,7 +20,7 @@ import javax.sql.DataSource;
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LiquibaseConfig.class),
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebConfig.class)
         })
-@PropertySource("classpath:application-test.properties")
+@PropertySource(value = "classpath:application-test.yml", factory = YamlPropertySourceFactory.class)
 @EnableAspectJAutoProxy
 public class TestAppConfig {
 

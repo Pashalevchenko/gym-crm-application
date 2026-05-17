@@ -10,7 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @ComponentScan("com.gym.crm.application")
-@PropertySource("classpath:application.properties")
+@PropertySource(value = "classpath:application.yml", factory = YamlPropertySourceFactory.class)
 @EnableAspectJAutoProxy
 public class GymAppConfig {
 
