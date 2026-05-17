@@ -6,7 +6,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.gym.crm.application.dao.TraineeDao;
 import com.gym.crm.application.entity.Trainee;
+import com.gym.crm.application.entity.Trainer;
+import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.User;
+import com.gym.crm.application.search.filter.TraineeTrainingSearchFilter;
 import com.gym.crm.application.service.impl.TraineeServiceImpl;
 import com.gym.crm.application.validation.TraineeValidator;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +28,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -308,5 +312,87 @@ class TraineeServiceImplTest {
                         updatedTrainee.getId().equals(existingTrainee.getId()) &&
                         updatedTrainee.getUser().getUsername().equals(username) &&
                         updatedTrainee.getUser().getPassword().equals(encodedPassword)));
+    }
+
+    @Test
+    @DisplayName("Should delete trainee by username")
+    void deleteTraineeByUsername_shouldValidateUsernameAndDelete() {
+        String username = "test.user";
+
+        traineeService.deleteTraineeByUsername(username);
+
+        verify(traineeValidator).validateUsername(username);
+        verify(traineeDao).deleteByUsername(username);
+    }
+
+    @Test
+    @DisplayName("Should get trainee trainings by criteria")
+    void getTraineeTrainings_shouldBuildFilterAndReturnTrainings() {
+        String username = "test.user";
+        LocalDate fromDate = LocalDate.of(2026, 1, 1);
+        LocalDate toDate = LocalDate.of(2026, 1, 31);
+        String trainerName = "Ivan";
+        String trainingTypeName = "Yoga";
+        Training training = Training.builder()
+                .id(1L)
+                .trainingName("Morning Yoga")
+                .build();
+
+        when(traineeDao.findTrainingsByCriteria(any(TraineeTrainingSearchFilter.class)))
+                .thenReturn(List.of(training));
+
+        List<Training> actual = traineeService.getTraineeTrainings(username, fromDate, toDate, trainerName, trainingTypeName);
+
+        assertEquals(1, actual.size());
+        assertEquals(training, actual.get(0));
+
+        verify(traineeValidator).validateUsername(username);
+        verify(traineeDao).findTrainingsByCriteria(argThat(filter ->
+                filter.getUsername().equals(username)
+                        && filter.getFromDate().equals(fromDate)
+                        && filter.getToDate().equals(toDate)
+                        && filter.getTrainerName().equals(trainerName)
+                        && filter.getTrainingTypeName().equals(trainingTypeName)));
+    }
+
+    @Test
+    @DisplayName("Should get not assigned trainers")
+    void getNotAssignedTrainers_shouldValidateUsernameAndReturnTrainers() {
+        String username = "test.user";
+        Trainer trainer = Trainer.builder()
+                .id(1L)
+                .build();
+
+        when(traineeDao.findNotAssignedTrainers(username)).thenReturn(List.of(trainer));
+
+        List<Trainer> actual = traineeService.getNotAssignedTrainers(username);
+
+        assertEquals(1, actual.size());
+        assertEquals(trainer, actual.get(0));
+        verify(traineeValidator).validateUsername(username);
+        verify(traineeDao).findNotAssignedTrainers(username);
+    }
+
+    @Test
+    @DisplayName("Should update trainee trainers list")
+    void updateTrainersList_shouldValidateAndUpdateTrainersList() {
+        String username = "test.user";
+        Trainer trainer = Trainer.builder()
+                .id(1L)
+                .build();
+        Set<Trainer> trainers = Set.of(trainer);
+        Trainee updatedTrainee = Trainee.builder()
+                .id(1L)
+                .trainers(trainers)
+                .build();
+
+        when(traineeDao.updateTrainersList(username, trainers)).thenReturn(updatedTrainee);
+
+        Trainee actual = traineeService.updateTrainersList(username, trainers);
+
+        assertEquals(updatedTrainee, actual);
+        verify(traineeValidator).validateUsername(username);
+        verify(traineeValidator).validateTrainersList(trainers);
+        verify(traineeDao).updateTrainersList(username, trainers);
     }
 }
