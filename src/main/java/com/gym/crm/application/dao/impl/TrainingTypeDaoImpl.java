@@ -11,7 +11,7 @@ import java.util.List;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class TrainingTypeImpl implements TrainingTypeDao {
+public class TrainingTypeDaoImpl implements TrainingTypeDao {
 
     private final TransactionHandler transactionHandler;
 
