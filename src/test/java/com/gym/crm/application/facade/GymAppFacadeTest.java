@@ -5,9 +5,9 @@ import com.gym.crm.application.dto.mapper.TrainerMapper;
 import com.gym.crm.application.dto.mapper.TrainingMapper;
 import com.gym.crm.application.dto.mapper.rest.TraineeRestMapper;
 import com.gym.crm.application.dto.mapper.rest.TrainerRestMapper;
+import com.gym.crm.application.dto.mapper.rest.TrainingRestMapper;
 import com.gym.crm.application.dto.request.TraineeUpdateDTO;
 import com.gym.crm.application.dto.request.TrainerUpdateDTO;
-import com.gym.crm.application.dto.request.TrainingRequestDTO;
 import com.gym.crm.application.dto.response.TraineeResponseDTO;
 import com.gym.crm.application.dto.response.TrainingResponseDTO;
 import com.gym.crm.application.entity.Trainee;
@@ -32,9 +32,12 @@ import com.gym.crm.application.openapi.TrainerCreateResponse;
 import com.gym.crm.application.openapi.TrainerGetResponse;
 import com.gym.crm.application.openapi.TrainerUpdateRequest;
 import com.gym.crm.application.openapi.TrainerUpdateResponse;
+import com.gym.crm.application.openapi.TrainingCreateRequest;
+import com.gym.crm.application.openapi.TrainingTypeResponse;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
+import com.gym.crm.application.service.TrainingTypeService;
 import com.gym.crm.application.service.UserService;
 import com.gym.crm.application.service.common.AuthenticationService;
 import org.junit.jupiter.api.AfterEach;
@@ -48,10 +51,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import com.gym.crm.application.context.SecurityContextHolder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -78,6 +80,9 @@ class GymAppFacadeTest {
     private TrainingService trainingService;
 
     @Mock
+    private TrainingTypeService trainingTypeService;
+
+    @Mock
     private TraineeMapper traineeMapper;
 
     @Mock
@@ -85,6 +90,9 @@ class GymAppFacadeTest {
 
     @Mock
     private TrainerRestMapper trainerRestMapper;
+
+    @Mock
+    private TrainingRestMapper trainingRestMapper;
 
     @Mock
     private TrainerMapper trainerMapper;
@@ -559,56 +567,45 @@ class GymAppFacadeTest {
     @Test
     @DisplayName("Should create training")
     void createTraining_shouldResolveTraineeAndTrainerThenMapAndCreateTraining() {
-        TrainingType requestTrainingType = TrainingType.builder()
-                .trainingTypeName("Yoga")
-                .build();
-        TrainingRequestDTO request = TrainingRequestDTO.builder()
-                .traineeId(TRAINEE_ID)
-                .trainerId(TRAINER_ID)
+        TrainingCreateRequest request = new TrainingCreateRequest()
+                .traineeUsername("test.trainee")
+                .trainerUsername("test.trainer")
                 .trainingName("Morning Yoga")
-                .trainingType(requestTrainingType)
                 .trainingDuration(60)
-                .trainingDate(LocalDate.of(2026, 4, 10))
-                .build();
+                .trainingDate(LocalDate.of(2026, 4, 10));
         Trainee trainee = Trainee.builder()
                 .id(TRAINEE_ID)
                 .build();
+        TrainingType specialization = TrainingType.builder()
+                .id(1L)
+                .trainingTypeName("Yoga")
+                .build();
         Trainer trainer = Trainer.builder()
                 .id(TRAINER_ID)
+                .specialization(specialization)
                 .build();
-        Training training = Training.builder()
-                .trainingName("Morning Yoga")
-                .build();
-        Training createdTraining = Training.builder()
-                .id(TRAINING_ID)
-                .trainingName("Morning Yoga")
-                .build();
-        TrainingResponseDTO expected = TrainingResponseDTO.builder()
-                .traineeId(TRAINEE_ID)
-                .trainerId(TRAINER_ID)
+        Training mappedTraining = Training.builder()
                 .trainingName("Morning Yoga")
                 .trainingDuration(60)
                 .trainingDate(LocalDate.of(2026, 4, 10))
                 .build();
 
-        when(traineeService.getTraineeById(TRAINEE_ID)).thenReturn(trainee);
-        when(trainerService.getTrainerById(TRAINER_ID)).thenReturn(trainer);
+        when(traineeService.getTraineeByUsername("test.trainee")).thenReturn(trainee);
+        when(trainerService.getTrainerByUsername("test.trainer")).thenReturn(trainer);
+        when(trainingRestMapper.toEntity(request)).thenReturn(mappedTraining);
 
-        when(trainingMapper.dtoToEntity(eq(request), eq(trainee), eq(trainer), any(TrainingType.class))).thenReturn(training);
+        facade.createTraining(request);
 
-        when(trainingService.createTraining(training)).thenReturn(createdTraining);
-        when(trainingMapper.entityToDto(createdTraining)).thenReturn(expected);
-
-        TrainingResponseDTO actual = facade.createTraining(request);
-
-        assertEquals(expected, actual);
-        assertEquals("Morning Yoga", actual.getTrainingName());
-
-        verify(traineeService).getTraineeById(TRAINEE_ID);
-        verify(trainerService).getTrainerById(TRAINER_ID);
-        verify(trainingMapper).dtoToEntity(eq(request), eq(trainee), eq(trainer), any(TrainingType.class));
-        verify(trainingService).createTraining(training);
-        verify(trainingMapper).entityToDto(createdTraining);
+        verify(traineeService).getTraineeByUsername("test.trainee");
+        verify(trainerService).getTrainerByUsername("test.trainer");
+        verify(trainingRestMapper).toEntity(request);
+        verify(trainingService).createTraining(argThat(training ->
+                        training.getTrainingName().equals("Morning Yoga") &&
+                        training.getTrainingDuration().equals(60) &&
+                        training.getTrainingDate().equals(LocalDate.of(2026, 4, 10)) &&
+                        training.getTrainee().equals(trainee) &&
+                        training.getTrainer().equals(trainer) &&
+                        training.getTrainingType().equals(specialization)));
     }
 
     @Test
@@ -633,25 +630,26 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should get all trainings")
-    void getAllTrainings_shouldReturnMappedDtoList() {
-        Training training = Training.builder()
-                .id(TRAINING_ID)
-                .trainingName("Boxing")
+    @DisplayName("Should get all training types")
+    void getAllTrainings_shouldReturnMappedTrainingTypeList() {
+        TrainingType trainingType = TrainingType.builder()
+                .id(1L)
+                .trainingTypeName("Boxing")
                 .build();
-        TrainingResponseDTO response = TrainingResponseDTO.builder()
-                .trainingName("Boxing")
-                .build();
+        TrainingTypeResponse response = new TrainingTypeResponse()
+                .id(1)
+                .name("Boxing");
 
-        when(trainingService.getAllTrainings()).thenReturn(List.of(training));
-        when(trainingMapper.entityToDto(training)).thenReturn(response);
+        when(trainingTypeService.getAllTrainingsType()).thenReturn(List.of(trainingType));
+        when(trainingRestMapper.toTrainingTypeResponses(List.of(trainingType)))
+                .thenReturn(List.of(response));
 
-        List<TrainingResponseDTO> actual = facade.getAllTrainings();
+        List<TrainingTypeResponse> actual = facade.getAllTrainingsType();
 
         assertEquals(1, actual.size());
-        assertEquals("Boxing", actual.get(0).getTrainingName());
-        verify(trainingService).getAllTrainings();
-        verify(trainingMapper).entityToDto(training);
+        assertEquals("Boxing", actual.get(0).getName());
+        verify(trainingTypeService).getAllTrainingsType();
+        verify(trainingRestMapper).toTrainingTypeResponses(List.of(trainingType));
     }
 
     @Test

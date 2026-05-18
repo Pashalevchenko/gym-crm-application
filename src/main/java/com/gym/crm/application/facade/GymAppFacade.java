@@ -8,15 +8,14 @@ import com.gym.crm.application.dto.mapper.TrainerMapper;
 import com.gym.crm.application.dto.mapper.TrainingMapper;
 import com.gym.crm.application.dto.mapper.rest.TraineeRestMapper;
 import com.gym.crm.application.dto.mapper.rest.TrainerRestMapper;
+import com.gym.crm.application.dto.mapper.rest.TrainingRestMapper;
 import com.gym.crm.application.dto.request.TraineeUpdateDTO;
 import com.gym.crm.application.dto.request.TrainerUpdateDTO;
-import com.gym.crm.application.dto.request.TrainingRequestDTO;
 import com.gym.crm.application.dto.response.TraineeResponseDTO;
 import com.gym.crm.application.dto.response.TrainingResponseDTO;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
-import com.gym.crm.application.entity.TrainingType;
 import com.gym.crm.application.openapi.ActivationStatusRequest;
 import com.gym.crm.application.openapi.AssignedTrainerResponse;
 import com.gym.crm.application.openapi.GetTraineeTrainingResponse;
@@ -34,6 +33,9 @@ import com.gym.crm.application.openapi.TrainerCreateResponse;
 import com.gym.crm.application.openapi.TrainerGetResponse;
 import com.gym.crm.application.openapi.TrainerUpdateRequest;
 import com.gym.crm.application.openapi.TrainerUpdateResponse;
+import com.gym.crm.application.openapi.TrainingCreateRequest;
+import com.gym.crm.application.openapi.TrainingTypeResponse;
+import com.gym.crm.application.service.TrainingTypeService;
 import com.gym.crm.application.service.UserService;
 import com.gym.crm.application.service.common.AuthenticationService;
 import com.gym.crm.application.service.TraineeService;
@@ -54,6 +56,7 @@ public class GymAppFacade {
     private final TraineeService traineeService;
     private final TrainerService trainerService;
     private final TrainingService trainingService;
+    private final TrainingTypeService trainingTypeService;
     private final UserService userService;
     private final TraineeMapper traineeMapper;
     private final TrainerMapper trainerMapper;
@@ -61,6 +64,7 @@ public class GymAppFacade {
     private final AuthenticationService authService;
     private final TraineeRestMapper traineeRestMapper;
     private final TrainerRestMapper trainerRestMapper;
+    private final TrainingRestMapper trainingRestMapper;
 
     @Transactional
     public void login(String username, String password) {
@@ -192,16 +196,17 @@ public class GymAppFacade {
     }
 
     @Authenticated
-    public TrainingResponseDTO createTraining(@Valid TrainingRequestDTO request) {
-        Trainee trainee = traineeService.getTraineeById(request.getTraineeId());
-        Trainer trainer = trainerService.getTrainerById(request.getTrainerId());
+    public void createTraining(@Valid TrainingCreateRequest request) {
+        Trainee trainee = traineeService.getTraineeByUsername(request.getTraineeUsername());
+        Trainer trainer = trainerService.getTrainerByUsername(request.getTrainerUsername());
 
-        TrainingType trainingType = TrainingType.builder()
-                .trainingTypeName(request.getTrainingType().getTrainingTypeName())
+        Training training = trainingRestMapper.toEntity(request).toBuilder()
+                .trainee(trainee)
+                .trainer(trainer)
+                .trainingType(trainer.getSpecialization())
                 .build();
-        Training training = trainingMapper.dtoToEntity(request, trainee, trainer, trainingType);
 
-        return trainingMapper.entityToDto(trainingService.createTraining(training));
+        trainingService.createTraining(training);
     }
 
     @Authenticated
@@ -210,10 +215,8 @@ public class GymAppFacade {
     }
 
     @Authenticated
-    public List<TrainingResponseDTO> getAllTrainings() {
-        return trainingService.getAllTrainings().stream()
-                .map(trainingMapper::entityToDto)
-                .toList();
+    public List<TrainingTypeResponse> getAllTrainingsType() {
+        return trainingRestMapper.toTrainingTypeResponses(trainingTypeService.getAllTrainingsType());
     }
 
     @Authenticated
