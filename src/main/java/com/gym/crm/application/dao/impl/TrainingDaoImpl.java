@@ -29,7 +29,6 @@ public class TrainingDaoImpl implements TrainingDao {
         return created;
     }
 
-
     @Override
     public Optional<Training> findById(Long id) {
         return transactionHandler.performReturningWithinTransaction(session ->

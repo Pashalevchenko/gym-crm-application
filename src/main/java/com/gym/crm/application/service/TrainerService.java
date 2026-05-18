@@ -19,9 +19,7 @@ public interface TrainerService {
 
     void changePassword(String username, String newPassword);
 
-    Trainer activateTrainer(String username);
-
-    Trainer deactivateTrainer(String username);
+    Trainer changeActiveStatus(String username, boolean status);
 
     List<Training> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName);
 }

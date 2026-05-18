@@ -7,12 +7,11 @@ import com.gym.crm.application.dto.mapper.TraineeMapper;
 import com.gym.crm.application.dto.mapper.TrainerMapper;
 import com.gym.crm.application.dto.mapper.TrainingMapper;
 import com.gym.crm.application.dto.mapper.rest.TraineeRestMapper;
+import com.gym.crm.application.dto.mapper.rest.TrainerRestMapper;
 import com.gym.crm.application.dto.request.TraineeUpdateDTO;
-import com.gym.crm.application.dto.request.TrainerRequestDTO;
 import com.gym.crm.application.dto.request.TrainerUpdateDTO;
 import com.gym.crm.application.dto.request.TrainingRequestDTO;
 import com.gym.crm.application.dto.response.TraineeResponseDTO;
-import com.gym.crm.application.dto.response.TrainerResponseDTO;
 import com.gym.crm.application.dto.response.TrainingResponseDTO;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
@@ -21,6 +20,7 @@ import com.gym.crm.application.entity.TrainingType;
 import com.gym.crm.application.openapi.ActivationStatusRequest;
 import com.gym.crm.application.openapi.AssignedTrainerResponse;
 import com.gym.crm.application.openapi.GetTraineeTrainingResponse;
+import com.gym.crm.application.openapi.GetTrainerTrainingResponse;
 import com.gym.crm.application.openapi.LoginChangeRequest;
 import com.gym.crm.application.openapi.TraineeAssignedTrainersUpdateRequest;
 import com.gym.crm.application.openapi.TraineeAssignedTrainersUpdateResponse;
@@ -29,6 +29,11 @@ import com.gym.crm.application.openapi.TraineeCreateResponse;
 import com.gym.crm.application.openapi.TraineeGetResponse;
 import com.gym.crm.application.openapi.TraineeUpdateRequest;
 import com.gym.crm.application.openapi.TraineeUpdateResponse;
+import com.gym.crm.application.openapi.TrainerCreateRequest;
+import com.gym.crm.application.openapi.TrainerCreateResponse;
+import com.gym.crm.application.openapi.TrainerGetResponse;
+import com.gym.crm.application.openapi.TrainerUpdateRequest;
+import com.gym.crm.application.openapi.TrainerUpdateResponse;
 import com.gym.crm.application.service.UserService;
 import com.gym.crm.application.service.common.AuthenticationService;
 import com.gym.crm.application.service.TraineeService;
@@ -55,6 +60,7 @@ public class GymAppFacade {
     private final TrainingMapper trainingMapper;
     private final AuthenticationService authService;
     private final TraineeRestMapper traineeRestMapper;
+    private final TrainerRestMapper trainerRestMapper;
 
     @Transactional
     public void login(String username, String password) {
@@ -149,56 +155,40 @@ public class GymAppFacade {
         return traineeRestMapper.toAssignedTrainersUpdateResponse(trainerResponses);
     }
 
-    public TrainerResponseDTO createTrainer(@Valid TrainerRequestDTO request) {
-        Trainer trainer = trainerMapper.dtoToEntity(request);
+    public TrainerCreateResponse createTrainer(TrainerCreateRequest request) {
+        Trainer trainer = trainerRestMapper.toEntity(request);
+        Trainer created = trainerService.createTrainer(trainer);
 
-        return trainerMapper.entityToDto(trainerService.createTrainer(trainer));
+        return trainerRestMapper.toCreateResponse(created);
     }
 
     @Authenticated
-    public TrainerResponseDTO getTrainerById(Long id) {
-        return trainerMapper.entityToDto(trainerService.getTrainerById(id));
+    @Transactional
+    public TrainerGetResponse getTrainerByUsername(String username) {
+        Trainer trainer = trainerService.getTrainerByUsername(username);
+
+        return trainerRestMapper.toGetResponse(trainer);
     }
 
     @Authenticated
-    public TrainerResponseDTO getTrainerByUsername(String username) {
-        return trainerMapper.entityToDto(trainerService.getTrainerByUsername(username));
+    public TrainerUpdateResponse updateTrainer(TrainerUpdateRequest request, String username) {
+        TrainerUpdateDTO dto = trainerRestMapper.toUpdateDto(username, request);
+        Trainer trainer = trainerMapper.dtoToEntity(dto);
+        Trainer updated = trainerService.updateTrainer(trainer);
+
+        return trainerRestMapper.toUpdateResponse(updated);
     }
 
     @Authenticated
-    public List<TrainerResponseDTO> getAllTrainers() {
-        return trainerService.getAllTrainers().stream()
-                .map(trainerMapper::entityToDto)
-                .toList();
+    public List<GetTrainerTrainingResponse> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
+        List<Training> trainings = trainerService.getTrainerTrainings(username, fromDate, toDate, traineeName);
+
+        return trainerRestMapper.toTrainingResponses(trainings);
     }
 
     @Authenticated
-    public TrainerResponseDTO updateTrainer(@Valid TrainerUpdateDTO request) {
-        Trainer trainer = trainerMapper.dtoToEntity(request);
-
-        return trainerMapper.entityToDto(trainerService.updateTrainer(trainer));
-    }
-
-    @Authenticated
-    public void changeTrainerPassword(String username, String newPassword) {
-        trainerService.changePassword(username, newPassword);
-    }
-
-    @Authenticated
-    public TrainerResponseDTO activateTrainer(String username) {
-        return trainerMapper.entityToDto(trainerService.activateTrainer(username));
-    }
-
-    @Authenticated
-    public TrainerResponseDTO deactivateTrainer(String username) {
-        return trainerMapper.entityToDto(trainerService.deactivateTrainer(username));
-    }
-
-    @Authenticated
-    public List<TrainingResponseDTO> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
-        return trainerService.getTrainerTrainings(username, fromDate, toDate, traineeName).stream()
-                .map(trainingMapper::entityToDto)
-                .toList();
+    public void changeTrainerActiveStatus(String username, ActivationStatusRequest request) {
+        trainerService.changeActiveStatus(username, request.getIsActive());
     }
 
     @Authenticated

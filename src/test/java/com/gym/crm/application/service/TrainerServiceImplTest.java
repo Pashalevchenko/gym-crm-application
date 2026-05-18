@@ -32,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -239,54 +241,68 @@ class TrainerServiceImplTest {
 
     @Test
     @DisplayName("Should activate inactive trainer")
-    void activateTrainer_whenInactive_shouldActivate() {
+    void changeActiveStatus_whenInactiveAndStatusTrue_shouldActivate() {
         Trainer inactiveTrainer = buildTrainer(false);
 
         when(trainerDao.findByUsername(USERNAME)).thenReturn(Optional.of(inactiveTrainer));
         when(trainerDao.update(any(Trainer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Trainer actual = trainerService.activateTrainer(USERNAME);
+        Trainer actual = trainerService.changeActiveStatus(USERNAME, true);
 
         assertTrue(actual.getUser().isActive());
         verify(trainerValidator).validateUsername(USERNAME);
-        verify(trainerDao).update(any(Trainer.class));
-    }
-
-    @Test
-    @DisplayName("Should throw IllegalStateException when trainer is already active")
-    void activateTrainer_whenAlreadyActive_shouldThrowException() {
-        Trainer activeTrainer = buildTrainer(true);
-
-        when(trainerDao.findByUsername(USERNAME)).thenReturn(Optional.of(activeTrainer));
-
-        assertThrows(IllegalStateException.class, () -> trainerService.activateTrainer(USERNAME));
-        verify(trainerValidator).validateUsername(USERNAME);
+        verify(trainerDao).findByUsername(USERNAME);
+        verify(trainerDao).update(argThat(updatedTrainer ->
+                updatedTrainer.getUser().isActive() && updatedTrainer.getUser().getUsername().equals(USERNAME)));
     }
 
     @Test
     @DisplayName("Should deactivate active trainer")
-    void deactivateTrainer_whenActive_shouldDeactivate() {
+    void changeActiveStatus_whenActiveAndStatusFalse_shouldDeactivate() {
         Trainer activeTrainer = buildTrainer(true);
 
         when(trainerDao.findByUsername(USERNAME)).thenReturn(Optional.of(activeTrainer));
         when(trainerDao.update(any(Trainer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Trainer actual = trainerService.deactivateTrainer(USERNAME);
+        Trainer actual = trainerService.changeActiveStatus(USERNAME, false);
 
         assertFalse(actual.getUser().isActive());
         verify(trainerValidator).validateUsername(USERNAME);
-        verify(trainerDao).update(any(Trainer.class));
+        verify(trainerDao).findByUsername(USERNAME);
+        verify(trainerDao).update(argThat(updatedTrainer ->
+                !updatedTrainer.getUser().isActive() && updatedTrainer.getUser().getUsername().equals(USERNAME)));
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalStateException when trainer is already active")
+    void changeActiveStatus_whenAlreadyActive_shouldThrowException() {
+        Trainer activeTrainer = buildTrainer(true);
+
+        when(trainerDao.findByUsername(USERNAME)).thenReturn(Optional.of(activeTrainer));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> trainerService.changeActiveStatus(USERNAME, true));
+
+        assertEquals("Trainer is already active", exception.getMessage());
+        verify(trainerValidator).validateUsername(USERNAME);
+        verify(trainerDao).findByUsername(USERNAME);
+        verify(trainerDao, never()).update(any(Trainer.class));
     }
 
     @Test
     @DisplayName("Should throw IllegalStateException when trainer is already inactive")
-    void deactivateTrainer_whenAlreadyInactive_shouldThrowException() {
+    void changeActiveStatus_whenAlreadyInactive_shouldThrowException() {
         Trainer inactiveTrainer = buildTrainer(false);
 
         when(trainerDao.findByUsername(USERNAME)).thenReturn(Optional.of(inactiveTrainer));
 
-        assertThrows(IllegalStateException.class, () -> trainerService.deactivateTrainer(USERNAME));
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> trainerService.changeActiveStatus(USERNAME, false));
+
+        assertEquals("Trainer is already inactive", exception.getMessage());
         verify(trainerValidator).validateUsername(USERNAME);
+        verify(trainerDao).findByUsername(USERNAME);
+        verify(trainerDao, never()).update(any(Trainer.class));
     }
 
     @Test

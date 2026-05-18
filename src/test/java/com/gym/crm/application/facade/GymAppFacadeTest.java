@@ -4,12 +4,11 @@ import com.gym.crm.application.dto.mapper.TraineeMapper;
 import com.gym.crm.application.dto.mapper.TrainerMapper;
 import com.gym.crm.application.dto.mapper.TrainingMapper;
 import com.gym.crm.application.dto.mapper.rest.TraineeRestMapper;
+import com.gym.crm.application.dto.mapper.rest.TrainerRestMapper;
 import com.gym.crm.application.dto.request.TraineeUpdateDTO;
-import com.gym.crm.application.dto.request.TrainerRequestDTO;
 import com.gym.crm.application.dto.request.TrainerUpdateDTO;
 import com.gym.crm.application.dto.request.TrainingRequestDTO;
 import com.gym.crm.application.dto.response.TraineeResponseDTO;
-import com.gym.crm.application.dto.response.TrainerResponseDTO;
 import com.gym.crm.application.dto.response.TrainingResponseDTO;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
@@ -19,6 +18,7 @@ import com.gym.crm.application.entity.User;
 import com.gym.crm.application.openapi.ActivationStatusRequest;
 import com.gym.crm.application.openapi.AssignedTrainerResponse;
 import com.gym.crm.application.openapi.GetTraineeTrainingResponse;
+import com.gym.crm.application.openapi.GetTrainerTrainingResponse;
 import com.gym.crm.application.openapi.LoginChangeRequest;
 import com.gym.crm.application.openapi.TraineeAssignedTrainersUpdateRequest;
 import com.gym.crm.application.openapi.TraineeAssignedTrainersUpdateResponse;
@@ -27,6 +27,11 @@ import com.gym.crm.application.openapi.TraineeCreateResponse;
 import com.gym.crm.application.openapi.TraineeGetResponse;
 import com.gym.crm.application.openapi.TraineeUpdateRequest;
 import com.gym.crm.application.openapi.TraineeUpdateResponse;
+import com.gym.crm.application.openapi.TrainerCreateRequest;
+import com.gym.crm.application.openapi.TrainerCreateResponse;
+import com.gym.crm.application.openapi.TrainerGetResponse;
+import com.gym.crm.application.openapi.TrainerUpdateRequest;
+import com.gym.crm.application.openapi.TrainerUpdateResponse;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
@@ -77,6 +82,9 @@ class GymAppFacadeTest {
 
     @Mock
     private TraineeRestMapper traineeRestMapper;
+
+    @Mock
+    private TrainerRestMapper trainerRestMapper;
 
     @Mock
     private TrainerMapper trainerMapper;
@@ -406,173 +414,118 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should verify the complete flow of trainer creation from DTO to entity and back")
+    @DisplayName("Should verify the complete flow of trainer creation from REST request to entity and response")
     void createTrainer_Test() {
-        TrainerRequestDTO request = TrainerRequestDTO.builder().build();
-        Trainer trainer = Trainer.builder().build();
-        Trainer createdTrainer = Trainer.builder().id(TRAINER_ID).build();
-
-        TrainingType trainingType = TrainingType.builder()
-                .trainingTypeName("Yoga")
-                .build();
-        TrainerResponseDTO expected = TrainerResponseDTO.builder()
-                .id(TRAINER_ID)
+        TrainerCreateRequest request = new TrainerCreateRequest()
                 .firstName(FIRST_NAME)
                 .lastName(LAST_NAME)
+                .specialization("Yoga");
+        Trainer trainer = Trainer.builder().build();
+        User user = User.builder()
                 .username(USERNAME)
-                .isActive(true)
-                .specialization(trainingType)
+                .password("generated-password")
                 .build();
+        Trainer createdTrainer = Trainer.builder()
+                .id(TRAINER_ID)
+                .user(user)
+                .build();
+        TrainerCreateResponse expected = new TrainerCreateResponse()
+                .username(USERNAME)
+                .password("generated-password");
 
-        when(trainerMapper.dtoToEntity(request)).thenReturn(trainer);
+        when(trainerRestMapper.toEntity(request)).thenReturn(trainer);
         when(trainerService.createTrainer(trainer)).thenReturn(createdTrainer);
-        when(trainerMapper.entityToDto(createdTrainer)).thenReturn(expected);
+        when(trainerRestMapper.toCreateResponse(createdTrainer)).thenReturn(expected);
 
-        TrainerResponseDTO actual = facade.createTrainer(request);
+        TrainerCreateResponse actual = facade.createTrainer(request);
 
         assertEquals(expected, actual);
         assertEquals(USERNAME, actual.getUsername());
-
-        verify(trainerMapper).dtoToEntity(request);
+        verify(trainerRestMapper).toEntity(request);
         verify(trainerService).createTrainer(trainer);
-        verify(trainerMapper).entityToDto(createdTrainer);
+        verify(trainerRestMapper).toCreateResponse(createdTrainer);
     }
 
     @Test
-    @DisplayName("Should successfully update trainer profile by orchestrating DTO mapping and service calls")
-    void updateTrainer_Test() {
-        Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
-
-        TrainerResponseDTO expected = TrainerResponseDTO.builder()
+    @DisplayName("Should get trainer profile by username")
+    void getTrainerProfile_shouldReturnMappedResponse() {
+        Trainer trainer = Trainer.builder()
                 .id(TRAINER_ID)
                 .build();
-
-        when(trainerService.getTrainerById(TRAINER_ID)).thenReturn(trainer);
-        when(trainerMapper.entityToDto(trainer)).thenReturn(expected);
-
-        TrainerResponseDTO actual = facade.getTrainerById(TRAINER_ID);
-
-        assertEquals(expected, actual);
-
-        verify(trainerService).getTrainerById(TRAINER_ID);
-        verify(trainerMapper).entityToDto(trainer);
-    }
-
-    @Test
-    @DisplayName("Should get trainer by username")
-    void getTrainerByUsername_shouldReturnMappedDto() {
-        Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
-
-        TrainerResponseDTO expected = TrainerResponseDTO.builder()
-                .id(TRAINER_ID)
-                .username(USERNAME)
-                .build();
+        TrainerGetResponse expected = new TrainerGetResponse()
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .specialization("Yoga")
+                .isActive(true);
 
         when(trainerService.getTrainerByUsername(USERNAME)).thenReturn(trainer);
-        when(trainerMapper.entityToDto(trainer)).thenReturn(expected);
+        when(trainerRestMapper.toGetResponse(trainer)).thenReturn(expected);
 
-        TrainerResponseDTO actual = facade.getTrainerByUsername(USERNAME);
+        TrainerGetResponse actual = facade.getTrainerByUsername(USERNAME);
 
         assertEquals(expected, actual);
-
         verify(trainerService).getTrainerByUsername(USERNAME);
-        verify(trainerMapper).entityToDto(trainer);
-    }
-
-    @Test
-    @DisplayName("Should retrieve all trainers from service and map the collection to response DTOs")
-    void getAllTrainers_Test() {
-        Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
-
-        TrainerResponseDTO response = TrainerResponseDTO.builder()
-                .id(TRAINER_ID)
-                .username(USERNAME)
-                .build();
-
-        when(trainerService.getAllTrainers()).thenReturn(List.of(trainer));
-        when(trainerMapper.entityToDto(trainer)).thenReturn(response);
-
-        List<TrainerResponseDTO> actual = facade.getAllTrainers();
-
-        assertEquals(1, actual.size());
-        assertEquals(USERNAME, actual.get(0).getUsername());
-
-        verify(trainerService).getAllTrainers();
-        verify(trainerMapper).entityToDto(trainer);
+        verify(trainerRestMapper).toGetResponse(trainer);
     }
 
     @Test
     @DisplayName("Should update trainer")
     void updateTrainer_shouldMapRequestCallServiceAndMapResponse() {
-        TrainerUpdateDTO request = TrainerUpdateDTO.builder().build();
-        Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
-        Trainer updated = Trainer.builder().id(TRAINER_ID).build();
-
-        TrainerResponseDTO expected = TrainerResponseDTO.builder()
-                .id(TRAINER_ID)
+        TrainerUpdateRequest request = new TrainerUpdateRequest()
+                .firstName(FIRST_NAME)
                 .lastName(LAST_NAME)
-                .build();
-
-        when(trainerMapper.dtoToEntity(request)).thenReturn(trainer);
-        when(trainerService.updateTrainer(trainer)).thenReturn(updated);
-        when(trainerMapper.entityToDto(updated)).thenReturn(expected);
-
-        TrainerResponseDTO actual = facade.updateTrainer(request);
-
-        assertEquals(expected, actual);
-
-        verify(trainerMapper).dtoToEntity(request);
-        verify(trainerService).updateTrainer(trainer);
-        verify(trainerMapper).entityToDto(updated);
-    }
-
-    @Test
-    @DisplayName("Should change trainer password")
-    void changeTrainerPassword_shouldDelegateToService() {
-        facade.changeTrainerPassword(USERNAME, NEW_PASSWORD);
-
-        verify(trainerService).changePassword(USERNAME, NEW_PASSWORD);
-    }
-
-    @Test
-    @DisplayName("Should activate trainer")
-    void activateTrainer_shouldActivateAndMapResponse() {
-        Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
-        TrainerResponseDTO expected = TrainerResponseDTO.builder()
-                .id(TRAINER_ID)
+                .isActive(true);
+        TrainerUpdateDTO dto = TrainerUpdateDTO.builder()
+                .username(USERNAME)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
                 .isActive(true)
                 .build();
+        Trainer trainer = Trainer.builder()
+                .id(TRAINER_ID)
+                .build();
+        Trainer updated = Trainer.builder()
+                .id(TRAINER_ID)
+                .build();
+        TrainerUpdateResponse expected = new TrainerUpdateResponse()
+                .username(USERNAME)
+                .firstName(FIRST_NAME)
+                .lastName(LAST_NAME)
+                .specialization("Yoga")
+                .isActive(true);
 
-        when(trainerService.activateTrainer(USERNAME)).thenReturn(trainer);
-        when(trainerMapper.entityToDto(trainer)).thenReturn(expected);
+        when(trainerRestMapper.toUpdateDto(USERNAME, request)).thenReturn(dto);
+        when(trainerMapper.dtoToEntity(dto)).thenReturn(trainer);
+        when(trainerService.updateTrainer(trainer)).thenReturn(updated);
+        when(trainerRestMapper.toUpdateResponse(updated)).thenReturn(expected);
 
-        TrainerResponseDTO actual = facade.activateTrainer(USERNAME);
+        TrainerUpdateResponse actual = facade.updateTrainer(request, USERNAME);
 
         assertEquals(expected, actual);
-
-        verify(trainerService).activateTrainer(USERNAME);
-        verify(trainerMapper).entityToDto(trainer);
+        verify(trainerRestMapper).toUpdateDto(USERNAME, request);
+        verify(trainerMapper).dtoToEntity(dto);
+        verify(trainerService).updateTrainer(trainer);
+        verify(trainerRestMapper).toUpdateResponse(updated);
     }
 
     @Test
-    @DisplayName("Should deactivate trainer")
-    void deactivateTrainer_shouldDeactivateAndMapResponse() {
-        Trainer trainer = Trainer.builder().id(TRAINER_ID).build();
+    @DisplayName("Should change trainer active status to active")
+    void changeTrainerActiveStatus_shouldActivateTrainer() {
+        ActivationStatusRequest request = new ActivationStatusRequest().isActive(true);
 
-        TrainerResponseDTO expected = TrainerResponseDTO.builder()
-                .id(TRAINER_ID)
-                .isActive(false)
-                .build();
+        facade.changeTrainerActiveStatus(USERNAME, request);
 
-        when(trainerService.deactivateTrainer(USERNAME)).thenReturn(trainer);
-        when(trainerMapper.entityToDto(trainer)).thenReturn(expected);
+        verify(trainerService).changeActiveStatus(USERNAME, true);
+    }
 
-        TrainerResponseDTO actual = facade.deactivateTrainer(USERNAME);
+    @Test
+    @DisplayName("Should change trainer active status to inactive")
+    void changeTrainerActiveStatus_shouldDeactivateTrainer() {
+        ActivationStatusRequest request = new ActivationStatusRequest().isActive(false);
 
-        assertEquals(expected, actual);
+        facade.changeTrainerActiveStatus(USERNAME, request);
 
-        verify(trainerService).deactivateTrainer(USERNAME);
-        verify(trainerMapper).entityToDto(trainer);
+        verify(trainerService).changeActiveStatus(USERNAME, false);
     }
 
     @Test
@@ -581,26 +534,26 @@ class GymAppFacadeTest {
         LocalDate fromDate = LocalDate.of(2026, 2, 1);
         LocalDate toDate = LocalDate.of(2026, 2, 28);
         String traineeName = "Ivan Trainee";
-
         Training training = Training.builder()
                 .id(TRAINING_ID)
                 .trainingName("Boxing")
                 .build();
-        TrainingResponseDTO response = TrainingResponseDTO.builder()
+        GetTrainerTrainingResponse response = new GetTrainerTrainingResponse()
                 .trainingName("Boxing")
-                .build();
+                .trainingDate(LocalDate.of(2026, 2, 10))
+                .trainingDuration(60)
+                .trainingType("Boxing")
+                .traineeName("ivan.trainee");
 
         when(trainerService.getTrainerTrainings(USERNAME, fromDate, toDate, traineeName)).thenReturn(List.of(training));
+        when(trainerRestMapper.toTrainingResponses(List.of(training))).thenReturn(List.of(response));
 
-        when(trainingMapper.entityToDto(training)).thenReturn(response);
-
-        List<TrainingResponseDTO> actual = facade.getTrainerTrainings(USERNAME, fromDate, toDate, traineeName);
+        List<GetTrainerTrainingResponse> actual = facade.getTrainerTrainings(USERNAME, fromDate, toDate, traineeName);
 
         assertEquals(1, actual.size());
         assertEquals("Boxing", actual.get(0).getTrainingName());
-
         verify(trainerService).getTrainerTrainings(USERNAME, fromDate, toDate, traineeName);
-        verify(trainingMapper).entityToDto(training);
+        verify(trainerRestMapper).toTrainingResponses(List.of(training));
     }
 
     @Test
