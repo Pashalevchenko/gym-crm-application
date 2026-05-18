@@ -38,7 +38,9 @@ class TrainerControllerTest {
     private static final String FIRST_NAME = "Test";
     private static final String LAST_NAME = "Trainer";
     private static final String SPECIALIZATION = "Yoga";
+
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
     private MockMvc mockMvc;
 
     @Mock
