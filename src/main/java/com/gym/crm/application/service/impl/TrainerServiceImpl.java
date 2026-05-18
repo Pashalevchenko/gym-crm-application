@@ -104,25 +104,16 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
-    public Trainer activateTrainer(String username) {
+    public Trainer changeActiveStatus(String username, boolean status) {
         Trainer trainer = getTrainerByUsername(username);
 
-        if (trainer.getUser().isActive()) {
-            throw new IllegalStateException("Trainer is already active");
+        if (trainer.getUser().isActive() == status) {
+            String errorMessage = status ? "Trainer is already active" : "Trainer is already inactive";
+
+            throw new IllegalStateException(errorMessage);
         }
 
-        return updateActiveStatus(trainer, true);
-    }
-
-    @Override
-    public Trainer deactivateTrainer(String username) {
-        Trainer trainer = getTrainerByUsername(username);
-
-        if (!trainer.getUser().isActive()) {
-            throw new IllegalStateException("Trainer is already inactive");
-        }
-
-        return updateActiveStatus(trainer, false);
+        return updateActiveStatus(trainer, status);
     }
 
     @Override
