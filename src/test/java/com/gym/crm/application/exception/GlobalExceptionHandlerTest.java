@@ -2,13 +2,26 @@ package com.gym.crm.application.exception;
 
 import com.gym.crm.application.openapi.ErrorResponse;
 import jakarta.persistence.PersistenceException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import org.hibernate.HibernateException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class GlobalExceptionHandlerTest {
 
@@ -104,4 +117,53 @@ class GlobalExceptionHandlerTest {
         assertEquals(3200, response.getBody().getErrorCode());
         assertEquals("Internal processing error", response.getBody().getErrorMessage());
     }
+
+    @Test
+    @DisplayName("Should handle method argument not valid exception as validation error")
+    void handleMethodArgumentNotValid_shouldReturnValidationError() {
+        MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
+        BindingResult bindingResult = mock(BindingResult.class);
+        FieldError firstNameError = new FieldError("traineeCreateRequest", "firstName", "must not be empty");
+        FieldError lastNameError = new FieldError("traineeCreateRequest", "lastName", "must not be empty");
+
+        when(exception.getBindingResult()).thenReturn(bindingResult);
+        when(bindingResult.getFieldErrors()).thenReturn(List.of(firstNameError, lastNameError));
+
+        ResponseEntity<ErrorResponse> response = handler.handleMethodArgumentNotValid(exception);
+
+        assertEquals(400, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(2760, response.getBody().getErrorCode());
+        assertEquals("Validation error: firstName must not be empty, lastName must not be empty", response.getBody().getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("Should handle constraint violation exception as validation error")
+    void handleConstraintViolation_shouldReturnValidationError() {
+        ConstraintViolationException exception = mock(ConstraintViolationException.class);
+
+        ConstraintViolation<?> usernameViolation = mock(ConstraintViolation.class);
+        Path usernamePath = mock(Path.class);
+        ConstraintViolation<?> passwordViolation = mock(ConstraintViolation.class);
+        Path passwordPath = mock(Path.class);
+
+        when(usernameViolation.getPropertyPath()).thenReturn(usernamePath);
+        when(usernamePath.toString()).thenReturn("username");
+        when(usernameViolation.getMessage()).thenReturn("must not be blank");
+        when(passwordViolation.getPropertyPath()).thenReturn(passwordPath);
+        when(passwordPath.toString()).thenReturn("password");
+        when(passwordViolation.getMessage()).thenReturn("must not be blank");
+        when(exception.getConstraintViolations()).thenReturn(Set.of(usernameViolation, passwordViolation));
+
+        ResponseEntity<ErrorResponse> response = handler.handleConstraintViolation(exception);
+
+        assertEquals(400, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(2760, response.getBody().getErrorCode());
+        assertThat(response.getBody().getErrorMessage())
+                .startsWith("Validation error:")
+                .contains("username must not be blank")
+                .contains("password must not be blank");
+    }
+
 }
