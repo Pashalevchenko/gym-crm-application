@@ -16,9 +16,15 @@ public class TransactionAspect {
 
     private final SessionFactory sessionFactory;
 
-    @Around("@annotation(com.gym.crm.application.aspect.annotation.Transactional)")
+    @Around("@annotation(com.gym.crm.application.aspect.annotation.Transactional) || " +
+            "@within(com.gym.crm.application.aspect.annotation.Transactional)")
     public Object handleTransaction(ProceedingJoinPoint joinPoint) throws Throwable {
         Session session = sessionFactory.getCurrentSession();
+
+        if (session.getTransaction().isActive()) {
+            return joinPoint.proceed();
+        }
+
         Transaction transaction = null;
 
         try {

@@ -15,32 +15,44 @@ public class TransactionHandler {
     private final SessionFactory sessionFactory;
 
     public void performWithinTransaction(Consumer<Session> action) {
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
+        Session session = sessionFactory.getCurrentSession();
 
-            try {
-                action.accept(session);
-                transaction.commit();
-            } catch (RuntimeException exception) {
-                rollback(transaction);
-                throw exception;
-            }
+        if (session.getTransaction().isActive()) {
+            action.accept(session);
+
+            return;
+        }
+
+        Transaction transaction = null;
+
+        try {
+            transaction = session.beginTransaction();
+            action.accept(session);
+            transaction.commit();
+        } catch (RuntimeException exception) {
+            rollback(transaction);
+            throw exception;
         }
     }
 
     public <T> T performReturningWithinTransaction(Function<Session, T> action) {
-        try (Session session = sessionFactory.openSession()) {
-            Transaction transaction = session.beginTransaction();
+        Session session = sessionFactory.getCurrentSession();
 
-            try {
-                T result = action.apply(session);
-                transaction.commit();
+        if (session.getTransaction().isActive()) {
+            return action.apply(session);
+        }
 
-                return result;
-            } catch (RuntimeException exception) {
-                rollback(transaction);
-                throw exception;
-            }
+        Transaction transaction = null;
+
+        try {
+            transaction = session.beginTransaction();
+            T result = action.apply(session);
+            transaction.commit();
+
+            return result;
+        } catch (RuntimeException exception) {
+            rollback(transaction);
+            throw exception;
         }
     }
 
