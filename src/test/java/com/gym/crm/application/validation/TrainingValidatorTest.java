@@ -65,7 +65,7 @@ public class TrainingValidatorTest {
                 .trainingType(TrainingType.builder().build())
                 .trainingName("Boxing")
                 .trainingDate(LocalDate.now())
-                .trainingDuration(0)
+                .trainingDuration(9999)
                 .build();
 
         assertThrows(IllegalArgumentException.class, () -> validator.validateForCreate(training));

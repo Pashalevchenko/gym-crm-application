@@ -1,6 +1,6 @@
 package com.gym.crm.application.aspect;
 
-import com.gym.crm.application.exception.AuthenticationFailedException;
+import com.gym.crm.application.exception.AuthorizationException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class SecurityAspect {
         String loggedInUser = getLoggedInUsername();
 
         if (loggedInUser == null) {
-            throw new AuthenticationFailedException("User is not authorized for request operation");
+            throw new AuthorizationException("User is not authorized for request operation");
         }
 
         Object[] args = joinPoint.getArgs();
@@ -33,7 +33,7 @@ public class SecurityAspect {
         String targetUsername = extractUsername(args[0]);
 
         if (targetUsername != null && !loggedInUser.equals(targetUsername)) {
-            throw new AuthenticationFailedException("User is not authorized for request operation");
+            throw new AuthorizationException("User is not authorized for request operation");
         }
     }
 

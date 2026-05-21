@@ -11,6 +11,7 @@ import com.gym.crm.application.openapi.TraineeCreateResponse;
 import com.gym.crm.application.openapi.TraineeGetResponse;
 import com.gym.crm.application.openapi.TraineeUpdateRequest;
 import com.gym.crm.application.openapi.TraineeUpdateResponse;
+import com.gym.crm.application.validation.annotation.ValidUsername;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -43,28 +44,28 @@ public class TraineeController {
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<TraineeGetResponse> getTraineeProfile(@PathVariable(name = "username") String username) {
+    public ResponseEntity<TraineeGetResponse> getTraineeProfile(@PathVariable(name = "username") @ValidUsername String username) {
         TraineeGetResponse response = facade.getTraineeByUsername(username);
 
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{username}")
-    public ResponseEntity<TraineeUpdateResponse> updateTraineeProfile(@PathVariable (name = "username") String username, @RequestBody @Valid TraineeUpdateRequest request) {
+    public ResponseEntity<TraineeUpdateResponse> updateTraineeProfile(@PathVariable (name = "username") @ValidUsername String username, @RequestBody @Valid TraineeUpdateRequest request) {
         TraineeUpdateResponse response = facade.updateTrainee(request, username);
 
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{username}")
-    public ResponseEntity<Void> deleteTrainee(@PathVariable(name = "username") String username) {
+    public ResponseEntity<Void> deleteTrainee(@PathVariable(name = "username") @ValidUsername String username) {
         facade.deleteTraineeByUsername(username);
 
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{username}/activation")
-    public ResponseEntity<Void> toggleActive(@PathVariable(name = "username") String username,
+    public ResponseEntity<Void> toggleActive(@PathVariable(name = "username") @ValidUsername String username,
                                              @RequestBody @Valid ActivationStatusRequest request) {
         facade.changeActiveStatus(username, request);
 
@@ -93,7 +94,7 @@ public class TraineeController {
     }
 
     @GetMapping("/{username}/available-trainers")
-    public ResponseEntity<List<AssignedTrainerResponse>> getAvailableTrainers(@PathVariable (name = "username") String username) {
+    public ResponseEntity<List<AssignedTrainerResponse>> getAvailableTrainers(@PathVariable (name = "username") @ValidUsername String username) {
         List<AssignedTrainerResponse> response = facade.getNotAssignedTrainers(username);
 
         return ResponseEntity.ok(response);

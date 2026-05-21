@@ -15,8 +15,8 @@ public class TrainingValidator {
         Validation.requireNotNull(training.getTrainingDate(), "Training date");
         Validation.requireNotNull(training.getTrainingDuration(), "Training duration");
 
-        if (training.getTrainingDuration() <= 0) {
-            throw new IllegalArgumentException("Training duration must be greater than zero");
+        if (training.getTrainingDuration() > 300) {
+            throw new IllegalArgumentException("Training duration must be not greater than 300");
         }
     }
 }

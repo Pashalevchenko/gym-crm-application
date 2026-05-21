@@ -4,6 +4,7 @@ import com.gym.crm.application.facade.GymAppFacade;
 import com.gym.crm.application.openapi.LoginChangeRequest;
 import com.gym.crm.application.openapi.LoginRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +21,7 @@ public class AuthController {
     private final GymAppFacade facade;
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequest request, HttpSession session) {
+    public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest request, HttpSession session) {
         facade.login(request.getUsername(), request.getPassword());
 
         session.setAttribute("username", request.getUsername());
@@ -29,7 +30,7 @@ public class AuthController {
     }
 
     @PutMapping("/password")
-    public ResponseEntity<Void> changePassword(@RequestBody LoginChangeRequest request) {
+    public ResponseEntity<Void> changePassword(@RequestBody @Valid LoginChangeRequest request) {
         facade.changePassword(request);
 
         return ResponseEntity.ok().build();

@@ -13,6 +13,8 @@ import com.gym.crm.application.openapi.TraineeCreateResponse;
 import com.gym.crm.application.openapi.TraineeGetResponse;
 import com.gym.crm.application.openapi.TraineeUpdateRequest;
 import com.gym.crm.application.openapi.TraineeUpdateResponse;
+import org.hibernate.validator.HibernateValidator;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.time.LocalDate;
 import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,7 +54,14 @@ class TraineeControllerTest {
     @BeforeEach
     void setUp() {
         TraineeController controller = new TraineeController(facade);
+
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.setProviderClass(HibernateValidator.class);
+        validator.setMessageInterpolator(new ParameterMessageInterpolator());
+        validator.afterPropertiesSet();
+
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setValidator(validator)
                 .addPlaceholderValue("app.api.base-path", "/api/v1")
                 .build();
     }

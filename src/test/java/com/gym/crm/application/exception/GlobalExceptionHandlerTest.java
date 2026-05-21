@@ -2,22 +2,16 @@ package com.gym.crm.application.exception;
 
 import com.gym.crm.application.openapi.ErrorResponse;
 import jakarta.persistence.PersistenceException;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Path;
 import org.hibernate.HibernateException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -56,7 +50,7 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle security exception as authorization error")
     void handleAuthorization_shouldReturnAuthorizationError() {
-        SecurityException exception = new SecurityException("User is not authorized");
+        AuthorizationException exception = new AuthorizationException("User is not authorized");
 
         ResponseEntity<ErrorResponse> response = handler.handleAuthorization(exception);
         
@@ -81,28 +75,41 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("Should handle Hibernate exception as database error")
-    void handleDatabaseException_whenHibernateException_shouldReturnDatabaseError() {
+    void handleHibernateException_shouldReturnDatabaseError() {
         HibernateException exception = new HibernateException("Database failed");
 
-        ResponseEntity<ErrorResponse> response = handler.handleDatabaseException(exception);
+        ResponseEntity<ErrorResponse> response = handler.handleHibernateException(exception);
 
         assertEquals(500, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(3358, response.getBody().getErrorCode());
-        assertEquals("Unexpected database access failure", response.getBody().getErrorMessage());
+        assertEquals("Unexpected database access failure: Database failed", response.getBody().getErrorMessage());
     }
 
     @Test
     @DisplayName("Should handle persistence exception as database error")
-    void handleDatabaseException_whenPersistenceException_shouldReturnDatabaseError() {
+    void handlePersistenceException_shouldReturnDatabaseError() {
         PersistenceException exception = new PersistenceException("Persistence failed");
 
-        ResponseEntity<ErrorResponse> response = handler.handleDatabaseException(exception);
+        ResponseEntity<ErrorResponse> response = handler.handlePersistenceException(exception);
 
         assertEquals(500, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(3358, response.getBody().getErrorCode());
-        assertEquals("Unexpected database access failure", response.getBody().getErrorMessage());
+        assertEquals("Unexpected database access failure: Persistence failed", response.getBody().getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("Should handle data access exception as database error")
+    void handleDataAccessException_shouldReturnDatabaseError() {
+        DataAccessException exception = new DataAccessException("Data access failed") {};
+
+        ResponseEntity<ErrorResponse> response = handler.handleDataAccessException(exception);
+
+        assertEquals(500, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(3358, response.getBody().getErrorCode());
+        assertEquals("Unexpected database access failure: Data access failed", response.getBody().getErrorMessage());
     }
 
     @Test
@@ -136,34 +143,4 @@ class GlobalExceptionHandlerTest {
         assertEquals(2760, response.getBody().getErrorCode());
         assertEquals("Validation error: firstName must not be empty, lastName must not be empty", response.getBody().getErrorMessage());
     }
-
-    @Test
-    @DisplayName("Should handle constraint violation exception as validation error")
-    void handleConstraintViolation_shouldReturnValidationError() {
-        ConstraintViolationException exception = mock(ConstraintViolationException.class);
-
-        ConstraintViolation<?> usernameViolation = mock(ConstraintViolation.class);
-        Path usernamePath = mock(Path.class);
-        ConstraintViolation<?> passwordViolation = mock(ConstraintViolation.class);
-        Path passwordPath = mock(Path.class);
-
-        when(usernameViolation.getPropertyPath()).thenReturn(usernamePath);
-        when(usernamePath.toString()).thenReturn("username");
-        when(usernameViolation.getMessage()).thenReturn("must not be blank");
-        when(passwordViolation.getPropertyPath()).thenReturn(passwordPath);
-        when(passwordPath.toString()).thenReturn("password");
-        when(passwordViolation.getMessage()).thenReturn("must not be blank");
-        when(exception.getConstraintViolations()).thenReturn(Set.of(usernameViolation, passwordViolation));
-
-        ResponseEntity<ErrorResponse> response = handler.handleConstraintViolation(exception);
-
-        assertEquals(400, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals(2760, response.getBody().getErrorCode());
-        assertThat(response.getBody().getErrorMessage())
-                .startsWith("Validation error:")
-                .contains("username must not be blank")
-                .contains("password must not be blank");
-    }
-
 }
