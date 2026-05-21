@@ -58,6 +58,8 @@ public class SecurityAspect {
         if (request instanceof String s) return s;
         try {
             return (String) request.getClass().getMethod("getUsername").invoke(request);
-        } catch (Exception e) { return null; }
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

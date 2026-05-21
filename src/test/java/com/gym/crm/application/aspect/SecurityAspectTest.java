@@ -63,12 +63,10 @@ class SecurityAspectTest {
     void authorize_whenSessionDoesNotExist_shouldThrowException() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         ServletRequestAttributes attributes = new ServletRequestAttributes(request);
+        RequestContextHolder.setRequestAttributes(attributes);
         JoinPoint joinPoint = mock(JoinPoint.class);
 
         when(request.getSession(false)).thenReturn(null);
-
-        RequestContextHolder.setRequestAttributes(attributes);
-
         when(joinPoint.getArgs()).thenReturn(new Object[]{USERNAME});
 
         assertThrows(AuthorizationException.class, () -> securityAspect.authorize(joinPoint));
@@ -98,12 +96,12 @@ class SecurityAspectTest {
 
     private void mockSession(String username) {
         HttpSession session = mock(HttpSession.class);
-        when(session.getAttribute("username")).thenReturn(username);
-
         HttpServletRequest request = mock(HttpServletRequest.class);
+        ServletRequestAttributes attributes = new ServletRequestAttributes(request);
+
+        when(session.getAttribute("username")).thenReturn(username);
         when(request.getSession(false)).thenReturn(session);
 
-        ServletRequestAttributes attributes = new ServletRequestAttributes(request);
         RequestContextHolder.setRequestAttributes(attributes);
     }
 }

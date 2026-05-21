@@ -10,8 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+
 import java.util.List;
 import java.util.NoSuchElementException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -53,7 +55,7 @@ class GlobalExceptionHandlerTest {
         AuthorizationException exception = new AuthorizationException("User is not authorized");
 
         ResponseEntity<ErrorResponse> response = handler.handleAuthorization(exception);
-        
+
         assertEquals(401, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(2806, response.getBody().getErrorCode());
@@ -102,7 +104,8 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Should handle data access exception as database error")
     void handleDataAccessException_shouldReturnDatabaseError() {
-        DataAccessException exception = new DataAccessException("Data access failed") {};
+        DataAccessException exception = new DataAccessException("Data access failed") {
+        };
 
         ResponseEntity<ErrorResponse> response = handler.handleDataAccessException(exception);
 

@@ -2,7 +2,6 @@ package com.gym.crm.application.exception;
 
 import com.gym.crm.application.openapi.ErrorResponse;
 import jakarta.persistence.PersistenceException;
-import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.HibernateException;
 import org.springframework.dao.DataAccessException;
@@ -11,14 +10,16 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import static com.gym.crm.application.exception.ApiErrorCode.VALIDATION_ERROR;
-import static com.gym.crm.application.exception.ApiErrorCode.NOT_FOUND_ERROR;
+
 import static com.gym.crm.application.exception.ApiErrorCode.AUTHENTICATION_ERROR;
 import static com.gym.crm.application.exception.ApiErrorCode.AUTHORIZATION_ERROR;
 import static com.gym.crm.application.exception.ApiErrorCode.DATABASE_ERROR;
+import static com.gym.crm.application.exception.ApiErrorCode.NOT_FOUND_ERROR;
 import static com.gym.crm.application.exception.ApiErrorCode.SERVICE_ERROR;
+import static com.gym.crm.application.exception.ApiErrorCode.VALIDATION_ERROR;
 
 @Slf4j
 @RestControllerAdvice
@@ -102,11 +103,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationFailedException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationFailedException exception) {
         log.error("Authentication fail: {}", exception.getMessage(), exception);
-        
+
         return buildResponse(AUTHENTICATION_ERROR, AUTHENTICATION_ERROR.getMessage());
     }
 
-    private String buildMessage(ApiErrorCode apiErrorCode, String exceptionMessage){
+    private String buildMessage(ApiErrorCode apiErrorCode, String exceptionMessage) {
         return String.format("%s: %s", apiErrorCode.getMessage(), exceptionMessage);
     }
 
