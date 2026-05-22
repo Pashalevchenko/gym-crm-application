@@ -29,7 +29,7 @@ public class RestLoggingFilter extends OncePerRequestFilter {
             String requestBody = maskSensitiveData(getRequestBody(wrappedRequest));
 
             log.info("REST call completed. transactionId={}, method={}, endpoint={}, query={}, requestBody={}, responseStatus={}",
-                    MDC.get(TransactionIdFilter.TRANSACTION_ID),
+                    MDC.get("transactionId"),
                     request.getMethod(),
                     request.getRequestURI(),
                     request.getQueryString(),

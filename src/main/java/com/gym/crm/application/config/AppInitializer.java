@@ -29,10 +29,9 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 
     @Override
     protected Filter[] getServletFilters() {
-        return new Filter[]
-                {
-                    new TransactionIdFilter(),
-                    new RestLoggingFilter()
-                };
+        return new Filter[]{
+                new TransactionIdFilter(),
+                new RestLoggingFilter()
+        };
     }
 }

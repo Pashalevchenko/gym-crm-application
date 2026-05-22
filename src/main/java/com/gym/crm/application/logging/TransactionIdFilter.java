@@ -14,7 +14,7 @@ import java.util.UUID;
 @Component
 public class TransactionIdFilter extends OncePerRequestFilter {
 
-    public static final String TRANSACTION_ID = "transactionId";
+    private static final String TRANSACTION_ID = "transactionId";
     private static final String TRANSACTION_ID_HEADER = "X-Transaction-Id";
 
     @Override
