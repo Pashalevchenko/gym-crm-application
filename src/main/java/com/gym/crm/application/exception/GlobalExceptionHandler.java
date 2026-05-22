@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
         String message = buildMessage(VALIDATION_ERROR, details);
 
-        log.error("Method argument validation failed: {}", message);
+        log.warn("Method argument validation failed: {}", message);
         return buildResponse(VALIDATION_ERROR, message);
     }
 
@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleHandlerMethodValidation(HandlerMethodValidationException exception) {
         String message = buildMessage(VALIDATION_ERROR, exception.getMessage());
 
-        log.error("Validation failed: {}", message);
+        log.warn("Validation failed: {}", message);
         return buildResponse(VALIDATION_ERROR, message);
     }
 
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException exception) {
         String message = buildMessage(VALIDATION_ERROR, exception.getMessage());
 
-        log.error("Illegal argument exception occurred: {}", message);
+        log.warn("Illegal argument exception occurred: {}", message);
         return buildResponse(VALIDATION_ERROR, message);
     }
 
@@ -58,13 +58,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotFound(NoSuchElementException exception) {
         String message = buildMessage(NOT_FOUND_ERROR, exception.getMessage());
 
-        log.error("Requested resource was not found: {}", exception.getMessage(), exception);
+        log.warn("Requested resource was not found: {}", exception.getMessage(), exception);
         return buildResponse(NOT_FOUND_ERROR, message);
     }
 
     @ExceptionHandler(AuthorizationException.class)
     public ResponseEntity<ErrorResponse> handleAuthorization(AuthorizationException exception) {
-        log.error("Authorization fail: {}", exception.getMessage(), exception);
+        log.warn("Authorization fail: {}", exception.getMessage(), exception);
 
         return buildResponse(AUTHORIZATION_ERROR, AUTHORIZATION_ERROR.getMessage());
     }
@@ -102,7 +102,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationFailedException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationFailedException exception) {
-        log.error("Authentication fail: {}", exception.getMessage(), exception);
+        log.warn("Authentication fail: {}", exception.getMessage(), exception);
 
         return buildResponse(AUTHENTICATION_ERROR, AUTHENTICATION_ERROR.getMessage());
     }
