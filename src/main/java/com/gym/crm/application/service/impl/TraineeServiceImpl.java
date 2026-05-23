@@ -114,9 +114,11 @@ public class TraineeServiceImpl implements TraineeService {
     @Override
     public Trainee changeActiveStatus(String username, boolean status){
         Trainee trainee = getTraineeByUsername(username);
-        String errorMessage = trainee.getUser().isActive() ? "Trainee is already active" : "Trainee is already inactive";
+        boolean currentStatus = trainee.getUser().isActive();
 
-        if (trainee.getUser().isActive()) {
+        if (currentStatus == status) {
+            String errorMessage = status ? "Trainee is already active" : "Trainee is already inactive";
+
             throw new IllegalStateException(errorMessage);
         }
 

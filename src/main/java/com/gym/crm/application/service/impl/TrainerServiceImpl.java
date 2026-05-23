@@ -55,6 +55,7 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
+    @Transactional
     public Trainer getTrainerByUsername(String username) {
         validator.validateUsername(username);
 
@@ -106,8 +107,9 @@ public class TrainerServiceImpl implements TrainerService {
     @Override
     public Trainer changeActiveStatus(String username, boolean status) {
         Trainer trainer = getTrainerByUsername(username);
+        boolean currentStatus = trainer.getUser().isActive();
 
-        if (trainer.getUser().isActive() == status) {
+        if (currentStatus == status) {
             String errorMessage = status ? "Trainer is already active" : "Trainer is already inactive";
 
             throw new IllegalStateException(errorMessage);

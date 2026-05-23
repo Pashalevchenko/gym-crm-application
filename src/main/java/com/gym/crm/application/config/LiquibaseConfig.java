@@ -13,6 +13,7 @@ public class LiquibaseConfig {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog("classpath:db/changelog-master.xml");
+        System.setProperty("liquibase.duplicateFileMode", "WARN");
 
         return liquibase;
     }
