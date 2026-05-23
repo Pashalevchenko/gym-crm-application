@@ -163,7 +163,6 @@ public class GymAppFacade {
 
     public TrainerCreateResponse createTrainer(TrainerCreateRequest request) {
         TrainingType specialization = trainingTypeService.getByName(request.getSpecialization());
-
         Trainer trainer = trainerRestMapper.toEntity(request).toBuilder()
                 .specialization(specialization)
                 .build();
