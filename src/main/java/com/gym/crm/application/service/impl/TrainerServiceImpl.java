@@ -43,10 +43,17 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer trainerToCreate = trainer.toBuilder()
                 .user(userWithCredentials)
                 .build();
+
         Trainer created = trainerDao.create(trainerToCreate);
 
+        User responseUser = created.getUser().toBuilder()
+                .password(password)
+                .build();
+
         log.info("Trainer profile created with username: {}", username);
-        return created;
+        return created.toBuilder()
+                .user(responseUser)
+                .build();
     }
 
     @Override

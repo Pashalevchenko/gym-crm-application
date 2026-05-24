@@ -106,7 +106,7 @@ class TrainerServiceImplTest {
         assertEquals(FIRST_NAME, actual.getUser().getFirstName());
         assertEquals(LAST_NAME, actual.getUser().getLastName());
         assertEquals(USERNAME, actual.getUser().getUsername());
-        assertEquals(encodedPassword, actual.getUser().getPassword());
+        assertEquals(PASSWORD, actual.getUser().getPassword());
         assertTrue(actual.getUser().isActive());
         assertEquals("Yoga", actual.getSpecialization().getTrainingTypeName());
         verify(trainerValidator).validateForCreate(trainer);
