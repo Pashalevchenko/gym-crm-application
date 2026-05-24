@@ -96,22 +96,6 @@ public class TrainerServiceImpl implements TrainerService {
     }
 
     @Override
-    @Transactional
-    public void changePassword(String username, String newPassword) {
-        validator.validateNewPassword(newPassword);
-
-        Trainer existing = getTrainerByUsername(username);
-        User userToUpdate = existing.getUser().toBuilder()
-                .password(newPassword)
-                .build();
-        Trainer trainerToUpdate = existing.toBuilder()
-                .user(userToUpdate)
-                .build();
-
-        trainerDao.update(trainerToUpdate);
-    }
-
-    @Override
     public Trainer changeActiveStatus(String username, boolean status) {
         Trainer trainer = getTrainerByUsername(username);
         boolean currentStatus = trainer.getUser().isActive();

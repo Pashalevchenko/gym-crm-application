@@ -19,8 +19,6 @@ public interface TraineeService {
 
     Trainee updateTrainee(Trainee trainee);
 
-    void changePassword(String username, String newPassword);
-
     void deleteTrainee(Long id);
 
     void deleteTraineeByUsername(String username);

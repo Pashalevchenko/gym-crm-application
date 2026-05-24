@@ -115,11 +115,6 @@ public class GymAppFacade {
     }
 
     @Authenticated
-    public void changeTraineePassword(String username, String newPassword) {
-        traineeService.changePassword(username, newPassword);
-    }
-
-    @Authenticated
     public void changeActiveStatus(String username, ActivationStatusRequest request) {
         traineeService.changeActiveStatus(username, request.getIsActive());
     }
