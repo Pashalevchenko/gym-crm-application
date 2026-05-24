@@ -214,31 +214,7 @@ class TrainerServiceImplTest {
         verify(trainerDao).findByUsername(USERNAME);
         verify(trainerDao).update(any(Trainer.class));
     }
-
-    @Test
-    @DisplayName("Should change trainer password")
-    void changePassword_shouldUpdatePassword() {
-        Trainer existing = buildTrainer(true);
-
-        when(trainerDao.findByUsername(USERNAME)).thenReturn(Optional.of(existing));
-        when(trainerDao.update(any(Trainer.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        trainerService.changePassword(USERNAME, NEW_PASSWORD);
-
-        ArgumentCaptor<Trainer> captor = ArgumentCaptor.forClass(Trainer.class);
-        verify(trainerDao).update(captor.capture());
-
-        Trainer updated = captor.getValue();
-
-        assertEquals(NEW_PASSWORD, updated.getUser().getPassword());
-        assertEquals(USERNAME, updated.getUser().getUsername());
-        assertEquals(FIRST_NAME, updated.getUser().getFirstName());
-        assertEquals(LAST_NAME, updated.getUser().getLastName());
-        assertEquals("Yoga", updated.getSpecialization().getTrainingTypeName());
-        verify(trainerValidator).validateUsername(USERNAME);
-        verify(trainerValidator).validateNewPassword(NEW_PASSWORD);
-    }
-
+    
     @Test
     @DisplayName("Should activate inactive trainer")
     void changeActiveStatus_whenInactiveAndStatusTrue_shouldActivate() {

@@ -280,14 +280,6 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should change trainee password")
-    void changeTraineePassword_shouldDelegateToService() {
-        facade.changeTraineePassword(USERNAME, NEW_PASSWORD);
-
-        verify(traineeService).changePassword(USERNAME, NEW_PASSWORD);
-    }
-
-    @Test
     @DisplayName("Should change trainee active status to active")
     void changeActiveStatus_shouldActivateTrainee() {
         ActivationStatusRequest request = new ActivationStatusRequest()

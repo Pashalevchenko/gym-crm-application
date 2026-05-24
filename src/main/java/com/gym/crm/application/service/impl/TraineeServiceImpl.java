@@ -101,25 +101,6 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
-    @Transactional
-    public void changePassword(String username, String newPassword) {
-        validator.validateUsername(username);
-        validator.validateNewPassword(newPassword);
-
-        Trainee existing = getTraineeByUsername(username);
-        User userToUpdate = existing.getUser().toBuilder()
-                .password(passwordEncoder.encode(newPassword))
-                .build();
-        Trainee traineeToUpdate = existing.toBuilder()
-                .user(userToUpdate)
-                .build();
-
-        traineeDao.update(traineeToUpdate);
-
-        log.info("Password changed for trainee username: {}", username);
-    }
-
-    @Override
     public Trainee changeActiveStatus(String username, boolean status){
         Trainee trainee = getTraineeByUsername(username);
         boolean currentStatus = trainee.getUser().isActive();
