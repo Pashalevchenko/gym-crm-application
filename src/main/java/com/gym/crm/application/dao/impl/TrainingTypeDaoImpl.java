@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Repository
@@ -19,5 +20,16 @@ public class TrainingTypeDaoImpl implements TrainingTypeDao {
     public List<TrainingType> findAll() {
         return transactionHandler.performReturningWithinTransaction(session ->
                 session.createQuery("from TrainingType", TrainingType.class).getResultList());
+    }
+
+    @Override
+    public Optional<TrainingType> findByName(String name) {
+        return transactionHandler.performReturningWithinTransaction(session ->
+                session.createQuery("""
+                    from TrainingType tt
+                    where tt.trainingTypeName = :name
+                    """, TrainingType.class)
+                        .setParameter("name", name)
+                        .uniqueResultOptional());
     }
 }

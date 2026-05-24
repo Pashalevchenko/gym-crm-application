@@ -16,6 +16,7 @@ import com.gym.crm.application.dto.response.TrainingResponseDTO;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
+import com.gym.crm.application.entity.TrainingType;
 import com.gym.crm.application.openapi.ActivationStatusRequest;
 import com.gym.crm.application.openapi.AssignedTrainerResponse;
 import com.gym.crm.application.openapi.GetTraineeTrainingResponse;
@@ -104,6 +105,7 @@ public class GymAppFacade {
     }
 
     @Authenticated
+    @Transactional
     public TraineeUpdateResponse updateTrainee(TraineeUpdateRequest request, String username) {
         TraineeUpdateDTO dto = traineeRestMapper.toUpdateDto(username, request);
         Trainee trainee = traineeMapper.dtoToEntity(dto);
@@ -160,7 +162,10 @@ public class GymAppFacade {
     }
 
     public TrainerCreateResponse createTrainer(TrainerCreateRequest request) {
-        Trainer trainer = trainerRestMapper.toEntity(request);
+        TrainingType specialization = trainingTypeService.getByName(request.getSpecialization());
+        Trainer trainer = trainerRestMapper.toEntity(request).toBuilder()
+                .specialization(specialization)
+                .build();
         Trainer created = trainerService.createTrainer(trainer);
 
         return trainerRestMapper.toCreateResponse(created);

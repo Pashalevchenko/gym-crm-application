@@ -5,4 +5,6 @@ import java.util.List;
 
 public interface TrainingTypeService {
     List<TrainingType> getAllTrainingsType();
+
+    TrainingType getByName(String name);
 }
