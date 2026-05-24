@@ -51,7 +51,15 @@ public class TraineeServiceImpl implements TraineeService {
                 .user(userWithCredentials)
                 .build();
 
-        return traineeDao.create(traineeToCreate);
+        Trainee created = traineeDao.create(traineeToCreate);
+
+        User responseUser = created.getUser().toBuilder()
+                .password(password)
+                .build();
+
+        return created.toBuilder()
+                .user(responseUser)
+                .build();
     }
 
     @Override

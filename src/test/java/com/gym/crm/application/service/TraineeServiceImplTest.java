@@ -113,7 +113,7 @@ class TraineeServiceImplTest {
         assertEquals(LAST_NAME, actual.getUser().getLastName());
         assertEquals(USERNAME, actual.getUser().getUsername());
         assertNotNull(actual.getUser());
-        assertEquals(encodedHash, actual.getUser().getPassword());
+        assertEquals(rawPassword, actual.getUser().getPassword());
         assertTrue(actual.getUser().isActive());
         verify(traineeValidator).validateForCreate(trainee);
         verify(profileService).createUsername(FIRST_NAME, LAST_NAME);
