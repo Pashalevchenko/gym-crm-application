@@ -1,10 +1,10 @@
 package com.gym.crm.application.service.impl;
 
-import com.gym.crm.application.dao.TraineeDao;
-import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.User;
+import com.gym.crm.application.repository.TraineeRepository;
+import com.gym.crm.application.repository.TrainerRepository;
 import com.gym.crm.application.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +23,8 @@ public class ProfileServiceImpl implements ProfileService {
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int PASSWORD_LENGTH = 10;
 
-    private final TraineeDao traineeDao;
-    private final TrainerDao trainerDao;
+    private final TraineeRepository traineeRepository;
+    private final TrainerRepository trainerRepository;
     private final SecureRandom random = new SecureRandom();
 
     @Override
@@ -60,8 +60,8 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     private Set<String> getAllUsernames() {
-        return Stream.concat(traineeDao.findAll().stream().map(Trainee::getUser).filter(Objects::nonNull).map(User::getUsername),
-                        trainerDao.findAll().stream().map(Trainer::getUser).filter(Objects::nonNull).map(User::getUsername))
+        return Stream.concat(traineeRepository.findAll().stream().map(Trainee::getUser).filter(Objects::nonNull).map(User::getUsername),
+                        trainerRepository.findAll().stream().map(Trainer::getUser).filter(Objects::nonNull).map(User::getUsername))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }

@@ -1,8 +1,8 @@
 package com.gym.crm.application.service;
 
-import com.gym.crm.application.dao.UserDao;
 import com.gym.crm.application.entity.User;
 import com.gym.crm.application.openapi.LoginChangeRequest;
+import com.gym.crm.application.repository.UserRepository;
 import com.gym.crm.application.service.common.AuthenticationService;
 import com.gym.crm.application.service.impl.UserServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,7 +16,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
@@ -29,7 +28,7 @@ import static org.mockito.Mockito.when;
 class UserServiceImplTest {
 
     @Mock
-    private UserDao userDao;
+    private UserRepository repository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -55,7 +54,7 @@ class UserServiceImplTest {
                 .isActive(true)
                 .build();
 
-        when(userDao.findByUsername("ricardo.milos")).thenReturn(Optional.of(existingUser));
+        when(repository.findByUsername("ricardo.milos")).thenReturn(Optional.of(existingUser));
         when(authentication.encodePassword("new-password")).thenReturn("encoded-new-password");
 
         userService.changePassword(request);
@@ -63,7 +62,7 @@ class UserServiceImplTest {
         verify(authentication).verifyPassword("old-password", "encoded-old-password",
                 "The provided old password does not match the current password");
         verify(authentication).encodePassword("new-password");
-        verify(userDao).update(argThat(actual ->
+        verify(repository).save(argThat(actual ->
                 actual.getUsername().equals("ricardo.milos") &&
                 actual.getPassword().equals("encoded-new-password") &&
                 actual.getId().equals(1L)));
@@ -76,14 +75,13 @@ class UserServiceImplTest {
                 .oldPassword("old-password")
                 .newPassword("new-password");
 
-        when(userDao.findByUsername("unknown.user"))
+        when(repository.findByUsername("unknown.user"))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.changePassword(request))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("User not found");
 
-        verify(userDao, never()).update(any());
         verifyNoInteractions(passwordEncoder);
     }
 
@@ -102,7 +100,7 @@ class UserServiceImplTest {
                 .isActive(true)
                 .build();
 
-        when(userDao.findByUsername("ricardo.milos"))
+        when(repository.findByUsername("ricardo.milos"))
                 .thenReturn(Optional.of(existingUser));
         doThrow(new IllegalArgumentException("The provided old password does not match the current password"))
                 .when(authentication)
@@ -113,7 +111,6 @@ class UserServiceImplTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("The provided old password does not match the current password");
 
-        verify(userDao, never()).update(any());
         verify(authentication, never()).encodePassword(anyString());
     }
 
@@ -128,7 +125,7 @@ class UserServiceImplTest {
                 .isActive(true)
                 .build();
 
-        when(userDao.findByUsername("ricardo.milos")).thenReturn(Optional.of(user));
+        when(repository.findByUsername("ricardo.milos")).thenReturn(Optional.of(user));
 
         User result = userService.findByUsername("ricardo.milos");
 
@@ -137,7 +134,7 @@ class UserServiceImplTest {
 
     @Test
     void findByUsernameShouldThrowNoSuchElementExceptionWhenUserDoesNotExist() {
-        when(userDao.findByUsername("unknown.user")).thenReturn(Optional.empty());
+        when(repository.findByUsername("unknown.user")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.findByUsername("unknown.user"))
                 .isInstanceOf(NoSuchElementException.class)

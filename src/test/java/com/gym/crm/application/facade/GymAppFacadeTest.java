@@ -280,14 +280,6 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should change trainee password")
-    void changeTraineePassword_shouldDelegateToService() {
-        facade.changeTraineePassword(USERNAME, NEW_PASSWORD);
-
-        verify(traineeService).changePassword(USERNAME, NEW_PASSWORD);
-    }
-
-    @Test
     @DisplayName("Should change trainee active status to active")
     void changeActiveStatus_shouldActivateTrainee() {
         ActivationStatusRequest request = new ActivationStatusRequest()
@@ -307,14 +299,6 @@ class GymAppFacadeTest {
         facade.changeActiveStatus(USERNAME, request);
 
         verify(traineeService).changeActiveStatus(USERNAME, false);
-    }
-
-    @Test
-    @DisplayName("Should successfully delegate trainee deletion to the service layer using the provided ID")
-    void deleteTrainee_Test() {
-        facade.deleteTrainee(TRAINEE_ID);
-
-        verify(traineeService).deleteTrainee(TRAINEE_ID);
     }
 
     @Test

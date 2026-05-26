@@ -4,11 +4,11 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.gym.crm.application.dao.TrainingDao;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.repository.TrainingRepository;
 import com.gym.crm.application.service.impl.TrainingServiceImpl;
 import com.gym.crm.application.validation.TrainingValidator;
 import org.junit.jupiter.api.AfterEach;
@@ -20,10 +20,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,7 +40,7 @@ class TrainingServiceImplTest {
     private final Long TRAINING_ID = 1L;
 
     @Mock
-    private TrainingDao trainingDao;
+    private TrainingRepository repository;
 
     @Mock
     private TrainingValidator trainingValidator;
@@ -76,7 +78,7 @@ class TrainingServiceImplTest {
                 .trainingDuration(training.getTrainingDuration())
                 .build();
 
-        when(trainingDao.create(training)).thenReturn(createdTraining);
+        when(repository.save(training)).thenReturn(createdTraining);
 
         Training actual = trainingService.createTraining(training);
 
@@ -84,7 +86,7 @@ class TrainingServiceImplTest {
         assertEquals(TRAINING_ID, actual.getId());
         assertEquals("Morning Yoga", actual.getTrainingName());
         verify(trainingValidator).validateForCreate(training);
-        verify(trainingDao).create(training);
+        verify(repository).save(training);
 
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
@@ -96,24 +98,24 @@ class TrainingServiceImplTest {
     void getTrainingById_whenFound_shouldReturnTraining() {
         Training training = buildTrainingWithId();
 
-        when(trainingDao.findById(TRAINING_ID)).thenReturn(Optional.of(training));
+        when(repository.findById(TRAINING_ID)).thenReturn(Optional.of(training));
 
         Training actual = trainingService.getTrainingById(TRAINING_ID);
 
         assertSame(training, actual);
         assertEquals(TRAINING_ID, actual.getId());
         assertEquals("Morning Yoga", actual.getTrainingName());
-        verify(trainingDao).findById(TRAINING_ID);
+        verify(repository).findById(TRAINING_ID);
     }
 
     @Test
     @DisplayName("Should throw NoSuchElementException when training ID does not exist")
     void getTrainingById_whenNotFound_shouldThrowException() {
-        when(trainingDao.findById(TRAINING_ID)).thenReturn(Optional.empty());
+        when(repository.findById(TRAINING_ID)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> trainingService.getTrainingById(TRAINING_ID));
 
-        verify(trainingDao).findById(TRAINING_ID);
+        verify(repository).findById(TRAINING_ID);
     }
 
     @Test
@@ -134,14 +136,14 @@ class TrainingServiceImplTest {
                 .trainingType(trainingType)
                 .build();
 
-        when(trainingDao.findAll()).thenReturn(List.of(firstTraining, secondTraining));
+        when(repository.findAll()).thenReturn(List.of(firstTraining, secondTraining));
 
         List<Training> actual = trainingService.getAllTrainings();
 
         assertEquals(2, actual.size());
         assertEquals("Morning Yoga", actual.get(0).getTrainingName());
         assertEquals("Evening Boxing", actual.get(1).getTrainingName());
-        verify(trainingDao).findAll();
+        verify(repository).findAll();
     }
 
     private Training buildTrainingWithId() {

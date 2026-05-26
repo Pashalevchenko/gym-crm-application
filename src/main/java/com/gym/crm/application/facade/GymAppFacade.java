@@ -1,7 +1,6 @@
 package com.gym.crm.application.facade;
 
 import com.gym.crm.application.aspect.annotation.Authenticated;
-import com.gym.crm.application.aspect.annotation.Transactional;
 import com.gym.crm.application.context.SecurityContextHolder;
 import com.gym.crm.application.dto.mapper.TraineeMapper;
 import com.gym.crm.application.dto.mapper.TrainerMapper;
@@ -45,6 +44,8 @@ import com.gym.crm.application.service.TrainingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -105,7 +106,6 @@ public class GymAppFacade {
     }
 
     @Authenticated
-    @Transactional
     public TraineeUpdateResponse updateTrainee(TraineeUpdateRequest request, String username) {
         TraineeUpdateDTO dto = traineeRestMapper.toUpdateDto(username, request);
         Trainee trainee = traineeMapper.dtoToEntity(dto);
@@ -115,18 +115,8 @@ public class GymAppFacade {
     }
 
     @Authenticated
-    public void changeTraineePassword(String username, String newPassword) {
-        traineeService.changePassword(username, newPassword);
-    }
-
-    @Authenticated
     public void changeActiveStatus(String username, ActivationStatusRequest request) {
         traineeService.changeActiveStatus(username, request.getIsActive());
-    }
-
-    @Authenticated
-    public void deleteTrainee(Long id) {
-        traineeService.deleteTrainee(id);
     }
 
     @Authenticated
@@ -149,6 +139,7 @@ public class GymAppFacade {
     }
 
     @Authenticated
+    @Transactional
     public TraineeAssignedTrainersUpdateResponse updateTraineeTrainersList(String traineeUsername, TraineeAssignedTrainersUpdateRequest request) {
         Set<Trainer> trainers = request.getTrainerUsernames().stream()
                 .map(trainerService::getTrainerByUsername)

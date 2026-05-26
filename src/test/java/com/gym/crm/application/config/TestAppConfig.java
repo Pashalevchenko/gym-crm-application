@@ -16,30 +16,12 @@ import javax.sql.DataSource;
 @Configuration
 @ComponentScan(basePackages = "com.gym.crm.application",
                excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = GymAppConfig.class),
-                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LiquibaseConfig.class),
+
                 @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebConfig.class)
         })
 @PropertySource(value = "classpath:application-test.yml", factory = YamlPropertySourceFactory.class)
 @EnableAspectJAutoProxy
 public class TestAppConfig {
-
-    @Value("${liquibase.changelog.master}")
-    private String changeLog;
-
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-        return new PropertySourcesPlaceholderConfigurer();
-    }
-
-    @Bean
-    public SpringLiquibase liquibase(DataSource dataSource) {
-        SpringLiquibase liquibase = new SpringLiquibase();
-        liquibase.setDataSource(dataSource);
-        liquibase.setChangeLog(changeLog);
-
-        return liquibase;
-    }
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {

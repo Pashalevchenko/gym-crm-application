@@ -1,32 +1,25 @@
-package com.gym.crm.application.dao;
+package com.gym.crm.application.repository;
 
 import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.TrainingType;
 import com.gym.crm.application.entity.User;
-import org.hibernate.Session;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
 import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import com.gym.crm.application.entity.Training;
-import com.gym.crm.application.search.filter.TrainerTrainingSearchFilter;
-import java.time.LocalDate;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import java.util.stream.Stream;
 
 @DisplayName("Trainer DAO DBUnit integration tests")
-class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
+class TrainerRepositoryTest extends AbstractRepositoryTest<TrainerRepository> {
 
     private static final Long TRAINER_ID = 10L;
     private static final Long SECOND_TRAINER_ID = 12L;
-    private static final Long THIRD_TRAINER_ID = 15L;
     private static final Long TRAINER_USER_ID = 10L;
     private static final Long SECOND_TRAINER_USER_ID = 12L;
     private static final Long SPECIALIZATION_ID = 10L;
@@ -41,14 +34,14 @@ class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
         @DisplayName("Should save trainer")
         void create_success() {
             Trainer trainer = buildTrainer("New", "Trainer", "new.trainer", SPECIALIZATION_ID);
-            Trainer actual = dao.create(trainer);
+            Trainer actual = repository.save(trainer);
 
             assertThat(actual).isNotNull();
             assertThat(actual.getId()).isNotNull();
             assertThat(actual.getUser()).isNotNull();
             assertThat(actual.getUser().getId()).isNotNull();
 
-            Optional<Trainer> found = dao.findByUsername("new.trainer");
+            Optional<Trainer> found = repository.findByUserUsername("new.trainer");
 
             assertThat(found).isPresent();
 
@@ -65,7 +58,7 @@ class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
         @Test
         @DisplayName("Should throw exception when trainer is null")
         void create_nullTrainer() {
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> dao.create(null));
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> repository.save(null));
 
             assertThat(exception).isNotNull();
         }
@@ -79,7 +72,7 @@ class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
         @Test
         @DisplayName("Should update trainer when trainer exists")
         void update_success() {
-            Trainer existing = dao.findById(TRAINER_ID).orElseThrow();
+            Trainer existing = repository.findById(TRAINER_ID).orElseThrow();
 
             User user = User.builder()
                     .id(existing.getUser().getId())
@@ -99,8 +92,8 @@ class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
                     .specialization(specialization)
                     .build();
 
-            Trainer updated = dao.update(trainerToUpdate);
-            Optional<Trainer> found = dao.findById(updated.getId());
+            Trainer updated = repository.save(trainerToUpdate);
+            Optional<Trainer> found = repository.findById(updated.getId());
 
             assertThat(found).isPresent();
 
@@ -119,7 +112,7 @@ class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
         @Test
         @DisplayName("Should throw exception when trainer is null")
         void update_nullTrainer() {
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> dao.update(null));
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> repository.save(null));
 
             assertThat(exception).isNotNull();
         }
@@ -133,7 +126,7 @@ class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
         @Test
         @DisplayName("Should return trainer when trainer with requested id exists")
         void findById_found() {
-            Optional<Trainer> found = dao.findById(TRAINER_ID);
+            Optional<Trainer> found = repository.findById(TRAINER_ID);
 
             assertThat(found).isPresent();
 
@@ -153,7 +146,7 @@ class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
         @Test
         @DisplayName("Should return empty optional when trainer with requested id does not exist")
         void findById_notFound() {
-            Optional<Trainer> actual = dao.findById(999L);
+            Optional<Trainer> actual = repository.findById(999L);
 
             assertThat(actual).isEmpty();
         }
@@ -167,7 +160,7 @@ class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
         @Test
         @DisplayName("Should return trainer when trainer with requested username exists")
         void findByUsername_found() {
-            Optional<Trainer> found = dao.findByUsername("fedir.foamroller");
+            Optional<Trainer> found = repository.findByUserUsername("fedir.foamroller");
 
             assertThat(found).isPresent();
 
@@ -187,7 +180,7 @@ class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
         @Test
         @DisplayName("Should return empty optional when trainer with requested username does not exist")
         void findByUsername_notFound() {
-            Optional<Trainer> found = dao.findByUsername("ghost.trainer");
+            Optional<Trainer> found = repository.findByUserUsername("ghost.trainer");
 
             assertThat(found).isEmpty();
         }
@@ -201,41 +194,12 @@ class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
         @Test
         @DisplayName("Should return all trainers")
         void findAll_success() {
-            List<Trainer> actual = dao.findAll();
+            List<Trainer> actual = repository.findAll();
 
             assertThat(actual).hasSize(3);
             assertThat(actual)
                     .extracting(trainer -> trainer.getUser().getUsername())
                     .containsExactlyInAnyOrder("pavlo.plank", "fedir.foamroller", "ira.iron");
-        }
-
-        @Test
-        @DisplayName("Should return empty list when there are no trainers")
-        void findAll_empty() {
-            deleteTrainer(THIRD_TRAINER_ID);
-            deleteTrainer(SECOND_TRAINER_ID);
-            deleteTrainer(TRAINER_ID);
-
-            List<Trainer> actual = dao.findAll();
-
-            assertThat(actual).isEmpty();
-        }
-    }
-
-    @Nested
-    @DatabaseSetup(value = "/dataset/trainer-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
-    @DisplayName("findTrainingsByCriteria")
-    class FindTrainingsByCriteriaTests {
-
-        @ParameterizedTest(name = "{index} => {0}")
-        @MethodSource("com.gym.crm.application.dao.TrainerDaoImplTest#findTrainingsByCriteriaCases")
-        @DisplayName("Should filter trainer trainings by criteria")
-        void findTrainingsByCriteria_shouldFilterTrainings(String testCase, TrainerTrainingSearchFilter filter, List<String> expectedTrainingNames) {
-            List<Training> actual = dao.findTrainingsByCriteria(filter);
-
-            assertThat(actual)
-                    .extracting(Training::getTrainingName)
-                    .containsExactlyInAnyOrderElementsOf(expectedTrainingNames);
         }
     }
 
@@ -255,65 +219,5 @@ class TrainerDaoImplTest extends AbstractDaoTest<TrainerDao> {
                 .user(user)
                 .specialization(specialization)
                 .build();
-    }
-
-    private void deleteTrainer(Long id) {
-        try (Session session = sessionFactory.openSession()) {
-            var transaction = session.beginTransaction();
-            Trainer trainer = session.get(Trainer.class, id);
-
-            if (trainer == null) {
-                transaction.commit();
-                return;
-            }
-
-            Long userId = trainer.getUser().getId();
-
-            session.createMutationQuery("""
-                            delete from Training t
-                            where t.trainer.id = :trainerId
-                            """)
-                    .setParameter("trainerId", id)
-                    .executeUpdate();
-            session.createMutationQuery("""
-                            delete from Training t
-                            where t.trainee.user.id = :userId
-                            """)
-                    .setParameter("userId", userId)
-                    .executeUpdate();
-            session.createMutationQuery("""
-                            delete from Trainee t
-                            where t.user.id = :userId
-                            """)
-                    .setParameter("userId", userId)
-                    .executeUpdate();
-
-            session.remove(trainer);
-            transaction.commit();
-        }
-    }
-
-    private static Stream<Arguments> findTrainingsByCriteriaCases() {
-        return Stream.of(Arguments.of("by username", TrainerTrainingSearchFilter.builder()
-                                        .username("pavlo.plank")
-                                        .build(), List.of("Morning Penguin Stretch")),
-                         Arguments.of("by username and date range", TrainerTrainingSearchFilter.builder()
-                                        .username("pavlo.plank")
-                                        .fromDate(LocalDate.of(2026, 4, 1))
-                                        .toDate(LocalDate.of(2026, 4, 30))
-                                        .build(), List.of("Morning Penguin Stretch")),
-                         Arguments.of("by username and trainee name", TrainerTrainingSearchFilter.builder()
-                                        .username("pavlo.plank")
-                                        .traineeName("Fedir Foamroller")
-                                        .build(), List.of("Morning Penguin Stretch")),
-                         Arguments.of("empty when date range does not match", TrainerTrainingSearchFilter.builder()
-                                        .username("pavlo.plank")
-                                        .fromDate(LocalDate.of(2026, 5, 1))
-                                        .toDate(LocalDate.of(2026, 5, 31))
-                                        .build(), List.of()),
-                         Arguments.of("empty when trainee name does not match", TrainerTrainingSearchFilter.builder()
-                                        .username("pavlo.plank")
-                                        .traineeName("Marta Muscle")
-                                        .build(), List.of()));
     }
 }

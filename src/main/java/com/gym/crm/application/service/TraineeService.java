@@ -19,10 +19,6 @@ public interface TraineeService {
 
     Trainee updateTrainee(Trainee trainee);
 
-    void changePassword(String username, String newPassword);
-
-    void deleteTrainee(Long id);
-
     void deleteTraineeByUsername(String username);
 
     List<Training> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingTypeName);

@@ -1,6 +1,8 @@
 package com.gym.crm.application.service;
 
 import com.gym.crm.application.entity.User;
+import com.gym.crm.application.exception.AuthenticationFailedException;
+import com.gym.crm.application.repository.UserRepository;
 import com.gym.crm.application.service.common.AuthenticationService;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -17,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,13 +30,7 @@ class AuthenticationServiceTest {
     private final String PASSWORD = "correct_password";
 
     @Mock
-    private SessionFactory sessionFactory;
-
-    @Mock
-    private Session session;
-
-    @Mock
-    private Query<User> query;
+    private UserRepository repository;
 
     @Mock
     PasswordEncoder passwordEncoder;
@@ -53,30 +49,27 @@ class AuthenticationServiceTest {
                 .password(encodedPasswordInDb)
                 .build();
 
-        when(sessionFactory.getCurrentSession()).thenReturn(session);
-        when(session.createQuery(anyString(), eq(User.class))).thenReturn(query);
-        when(query.setParameter("username", USERNAME)).thenReturn(query);
-        when(query.uniqueResultOptional()).thenReturn(Optional.of(user));
+        when(repository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(rawPasswordInput, encodedPasswordInDb)).thenReturn(true);
 
         assertDoesNotThrow(() -> authService.authenticate(USERNAME, rawPasswordInput));
 
-        verify(session).createQuery("FROM User WHERE username = :username", User.class);
-        verify(query).setParameter("username", USERNAME);
+        verify(repository).findByUsername(USERNAME);
         verify(passwordEncoder).matches(rawPasswordInput, encodedPasswordInDb);
     }
 
     @Test
     @DisplayName("Should throw RuntimeException when user is not found in database")
     void authenticate_userNotFound_throwsException() {
-        when(sessionFactory.getCurrentSession()).thenReturn(session);
-        when(session.createQuery(anyString(), eq(User.class))).thenReturn(query);
-        when(query.setParameter("username", USERNAME)).thenReturn(query);
-        when(query.uniqueResultOptional()).thenReturn(Optional.empty());
+        when(repository.findByUsername(USERNAME)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.authenticate(USERNAME, PASSWORD));
+        AuthenticationFailedException exception = assertThrows(AuthenticationFailedException.class,
+                () -> authService.authenticate(USERNAME, PASSWORD));
 
-        assertEquals("User not found", exception.getMessage());
+        assertEquals("Invalid username or password", exception.getMessage());
+
+        verify(repository).findByUsername(USERNAME);
+        verify(passwordEncoder, never()).matches(anyString(), anyString());
     }
 
     @Test
@@ -90,10 +83,8 @@ class AuthenticationServiceTest {
                 .password(encodedPasswordInDb)
                 .build();
 
-        when(sessionFactory.getCurrentSession()).thenReturn(session);
-        when(session.createQuery(anyString(), eq(User.class))).thenReturn(query);
-        when(query.setParameter("username", USERNAME)).thenReturn(query);
-        when(query.uniqueResultOptional()).thenReturn(Optional.of(user));
+        when(repository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(rawPasswordInput, encodedPasswordInDb)).thenReturn(false);
 
         when(passwordEncoder.matches(rawPasswordInput, encodedPasswordInDb)).thenReturn(false);
 

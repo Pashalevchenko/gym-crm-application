@@ -4,11 +4,11 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.gym.crm.application.dao.TraineeDao;
-import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.User;
+import com.gym.crm.application.repository.TraineeRepository;
+import com.gym.crm.application.repository.TrainerRepository;
 import com.gym.crm.application.service.impl.ProfileServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,10 +39,10 @@ class ProfileServiceImplTest {
     private final String USERNAME_PLUS_ONE = USERNAME + "1";
 
     @Mock
-    private TraineeDao traineeDao;
+    private TraineeRepository traineeRepository;
 
     @Mock
-    private TrainerDao trainerDao;
+    private TrainerRepository trainerRepository;
 
     @InjectMocks
     private ProfileServiceImpl profileService;
@@ -52,8 +52,8 @@ class ProfileServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(traineeDao.findAll()).thenReturn(Collections.emptyList());
-        lenient().when(trainerDao.findAll()).thenReturn(Collections.emptyList());
+        lenient().when(traineeRepository.findAll()).thenReturn(Collections.emptyList());
+        lenient().when(trainerRepository.findAll()).thenReturn(Collections.emptyList());
 
         logger = (Logger) LoggerFactory.getLogger(ProfileServiceImpl.class);
         listAppender = new ListAppender<>();
@@ -84,7 +84,7 @@ class ProfileServiceImplTest {
                 .user(user)
                 .build();
 
-        when(traineeDao.findAll()).thenReturn(List.of(existingTrainee));
+        when(traineeRepository.findAll()).thenReturn(List.of(existingTrainee));
 
         String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
 
@@ -107,8 +107,8 @@ class ProfileServiceImplTest {
                 .user(UserPlusOne)
                 .build();
 
-        when(traineeDao.findAll()).thenReturn(List.of(existingTrainee));
-        when(trainerDao.findAll()).thenReturn(List.of(existingTrainer));
+        when(traineeRepository.findAll()).thenReturn(List.of(existingTrainee));
+        when(trainerRepository.findAll()).thenReturn(List.of(existingTrainer));
 
         String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
 
@@ -142,7 +142,7 @@ class ProfileServiceImplTest {
                 .user(user)
                 .build();
 
-        when(traineeDao.findAll()).thenReturn(List.of(existingTrainee));
+        when(traineeRepository.findAll()).thenReturn(List.of(existingTrainee));
 
         profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
 
@@ -158,7 +158,7 @@ class ProfileServiceImplTest {
                 .user(null)
                 .build();
 
-        when(traineeDao.findAll()).thenReturn(List.of(traineeWithoutUser));
+        when(traineeRepository.findAll()).thenReturn(List.of(traineeWithoutUser));
 
         String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
 
@@ -175,7 +175,7 @@ class ProfileServiceImplTest {
                 .user(user)
                 .build();
 
-        when(traineeDao.findAll()).thenReturn(List.of(traineeWithNullUsername));
+        when(traineeRepository.findAll()).thenReturn(List.of(traineeWithNullUsername));
 
         String actual = profileService.createUsername(USER_FIRST_NAME, USER_LAST_NAME);
 
