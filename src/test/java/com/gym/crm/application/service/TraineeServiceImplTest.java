@@ -286,7 +286,7 @@ class TraineeServiceImplTest {
         User trainerUser = User.builder()
                 .username(trainerUsername)
                 .build();
-        User TraineeUser = User.builder()
+        User traineeUser = User.builder()
                 .username(trainerUsername)
                 .build();
         Trainer inputTrainer = Trainer.builder()
@@ -295,7 +295,7 @@ class TraineeServiceImplTest {
                 .build();
         Trainer managedTrainer = Trainer.builder()
                 .id(1L)
-                .user(TraineeUser)
+                .user(traineeUser)
                 .build();
         Set<Trainer> inputTrainers = Set.of(inputTrainer);
         Set<Trainer> managedTrainers = Set.of(managedTrainer);

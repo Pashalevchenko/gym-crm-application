@@ -8,6 +8,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 public final class TrainingSpecifications {
 
+    private static final String TRAINING_DATA = "trainingDate";
+
     private TrainingSpecifications() {
     }
 
@@ -20,11 +22,11 @@ public final class TrainingSpecifications {
             }
 
             if (filter.getFromDate() != null) {
-                predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.get("trainingDate"), filter.getFromDate()));
+                predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.get(TRAINING_DATA), filter.getFromDate()));
             }
 
             if (filter.getToDate() != null) {
-                predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get("trainingDate"), filter.getToDate()));
+                predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get(TRAINING_DATA), filter.getToDate()));
             }
 
             if (filter.getTraineeName() != null && !filter.getTraineeName().isBlank()) {
@@ -49,11 +51,11 @@ public final class TrainingSpecifications {
             }
 
             if (filter.getFromDate() != null) {
-                predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.get("trainingDate"), filter.getFromDate()));
+                predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.get(TRAINING_DATA), filter.getFromDate()));
             }
 
             if (filter.getToDate() != null) {
-                predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get("trainingDate"), filter.getToDate()));
+                predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get(TRAINING_DATA), filter.getToDate()));
             }
 
             if (filter.getTrainerName() != null && !filter.getTrainerName().isBlank()) {
