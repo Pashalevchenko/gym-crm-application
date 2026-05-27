@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -34,6 +36,7 @@ public class TraineeServiceImpl implements TraineeService {
     private final TraineeValidator validator;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     @Override
     public Trainee createTrainee(Trainee trainee) {
         validator.validateForCreate(trainee);
@@ -66,12 +69,14 @@ public class TraineeServiceImpl implements TraineeService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Trainee getTraineeById(Long id) {
         return traineeRepository.findById(id).orElseThrow(() ->
                 new NoSuchElementException(String.format("Trainee with ID %d not found", id)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Trainee getTraineeByUsername(String username) {
         validator.validateUsername(username);
@@ -80,11 +85,13 @@ public class TraineeServiceImpl implements TraineeService {
                 .orElseThrow(() -> new NoSuchElementException(String.format("Trainee with username %s not found", username)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Trainee> getAllTrainees() {
         return traineeRepository.findAll();
     }
 
+    @Transactional
     @Override
     public Trainee updateTrainee(Trainee trainee) {
         validator.validateForUpdate(trainee);
@@ -103,6 +110,7 @@ public class TraineeServiceImpl implements TraineeService {
         return traineeRepository.save(traineeToUpdate);
     }
 
+    @Transactional
     @Override
     public Trainee changeActiveStatus(String username, boolean status){
         Trainee trainee = getTraineeByUsername(username);
@@ -117,6 +125,7 @@ public class TraineeServiceImpl implements TraineeService {
         return updateActiveStatus(trainee, status);
     }
 
+    @Transactional
     @Override
     public void deleteTraineeByUsername(String username) {
         validator.validateUsername(username);

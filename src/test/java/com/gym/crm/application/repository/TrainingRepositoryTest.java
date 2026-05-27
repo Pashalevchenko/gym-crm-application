@@ -1,6 +1,5 @@
 package com.gym.crm.application.repository;
 
-import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.github.springtestdbunit.annotation.DatabaseOperation.CLEAN_INSERT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -33,7 +33,7 @@ class TrainingRepositoryTest extends AbstractRepositoryTest<TrainingRepository> 
     private TrainingTypeRepository trainingTypeRepository;
 
     @Nested
-    @DatabaseSetup(value = "/dataset/training-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/training-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("save")
     class SaveTests {
 
@@ -74,7 +74,7 @@ class TrainingRepositoryTest extends AbstractRepositoryTest<TrainingRepository> 
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/training-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/training-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("findAll by trainee criteria")
     class FindAllByTraineeCriteriaTests {
 
@@ -192,7 +192,7 @@ class TrainingRepositoryTest extends AbstractRepositoryTest<TrainingRepository> 
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/training-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/training-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("findAll by trainer criteria")
     class FindAllByTrainerCriteriaTests {
 

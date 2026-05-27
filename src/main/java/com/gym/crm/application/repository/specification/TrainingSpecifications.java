@@ -3,21 +3,22 @@ package com.gym.crm.application.repository.specification;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.search.filter.TraineeTrainingSearchFilter;
 import com.gym.crm.application.search.filter.TrainerTrainingSearchFilter;
+import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.criteria.Join;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TrainingSpecifications {
 
     private static final String TRAINING_DATA = "trainingDate";
-
-    private TrainingSpecifications() {
-    }
 
     public static Specification<Training> byTrainerCriteria(TrainerTrainingSearchFilter filter) {
         return (root, query, cb) -> {
             var predicate = cb.conjunction();
 
-            if (filter.getUsername() != null && !filter.getUsername().isBlank()) {
+            if (StringUtils.isNotBlank(filter.getUsername())) {
                 predicate = cb.and(predicate, cb.equal(root.get("trainer").get("user").get("username"), filter.getUsername()));
             }
 
@@ -29,13 +30,11 @@ public final class TrainingSpecifications {
                 predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get(TRAINING_DATA), filter.getToDate()));
             }
 
-            if (filter.getTraineeName() != null && !filter.getTraineeName().isBlank()) {
+            if (StringUtils.isNotBlank(filter.getTraineeName())) {
                 Join<Object, Object> traineeUser = root.join("trainee").join("user");
 
                 var fullName = cb.concat(cb.concat(traineeUser.get("firstName"), " "), traineeUser.get("lastName"));
-
-                predicate = cb.and(predicate,
-                        cb.like(cb.lower(fullName), "%" + filter.getTraineeName().toLowerCase() + "%"));
+                predicate = cb.and(predicate, cb.like(cb.lower(fullName), "%" + filter.getTraineeName().toLowerCase() + "%"));
             }
 
             return predicate;
@@ -46,7 +45,7 @@ public final class TrainingSpecifications {
         return (root, query, cb) -> {
             var predicate = cb.conjunction();
 
-            if (filter.getUsername() != null && !filter.getUsername().isBlank()) {
+            if (StringUtils.isNotBlank(filter.getUsername())) {
                 predicate = cb.and(predicate, cb.equal(root.get("trainee").get("user").get("username"), filter.getUsername()));
             }
 
@@ -58,18 +57,15 @@ public final class TrainingSpecifications {
                 predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get(TRAINING_DATA), filter.getToDate()));
             }
 
-            if (filter.getTrainerName() != null && !filter.getTrainerName().isBlank()) {
+            if (StringUtils.isNotBlank(filter.getTrainerName())) {
                 Join<Object, Object> trainerUser = root.join("trainer").join("user");
 
                 var fullName = cb.concat(cb.concat(trainerUser.get("firstName"), " "), trainerUser.get("lastName"));
-
-                predicate = cb.and(predicate, cb.like(cb.lower(fullName), "%" + filter.getTrainerName().toLowerCase() + "%")
-                );
+                predicate = cb.and(predicate, cb.like(cb.lower(fullName), "%" + filter.getTrainerName().toLowerCase() + "%"));
             }
 
-            if (filter.getTrainingTypeName() != null && !filter.getTrainingTypeName().isBlank()) {
-                predicate = cb.and(predicate, cb.equal(root.get("trainingType").get("trainingTypeName"), filter.getTrainingTypeName())
-                );
+            if (StringUtils.isNotBlank(filter.getTrainingTypeName())) {
+                predicate = cb.and(predicate, cb.equal(root.get("trainingType").get("trainingTypeName"), filter.getTrainingTypeName()));
             }
 
             return predicate;

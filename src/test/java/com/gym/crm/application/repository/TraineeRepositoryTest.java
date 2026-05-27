@@ -1,6 +1,5 @@
 package com.gym.crm.application.repository;
 
-import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
@@ -9,8 +8,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+
+import static com.github.springtestdbunit.annotation.DatabaseOperation.CLEAN_INSERT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,7 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
     private JdbcTemplate jdbcTemplate;
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("create")
     class CreateTests {
 
@@ -37,15 +39,14 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
             jdbcTemplate.execute("ALTER TABLE trainees ALTER COLUMN id RESTART WITH 100");
 
             Trainee trainee = buildTrainee("New", "Trainee", "new.trainee");
+
             Trainee actual = repository.save(trainee);
 
             assertThat(actual).isNotNull();
             assertThat(actual.getId()).isNotNull();
             assertThat(actual.getUser()).isNotNull();
             assertThat(actual.getUser().getId()).isNotNull();
-
             Optional<Trainee> found = repository.findByUserUsername("new.trainee");
-
             assertThat(found).isPresent();
         }
 
@@ -59,7 +60,7 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("update")
     class UpdateTests {
 
@@ -82,22 +83,20 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
                     .user(user)
                     .build();
 
-            Trainee updated = repository.save(traineeToUpdate);
-            Optional<Trainee> found = repository.findById(updated.getId());
+            Trainee actual = repository.save(traineeToUpdate);
 
+            Optional<Trainee> found = repository.findById(actual.getId());
             assertThat(found).isPresent();
-
-            Trainee actual = found.get();
-
-            assertThat(actual.getId()).isEqualTo(TRAINEE_ID);
-            assertThat(actual.getDateOfBirth()).isEqualTo(LocalDate.of(1999, 9, 9));
-            assertThat(actual.getAddress()).isEqualTo("Lviv");
-            assertThat(actual.getUser().getId()).isEqualTo(TRAINEE_ID);
-            assertThat(actual.getUser().getFirstName()).isEqualTo("Updated");
-            assertThat(actual.getUser().getLastName()).isEqualTo("Burpee");
-            assertThat(actual.getUser().getUsername()).isEqualTo("borys.burpee");
-            assertThat(actual.getUser().getPassword()).isEqualTo("12345");
-            assertThat(actual.getUser().isActive()).isTrue();
+            Trainee updatedTrainee = found.get();
+            assertThat(updatedTrainee.getId()).isEqualTo(TRAINEE_ID);
+            assertThat(updatedTrainee.getDateOfBirth()).isEqualTo(LocalDate.of(1999, 9, 9));
+            assertThat(updatedTrainee.getAddress()).isEqualTo("Lviv");
+            assertThat(updatedTrainee.getUser().getId()).isEqualTo(TRAINEE_ID);
+            assertThat(updatedTrainee.getUser().getFirstName()).isEqualTo("Updated");
+            assertThat(updatedTrainee.getUser().getLastName()).isEqualTo("Burpee");
+            assertThat(updatedTrainee.getUser().getUsername()).isEqualTo("borys.burpee");
+            assertThat(updatedTrainee.getUser().getPassword()).isEqualTo("12345");
+            assertThat(updatedTrainee.getUser().isActive()).isTrue();
         }
 
         @Test
@@ -110,7 +109,7 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("findById")
     class FindByIdTests {
 
@@ -120,9 +119,7 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
             Optional<Trainee> found = repository.findById(TRAINEE_ID);
 
             assertThat(found).isPresent();
-
             Trainee actual = found.get();
-
             assertThat(actual.getId()).isEqualTo(TRAINEE_ID);
             assertThat(actual.getDateOfBirth()).isEqualTo(LocalDate.of(2000, 1, 1));
             assertThat(actual.getAddress()).isEqualTo("Kyiv");
@@ -144,7 +141,7 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("findByUsername")
     class FindByUsernameTests {
 
@@ -154,9 +151,7 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
             Optional<Trainee> found = repository.findByUserUsername("marta.muscle");
 
             assertThat(found).isPresent();
-
             Trainee actual = found.get();
-
             assertThat(actual.getId()).isEqualTo(SECOND_TRAINEE_ID);
             assertThat(actual.getDateOfBirth()).isEqualTo(LocalDate.of(2001, 2, 2));
             assertThat(actual.getAddress()).isEqualTo("Lviv");
@@ -178,7 +173,7 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("findAll")
     class FindAllTests {
 
@@ -187,15 +182,37 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
         void findAll_success() {
             List<Trainee> actual = repository.findAll();
 
+            actual.sort(Comparator.comparing(trainee -> trainee.getUser().getUsername()));
+
             assertThat(actual).hasSize(2);
-            assertThat(actual)
-                    .extracting(trainee -> trainee.getUser().getUsername())
-                    .containsExactlyInAnyOrder("borys.burpee", "marta.muscle");
+            Trainee borys = actual.get(0);
+            assertThat(borys.getId()).isEqualTo(1L);
+            assertThat(borys.getDateOfBirth()).isEqualTo(LocalDate.of(2000, 1, 1));
+            assertThat(borys.getAddress()).isEqualTo("Kyiv");
+            assertThat(borys.getUser()).isNotNull();
+            assertThat(borys.getUser().getId()).isEqualTo(1L);
+            assertThat(borys.getUser().getFirstName()).isEqualTo("Borys");
+            assertThat(borys.getUser().getLastName()).isEqualTo("Burpee");
+            assertThat(borys.getUser().getUsername()).isEqualTo("borys.burpee");
+            assertThat(borys.getUser().getPassword()).isEqualTo("12345");
+            assertThat(borys.getUser().isActive()).isTrue();
+
+            Trainee marta = actual.get(1);
+            assertThat(marta.getId()).isEqualTo(2L);
+            assertThat(marta.getDateOfBirth()).isEqualTo(LocalDate.of(2001, 2, 2));
+            assertThat(marta.getAddress()).isEqualTo("Lviv");
+            assertThat(marta.getUser()).isNotNull();
+            assertThat(marta.getUser().getId()).isEqualTo(2L);
+            assertThat(marta.getUser().getFirstName()).isEqualTo("Marta");
+            assertThat(marta.getUser().getLastName()).isEqualTo("Muscle");
+            assertThat(marta.getUser().getUsername()).isEqualTo("marta.muscle");
+            assertThat(marta.getUser().getPassword()).isEqualTo("12345");
+            assertThat(marta.getUser().isActive()).isTrue();
         }
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("deleteByUsername")
     class DeleteByUsernameTests {
 
@@ -210,7 +227,7 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("findNotAssignedTrainers")
     class FindNotAssignedTrainersTests {
 

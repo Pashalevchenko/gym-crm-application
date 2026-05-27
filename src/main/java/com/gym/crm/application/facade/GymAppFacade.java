@@ -163,7 +163,6 @@ public class GymAppFacade {
     }
 
     @Authenticated
-    @Transactional
     public TrainerGetResponse getTrainerByUsername(String username) {
         Trainer trainer = trainerService.getTrainerByUsername(username);
 

@@ -5,6 +5,7 @@ import com.gym.crm.application.repository.TrainingTypeRepository;
 import com.gym.crm.application.service.TrainingTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -15,11 +16,13 @@ public class TrainingTypeServiceImpl implements TrainingTypeService {
 
     private final TrainingTypeRepository repository;
 
+    @Transactional(readOnly = true)
     @Override
     public List<TrainingType> getAllTrainingsType() {
         return repository.findAll();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public TrainingType getByName(String name) {
         return repository.findByTrainingTypeName(name)

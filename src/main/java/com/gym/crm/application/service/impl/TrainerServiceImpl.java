@@ -12,8 +12,10 @@ import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.validation.TrainerValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,6 +32,7 @@ public class TrainerServiceImpl implements TrainerService {
     private final TrainerValidator validator;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     @Override
     public Trainer createTrainer(Trainer trainer) {
         validator.validateForCreate(trainer);
@@ -58,11 +61,13 @@ public class TrainerServiceImpl implements TrainerService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Trainer getTrainerById(Long id) {
         return trainerRepository.findById(id).orElseThrow(() -> new NoSuchElementException(String.format("Trainer with ID %d not found", id)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Trainer getTrainerByUsername(String username) {
         validator.validateUsername(username);
@@ -71,11 +76,13 @@ public class TrainerServiceImpl implements TrainerService {
                 .orElseThrow(() -> new NoSuchElementException(String.format("Trainer with username %s  not found", username)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Trainer> getAllTrainers() {
         return trainerRepository.findAll();
     }
 
+    @Transactional
     @Override
     public Trainer updateTrainer(Trainer trainer) {
         validator.validateForUpdate(trainer);
@@ -95,6 +102,7 @@ public class TrainerServiceImpl implements TrainerService {
         return updated;
     }
 
+    @Transactional
     @Override
     public Trainer changeActiveStatus(String username, boolean status) {
         Trainer trainer = getTrainerByUsername(username);
@@ -109,6 +117,7 @@ public class TrainerServiceImpl implements TrainerService {
         return updateActiveStatus(trainer, status);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Training> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
         validator.validateUsername(username);
@@ -119,8 +128,9 @@ public class TrainerServiceImpl implements TrainerService {
                 .toDate(toDate)
                 .traineeName(traineeName)
                 .build();
+        Specification<Training> specification = TrainingSpecifications.byTrainerCriteria(filter);
 
-        return trainingRepository.findAll(TrainingSpecifications.byTrainerCriteria(filter));
+        return trainingRepository.findAll(specification);
     }
 
     private Trainer updateActiveStatus(Trainer trainer, boolean active) {

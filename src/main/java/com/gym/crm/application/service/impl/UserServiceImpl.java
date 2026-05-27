@@ -9,6 +9,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -19,6 +21,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
     private final AuthenticationService authentication;
 
+    @Transactional
     @Override
     public void changePassword(LoginChangeRequest request) {
         User existingUser = repository.findByUsername(request.getUsername())
@@ -34,6 +37,7 @@ public class UserServiceImpl implements UserService {
         log.info("Password changed for username: {}", request.getUsername());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public User findByUsername(String username) {
         return repository.findByUsername(username)

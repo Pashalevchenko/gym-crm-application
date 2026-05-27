@@ -1,6 +1,5 @@
 package com.gym.crm.application.repository;
 
-import com.github.springtestdbunit.annotation.DatabaseOperation;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import com.gym.crm.application.entity.TrainingType;
 import org.junit.jupiter.api.DisplayName;
@@ -10,13 +9,14 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Optional;
 
+import static com.github.springtestdbunit.annotation.DatabaseOperation.CLEAN_INSERT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Training type DAO DBUnit integration tests")
 class TrainingTypeRepositoryTest extends AbstractRepositoryTest<TrainingTypeRepository> {
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("findAll")
     class FindAllTests {
 
@@ -33,7 +33,7 @@ class TrainingTypeRepositoryTest extends AbstractRepositoryTest<TrainingTypeRepo
     }
 
     @Nested
-    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = DatabaseOperation.CLEAN_INSERT)
+    @DatabaseSetup(value = "/dataset/trainee-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("findByName")
     class FindByNameTests {
 
