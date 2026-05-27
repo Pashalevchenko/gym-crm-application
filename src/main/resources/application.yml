@@ -1,10 +1,4 @@
 spring:
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/gym-crm-application
-    username: gym
-    password: gym
-
   jpa:
     hibernate:
       ddl-auto: validate
