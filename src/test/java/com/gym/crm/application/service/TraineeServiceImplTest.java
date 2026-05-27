@@ -64,7 +64,7 @@ class TraineeServiceImplTest {
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private TraineeServiceImpl traineeService;
+    private TraineeServiceImpl service;
 
     private ListAppender<ILoggingEvent> listAppender;
     private Logger logger;
@@ -101,10 +101,9 @@ class TraineeServiceImplTest {
         when(profileService.createUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
         when(profileService.generatePassword()).thenReturn(rawPassword);
         when(passwordEncoder.encode(rawPassword)).thenReturn(encodedHash);
-
         when(repository.save(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Trainee actual = traineeService.createTrainee(trainee);
+        Trainee actual = service.createTrainee(trainee);
 
         assertNotNull(actual);
         assertEquals(FIRST_NAME, actual.getUser().getFirstName());
@@ -127,7 +126,7 @@ class TraineeServiceImplTest {
 
         when(repository.findById(TRAINEE_ID)).thenReturn(Optional.of(trainee));
 
-        Trainee actual = traineeService.getTraineeById(TRAINEE_ID);
+        Trainee actual = service.getTraineeById(TRAINEE_ID);
 
         assertEquals(TRAINEE_ID, actual.getId());
         assertEquals(FIRST_NAME, actual.getUser().getFirstName());
@@ -142,8 +141,7 @@ class TraineeServiceImplTest {
 
         when(repository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> traineeService.getTraineeById(id));
-
+        assertThrows(NoSuchElementException.class, () -> service.getTraineeById(id));
         verify(repository).findById(id);
     }
 
@@ -166,7 +164,7 @@ class TraineeServiceImplTest {
         when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(existing));
         when(repository.save(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Trainee actual = traineeService.updateTrainee(updateRequest);
+        Trainee actual = service.updateTrainee(updateRequest);
 
         assertEquals(TRAINEE_ID, actual.getId());
         assertEquals(USER_ID, actual.getUser().getId());
@@ -202,7 +200,7 @@ class TraineeServiceImplTest {
         when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(existing));
         when(repository.save(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        traineeService.updateTrainee(updateRequest);
+        service.updateTrainee(updateRequest);
 
         ArgumentCaptor<Trainee> captor = ArgumentCaptor.forClass(Trainee.class);
         verify(repository).save(captor.capture());
@@ -241,7 +239,7 @@ class TraineeServiceImplTest {
 
         when(repository.findAll()).thenReturn(trainees);
 
-        List<Trainee> actual = traineeService.getAllTrainees();
+        List<Trainee> actual = service.getAllTrainees();
 
         assertEquals(2, actual.size());
         assertEquals(USERNAME, actual.get(0).getUser().getUsername());
@@ -254,7 +252,7 @@ class TraineeServiceImplTest {
     void deleteTraineeByUsername_shouldValidateUsernameAndDelete() {
         String username = "test.user";
 
-        traineeService.deleteTraineeByUsername(username);
+        service.deleteTraineeByUsername(username);
 
         verify(traineeValidator).validateUsername(username);
         verify(repository).deleteByUserUsername(username);
@@ -270,7 +268,7 @@ class TraineeServiceImplTest {
 
         when(repository.findNotAssignedTrainers(username)).thenReturn(List.of(trainer));
 
-        List<Trainer> actual = traineeService.getNotAssignedTrainers(username);
+        List<Trainer> actual = service.getNotAssignedTrainers(username);
 
         assertEquals(1, actual.size());
         assertEquals(trainer, actual.get(0));
@@ -315,10 +313,9 @@ class TraineeServiceImplTest {
         when(trainerRepository.findByUserUsername(trainerUsername)).thenReturn(Optional.of(managedTrainer));
         when(repository.save(any(Trainee.class))).thenReturn(updatedTrainee);
 
-        Trainee actual = traineeService.updateTrainersList(traineeUsername, inputTrainers);
+        Trainee actual = service.updateTrainersList(traineeUsername, inputTrainers);
 
         assertEquals(updatedTrainee, actual);
-
         verify(traineeValidator).validateTrainersList(inputTrainers);
         verify(repository).findByUserUsername(traineeUsername);
         verify(trainerRepository).findByUserUsername(trainerUsername);
@@ -340,10 +337,9 @@ class TraineeServiceImplTest {
         when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(trainee));
         when(repository.save(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Trainee actual = traineeService.changeActiveStatus(USERNAME, true);
+        Trainee actual = service.changeActiveStatus(USERNAME, true);
 
         assertTrue(actual.getUser().isActive());
-
         verify(repository).findByUserUsername(USERNAME);
         verify(repository).save(argThat(updated -> updated.getUser().isActive() && updated.getUser().getUsername().equals(USERNAME)));
     }

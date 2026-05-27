@@ -110,7 +110,6 @@
           <excludes>
             <exclude>**/config/**</exclude>
             <exclude>**/dto/**</exclude>
-
           </excludes>
         </configuration>
         <executions>

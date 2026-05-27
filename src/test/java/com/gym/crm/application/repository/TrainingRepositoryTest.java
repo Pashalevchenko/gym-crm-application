@@ -11,7 +11,6 @@ import com.gym.crm.application.search.filter.TrainerTrainingSearchFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,15 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("Training repository tests")
 class TrainingRepositoryTest extends AbstractRepositoryTest<TrainingRepository> {
 
-    @Autowired
-    private TraineeRepository traineeRepository;
-
-    @Autowired
-    private TrainerRepository trainerRepository;
-
-    @Autowired
-    private TrainingTypeRepository trainingTypeRepository;
-
     @Nested
     @DatabaseSetup(value = "/dataset/training-data-init.xml", type = CLEAN_INSERT)
     @DisplayName("save")
@@ -40,9 +30,9 @@ class TrainingRepositoryTest extends AbstractRepositoryTest<TrainingRepository> 
         @Test
         @DisplayName("Should save training")
         void save_success() {
-            Trainee trainee = traineeRepository.findByUserUsername("borys.burpee").orElseThrow();
-            Trainer trainer = trainerRepository.findByUserUsername("fedir.foamroller").orElseThrow();
-            TrainingType trainingType = trainingTypeRepository.findByTrainingTypeName("Penguin Yoga").orElseThrow();
+            Trainee trainee = entityManager.find(Trainee.class, 10L);
+            Trainer trainer = entityManager.find(Trainer.class, 12L);
+            TrainingType trainingType = entityManager.find(TrainingType.class, 10L);
             Training training = Training.builder()
                     .trainingName("New Penguin Yoga")
                     .trainingDate(LocalDate.of(2026, 5, 20))

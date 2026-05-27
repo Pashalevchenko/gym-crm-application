@@ -7,19 +7,19 @@ import com.gym.crm.application.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 import static com.github.springtestdbunit.annotation.DatabaseOperation.CLEAN_INSERT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @DisplayName("Trainee DAO DBUnit integration tests")
-class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
+class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository> {
 
     private static final Long TRAINEE_ID = 1L;
     private static final Long SECOND_TRAINEE_ID = 2L;
@@ -116,19 +116,19 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
         @Test
         @DisplayName("Should return trainee when trainee with requested id exists")
         void findById_found() {
-            Optional<Trainee> found = repository.findById(TRAINEE_ID);
+            Optional<Trainee> actual = repository.findById(TRAINEE_ID);
 
-            assertThat(found).isPresent();
-            Trainee actual = found.get();
-            assertThat(actual.getId()).isEqualTo(TRAINEE_ID);
-            assertThat(actual.getDateOfBirth()).isEqualTo(LocalDate.of(2000, 1, 1));
-            assertThat(actual.getAddress()).isEqualTo("Kyiv");
-            assertThat(actual.getUser().getId()).isEqualTo(TRAINEE_ID);
-            assertThat(actual.getUser().getFirstName()).isEqualTo("Borys");
-            assertThat(actual.getUser().getLastName()).isEqualTo("Burpee");
-            assertThat(actual.getUser().getUsername()).isEqualTo("borys.burpee");
-            assertThat(actual.getUser().getPassword()).isEqualTo("12345");
-            assertThat(actual.getUser().isActive()).isTrue();
+            assertThat(actual).isPresent();
+            Trainee found = actual.get();
+            assertThat(found.getId()).isEqualTo(TRAINEE_ID);
+            assertThat(found.getDateOfBirth()).isEqualTo(LocalDate.of(2000, 1, 1));
+            assertThat(found.getAddress()).isEqualTo("Kyiv");
+            assertThat(found.getUser().getId()).isEqualTo(TRAINEE_ID);
+            assertThat(found.getUser().getFirstName()).isEqualTo("Borys");
+            assertThat(found.getUser().getLastName()).isEqualTo("Burpee");
+            assertThat(found.getUser().getUsername()).isEqualTo("borys.burpee");
+            assertThat(found.getUser().getPassword()).isEqualTo("12345");
+            assertThat(found.getUser().isActive()).isTrue();
         }
 
         @Test
@@ -148,27 +148,27 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
         @Test
         @DisplayName("Should return trainee when trainee with requested username exists")
         void findByUsername_found() {
-            Optional<Trainee> found = repository.findByUserUsername("marta.muscle");
+            Optional<Trainee> actual = repository.findByUserUsername("marta.muscle");
 
-            assertThat(found).isPresent();
-            Trainee actual = found.get();
-            assertThat(actual.getId()).isEqualTo(SECOND_TRAINEE_ID);
-            assertThat(actual.getDateOfBirth()).isEqualTo(LocalDate.of(2001, 2, 2));
-            assertThat(actual.getAddress()).isEqualTo("Lviv");
-            assertThat(actual.getUser().getId()).isEqualTo(SECOND_TRAINEE_ID);
-            assertThat(actual.getUser().getFirstName()).isEqualTo("Marta");
-            assertThat(actual.getUser().getLastName()).isEqualTo("Muscle");
-            assertThat(actual.getUser().getUsername()).isEqualTo("marta.muscle");
-            assertThat(actual.getUser().getPassword()).isEqualTo("12345");
-            assertThat(actual.getUser().isActive()).isTrue();
+            assertThat(actual).isPresent();
+            Trainee found = actual.get();
+            assertThat(found.getId()).isEqualTo(SECOND_TRAINEE_ID);
+            assertThat(found.getDateOfBirth()).isEqualTo(LocalDate.of(2001, 2, 2));
+            assertThat(found.getAddress()).isEqualTo("Lviv");
+            assertThat(found.getUser().getId()).isEqualTo(SECOND_TRAINEE_ID);
+            assertThat(found.getUser().getFirstName()).isEqualTo("Marta");
+            assertThat(found.getUser().getLastName()).isEqualTo("Muscle");
+            assertThat(found.getUser().getUsername()).isEqualTo("marta.muscle");
+            assertThat(found.getUser().getPassword()).isEqualTo("12345");
+            assertThat(found.getUser().isActive()).isTrue();
         }
 
         @Test
         @DisplayName("Should return empty optional when trainee with requested username does not exist")
         void findByUsername_notFound() {
-            Optional<Trainee> found = repository.findByUserUsername("ghost.gains");
+            Optional<Trainee> actual = repository.findByUserUsername("ghost.gains");
 
-            assertThat(found).isEmpty();
+            assertThat(actual).isEmpty();
         }
     }
 
@@ -181,8 +181,6 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
         @DisplayName("Should return all trainees")
         void findAll_success() {
             List<Trainee> actual = repository.findAll();
-
-            actual.sort(Comparator.comparing(trainee -> trainee.getUser().getUsername()));
 
             assertThat(actual).hasSize(2);
             Trainee borys = actual.get(0);
@@ -234,9 +232,9 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository>{
         @Test
         @DisplayName("Should return trainers not assigned to trainee")
         void findNotAssignedTrainers_success() {
-            List<Trainer> result = repository.findNotAssignedTrainers("borys.burpee");
+            List<Trainer> actual = repository.findNotAssignedTrainers("borys.burpee");
 
-            assertThat(result)
+            assertThat(actual)
                     .extracting(trainer -> trainer.getUser().getUsername())
                     .containsExactlyInAnyOrder("fedir.foamroller", "ira.iron");
         }

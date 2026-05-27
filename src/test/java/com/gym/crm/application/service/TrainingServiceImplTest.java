@@ -46,7 +46,7 @@ class TrainingServiceImplTest {
     private TrainingValidator trainingValidator;
 
     @InjectMocks
-    private TrainingServiceImpl trainingService;
+    private TrainingServiceImpl service;
 
     private ListAppender<ILoggingEvent> listAppender;
     private Logger logger;
@@ -80,14 +80,13 @@ class TrainingServiceImplTest {
 
         when(repository.save(training)).thenReturn(createdTraining);
 
-        Training actual = trainingService.createTraining(training);
+        Training actual = service.createTraining(training);
 
         assertSame(createdTraining, actual);
         assertEquals(TRAINING_ID, actual.getId());
         assertEquals("Morning Yoga", actual.getTrainingName());
         verify(trainingValidator).validateForCreate(training);
         verify(repository).save(training);
-
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
                 .contains(tuple("Training created with id: " + TRAINING_ID, Level.INFO));
@@ -100,7 +99,7 @@ class TrainingServiceImplTest {
 
         when(repository.findById(TRAINING_ID)).thenReturn(Optional.of(training));
 
-        Training actual = trainingService.getTrainingById(TRAINING_ID);
+        Training actual = service.getTrainingById(TRAINING_ID);
 
         assertSame(training, actual);
         assertEquals(TRAINING_ID, actual.getId());
@@ -113,7 +112,7 @@ class TrainingServiceImplTest {
     void getTrainingById_whenNotFound_shouldThrowException() {
         when(repository.findById(TRAINING_ID)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> trainingService.getTrainingById(TRAINING_ID));
+        assertThrows(NoSuchElementException.class, () -> service.getTrainingById(TRAINING_ID));
 
         verify(repository).findById(TRAINING_ID);
     }
@@ -138,7 +137,7 @@ class TrainingServiceImplTest {
 
         when(repository.findAll()).thenReturn(List.of(firstTraining, secondTraining));
 
-        List<Training> actual = trainingService.getAllTrainings();
+        List<Training> actual = service.getAllTrainings();
 
         assertEquals(2, actual.size());
         assertEquals("Morning Yoga", actual.get(0).getTrainingName());

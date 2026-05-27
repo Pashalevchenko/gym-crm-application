@@ -5,6 +5,7 @@ import com.github.springtestdbunit.annotation.DbUnitConfiguration;
 import com.github.springtestdbunit.bean.DatabaseConfigBean;
 import com.github.springtestdbunit.bean.DatabaseDataSourceConnectionFactoryBean;
 import com.gym.crm.application.config.DbUnitConfig;
+import jakarta.persistence.EntityManager;
 import org.dbunit.ext.h2.H2DataTypeFactory;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -31,6 +32,9 @@ public abstract class AbstractRepositoryTest<T> {
 
     @Autowired
     protected T repository;
+
+    @Autowired
+    protected EntityManager entityManager;
 
     @TestConfiguration
     static class DbUnitConfig {

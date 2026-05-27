@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,20 +89,20 @@ class TrainerRepositoryTest extends AbstractRepositoryTest<TrainerRepository> {
                     .specialization(specialization)
                     .build();
 
-            Trainer updated = repository.save(trainerToUpdate);
+            Trainer actual = repository.save(trainerToUpdate);
 
-            Optional<Trainer> found = repository.findById(updated.getId());
+            Optional<Trainer> found = repository.findById(actual.getId());
             assertThat(found).isPresent();
-            Trainer actual = found.get();
-            assertThat(actual.getId()).isEqualTo(TRAINER_ID);
-            assertThat(actual.getUser().getId()).isEqualTo(TRAINER_USER_ID);
-            assertThat(actual.getUser().getFirstName()).isEqualTo("Updated");
-            assertThat(actual.getUser().getLastName()).isEqualTo("Trainer");
-            assertThat(actual.getUser().getUsername()).isEqualTo("pavlo.plank");
-            assertThat(actual.getUser().getPassword()).isEqualTo("12345");
-            assertThat(actual.getUser().isActive()).isTrue();
-            assertThat(actual.getSpecialization().getId()).isEqualTo(SECOND_SPECIALIZATION_ID);
-            assertThat(actual.getSpecialization().getTrainingTypeName()).isEqualTo("Strength Shenanigans");
+            Trainer updated = found.get();
+            assertThat(updated.getId()).isEqualTo(TRAINER_ID);
+            assertThat(updated.getUser().getId()).isEqualTo(TRAINER_USER_ID);
+            assertThat(updated.getUser().getFirstName()).isEqualTo("Updated");
+            assertThat(updated.getUser().getLastName()).isEqualTo("Trainer");
+            assertThat(updated.getUser().getUsername()).isEqualTo("pavlo.plank");
+            assertThat(updated.getUser().getPassword()).isEqualTo("12345");
+            assertThat(updated.getUser().isActive()).isTrue();
+            assertThat(updated.getSpecialization().getId()).isEqualTo(SECOND_SPECIALIZATION_ID);
+            assertThat(updated.getSpecialization().getTrainingTypeName()).isEqualTo("Strength Shenanigans");
         }
 
         @Test
@@ -123,19 +122,19 @@ class TrainerRepositoryTest extends AbstractRepositoryTest<TrainerRepository> {
         @Test
         @DisplayName("Should return trainer when trainer with requested id exists")
         void findById_found() {
-            Optional<Trainer> found = repository.findById(TRAINER_ID);
+            Optional<Trainer> actual = repository.findById(TRAINER_ID);
 
-            assertThat(found).isPresent();
-            Trainer actual = found.get();
-            assertThat(actual.getId()).isEqualTo(TRAINER_ID);
-            assertThat(actual.getUser().getId()).isEqualTo(TRAINER_USER_ID);
-            assertThat(actual.getUser().getFirstName()).isEqualTo("Pavlo");
-            assertThat(actual.getUser().getLastName()).isEqualTo("Plank");
-            assertThat(actual.getUser().getUsername()).isEqualTo("pavlo.plank");
-            assertThat(actual.getUser().getPassword()).isEqualTo("12345");
-            assertThat(actual.getUser().isActive()).isTrue();
-            assertThat(actual.getSpecialization().getId()).isEqualTo(SPECIALIZATION_ID);
-            assertThat(actual.getSpecialization().getTrainingTypeName()).isEqualTo("Penguin Yoga");
+            assertThat(actual).isPresent();
+            Trainer found = actual.get();
+            assertThat(found.getId()).isEqualTo(TRAINER_ID);
+            assertThat(found.getUser().getId()).isEqualTo(TRAINER_USER_ID);
+            assertThat(found.getUser().getFirstName()).isEqualTo("Pavlo");
+            assertThat(found.getUser().getLastName()).isEqualTo("Plank");
+            assertThat(found.getUser().getUsername()).isEqualTo("pavlo.plank");
+            assertThat(found.getUser().getPassword()).isEqualTo("12345");
+            assertThat(found.getUser().isActive()).isTrue();
+            assertThat(found.getSpecialization().getId()).isEqualTo(SPECIALIZATION_ID);
+            assertThat(found.getSpecialization().getTrainingTypeName()).isEqualTo("Penguin Yoga");
         }
 
         @Test
@@ -155,27 +154,27 @@ class TrainerRepositoryTest extends AbstractRepositoryTest<TrainerRepository> {
         @Test
         @DisplayName("Should return trainer when trainer with requested username exists")
         void findByUsername_found() {
-            Optional<Trainer> found = repository.findByUserUsername("fedir.foamroller");
+            Optional<Trainer> actual = repository.findByUserUsername("fedir.foamroller");
 
-            assertThat(found).isPresent();
-            Trainer actual = found.get();
-            assertThat(actual.getId()).isEqualTo(SECOND_TRAINER_ID);
-            assertThat(actual.getUser().getId()).isEqualTo(SECOND_TRAINER_USER_ID);
-            assertThat(actual.getUser().getFirstName()).isEqualTo("Fedir");
-            assertThat(actual.getUser().getLastName()).isEqualTo("Foamroller");
-            assertThat(actual.getUser().getUsername()).isEqualTo("fedir.foamroller");
-            assertThat(actual.getUser().getPassword()).isEqualTo("12345");
-            assertThat(actual.getUser().isActive()).isTrue();
-            assertThat(actual.getSpecialization().getId()).isEqualTo(SECOND_SPECIALIZATION_ID);
-            assertThat(actual.getSpecialization().getTrainingTypeName()).isEqualTo("Strength Shenanigans");
+            assertThat(actual).isPresent();
+            Trainer found = actual.get();
+            assertThat(found.getId()).isEqualTo(SECOND_TRAINER_ID);
+            assertThat(found.getUser().getId()).isEqualTo(SECOND_TRAINER_USER_ID);
+            assertThat(found.getUser().getFirstName()).isEqualTo("Fedir");
+            assertThat(found.getUser().getLastName()).isEqualTo("Foamroller");
+            assertThat(found.getUser().getUsername()).isEqualTo("fedir.foamroller");
+            assertThat(found.getUser().getPassword()).isEqualTo("12345");
+            assertThat(found.getUser().isActive()).isTrue();
+            assertThat(found.getSpecialization().getId()).isEqualTo(SECOND_SPECIALIZATION_ID);
+            assertThat(found.getSpecialization().getTrainingTypeName()).isEqualTo("Strength Shenanigans");
         }
 
         @Test
         @DisplayName("Should return empty optional when trainer with requested username does not exist")
         void findByUsername_notFound() {
-            Optional<Trainer> found = repository.findByUserUsername("ghost.trainer");
+            Optional<Trainer> actual = repository.findByUserUsername("ghost.trainer");
 
-            assertThat(found).isEmpty();
+            assertThat(actual).isEmpty();
         }
     }
 
@@ -189,35 +188,9 @@ class TrainerRepositoryTest extends AbstractRepositoryTest<TrainerRepository> {
         void findAll_success() {
             List<Trainer> actual = repository.findAll();
 
-            actual.sort(Comparator.comparing(trainer -> trainer.getUser().getUsername()));
             assertThat(actual).hasSize(3);
 
-            Trainer fedir = actual.get(0);
-            assertThat(fedir.getUser()).isNotNull();
-            assertThat(fedir.getUser().getId()).isEqualTo(12L);
-            assertThat(fedir.getUser().getFirstName()).isEqualTo("Fedir");
-            assertThat(fedir.getUser().getLastName()).isEqualTo("Foamroller");
-            assertThat(fedir.getUser().getUsername()).isEqualTo("fedir.foamroller");
-            assertThat(fedir.getUser().getPassword()).isEqualTo("12345");
-            assertThat(fedir.getUser().isActive()).isTrue();
-            assertThat(fedir.getSpecialization()).isNotNull();
-            assertThat(fedir.getSpecialization().getId()).isEqualTo(12L);
-            assertThat(fedir.getSpecialization().getTrainingTypeName()).isEqualTo("Strength Shenanigans");
-
-            Trainer ira = actual.get(1);
-            assertThat(ira.getId()).isEqualTo(15L);
-            assertThat(ira.getUser()).isNotNull();
-            assertThat(ira.getUser().getId()).isEqualTo(15L);
-            assertThat(ira.getUser().getFirstName()).isEqualTo("Ira");
-            assertThat(ira.getUser().getLastName()).isEqualTo("Iron");
-            assertThat(ira.getUser().getUsername()).isEqualTo("ira.iron");
-            assertThat(ira.getUser().getPassword()).isEqualTo("12345");
-            assertThat(ira.getUser().isActive()).isTrue();
-            assertThat(ira.getSpecialization()).isNotNull();
-            assertThat(ira.getSpecialization().getId()).isEqualTo(12L);
-            assertThat(ira.getSpecialization().getTrainingTypeName()).isEqualTo("Strength Shenanigans");
-
-            Trainer pavlo = actual.get(2);
+            Trainer pavlo = actual.get(0);
             assertThat(pavlo.getId()).isEqualTo(10L);
             assertThat(pavlo.getUser()).isNotNull();
             assertThat(pavlo.getUser().getId()).isEqualTo(10L);
@@ -229,6 +202,31 @@ class TrainerRepositoryTest extends AbstractRepositoryTest<TrainerRepository> {
             assertThat(pavlo.getSpecialization()).isNotNull();
             assertThat(pavlo.getSpecialization().getId()).isEqualTo(10L);
             assertThat(pavlo.getSpecialization().getTrainingTypeName()).isEqualTo("Penguin Yoga");
+
+            Trainer fedir = actual.get(1);
+            assertThat(fedir.getUser()).isNotNull();
+            assertThat(fedir.getUser().getId()).isEqualTo(12L);
+            assertThat(fedir.getUser().getFirstName()).isEqualTo("Fedir");
+            assertThat(fedir.getUser().getLastName()).isEqualTo("Foamroller");
+            assertThat(fedir.getUser().getUsername()).isEqualTo("fedir.foamroller");
+            assertThat(fedir.getUser().getPassword()).isEqualTo("12345");
+            assertThat(fedir.getUser().isActive()).isTrue();
+            assertThat(fedir.getSpecialization()).isNotNull();
+            assertThat(fedir.getSpecialization().getId()).isEqualTo(12L);
+            assertThat(fedir.getSpecialization().getTrainingTypeName()).isEqualTo("Strength Shenanigans");
+
+            Trainer ira = actual.get(2);
+            assertThat(ira.getId()).isEqualTo(15L);
+            assertThat(ira.getUser()).isNotNull();
+            assertThat(ira.getUser().getId()).isEqualTo(15L);
+            assertThat(ira.getUser().getFirstName()).isEqualTo("Ira");
+            assertThat(ira.getUser().getLastName()).isEqualTo("Iron");
+            assertThat(ira.getUser().getUsername()).isEqualTo("ira.iron");
+            assertThat(ira.getUser().getPassword()).isEqualTo("12345");
+            assertThat(ira.getUser().isActive()).isTrue();
+            assertThat(ira.getSpecialization()).isNotNull();
+            assertThat(ira.getSpecialization().getId()).isEqualTo(12L);
+            assertThat(ira.getSpecialization().getTrainingTypeName()).isEqualTo("Strength Shenanigans");
         }
     }
 

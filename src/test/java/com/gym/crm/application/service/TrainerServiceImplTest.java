@@ -59,7 +59,7 @@ class TrainerServiceImplTest {
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private TrainerServiceImpl trainerService;
+    private TrainerServiceImpl service;
 
     private ListAppender<ILoggingEvent> listAppender;
     private Logger logger;
@@ -97,7 +97,7 @@ class TrainerServiceImplTest {
 
         when(repository.save(any(Trainer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Trainer actual = trainerService.createTrainer(trainer);
+        Trainer actual = service.createTrainer(trainer);
 
         assertNotNull(actual);
         assertEquals(FIRST_NAME, actual.getUser().getFirstName());
@@ -120,7 +120,7 @@ class TrainerServiceImplTest {
 
         when(repository.findById(TRAINER_ID)).thenReturn(Optional.of(trainer));
 
-        Trainer actual = trainerService.getTrainerById(TRAINER_ID);
+        Trainer actual = service.getTrainerById(TRAINER_ID);
 
         assertEquals(TRAINER_ID, actual.getId());
         assertEquals(USERNAME, actual.getUser().getUsername());
@@ -132,8 +132,7 @@ class TrainerServiceImplTest {
     void getTrainerById_WhenNotFound() {
         when(repository.findById(TRAINER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> trainerService.getTrainerById(TRAINER_ID));
-
+        assertThrows(NoSuchElementException.class, () -> service.getTrainerById(TRAINER_ID));
         verify(repository).findById(TRAINER_ID);
     }
 
@@ -144,7 +143,7 @@ class TrainerServiceImplTest {
 
         when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(trainer));
 
-        Trainer actual = trainerService.getTrainerByUsername(USERNAME);
+        Trainer actual = service.getTrainerByUsername(USERNAME);
 
         assertEquals(USERNAME, actual.getUser().getUsername());
         verify(trainerValidator).validateUsername(USERNAME);
@@ -156,7 +155,7 @@ class TrainerServiceImplTest {
     void getTrainerByUsername_whenNotFound_shouldThrowException() {
         when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> trainerService.getTrainerByUsername(USERNAME));
+        assertThrows(NoSuchElementException.class, () -> service.getTrainerByUsername(USERNAME));
 
         verify(trainerValidator).validateUsername(USERNAME);
         verify(repository).findByUserUsername(USERNAME);
@@ -169,7 +168,7 @@ class TrainerServiceImplTest {
 
         when(repository.findAll()).thenReturn(trainers);
 
-        List<Trainer> actual = trainerService.getAllTrainers();
+        List<Trainer> actual = service.getAllTrainers();
 
         assertEquals(2, actual.size());
         verify(repository).findAll();
@@ -197,7 +196,7 @@ class TrainerServiceImplTest {
         when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(existing));
         when(repository.save(any(Trainer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Trainer actual = trainerService.updateTrainer(updateRequest);
+        Trainer actual = service.updateTrainer(updateRequest);
 
         assertEquals(TRAINER_ID, actual.getId());
         assertEquals(USER_ID, actual.getUser().getId());
@@ -220,7 +219,7 @@ class TrainerServiceImplTest {
         when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(inactiveTrainer));
         when(repository.save(any(Trainer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Trainer actual = trainerService.changeActiveStatus(USERNAME, true);
+        Trainer actual = service.changeActiveStatus(USERNAME, true);
 
         assertTrue(actual.getUser().isActive());
         verify(trainerValidator).validateUsername(USERNAME);
@@ -237,7 +236,7 @@ class TrainerServiceImplTest {
         when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(activeTrainer));
         when(repository.save(any(Trainer.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Trainer actual = trainerService.changeActiveStatus(USERNAME, false);
+        Trainer actual = service.changeActiveStatus(USERNAME, false);
 
         assertFalse(actual.getUser().isActive());
         verify(trainerValidator).validateUsername(USERNAME);
@@ -254,7 +253,7 @@ class TrainerServiceImplTest {
         when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(activeTrainer));
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> trainerService.changeActiveStatus(USERNAME, true));
+                () -> service.changeActiveStatus(USERNAME, true));
 
         assertEquals("Trainer is already active", exception.getMessage());
         verify(trainerValidator).validateUsername(USERNAME);
@@ -269,7 +268,7 @@ class TrainerServiceImplTest {
         when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(inactiveTrainer));
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> trainerService.changeActiveStatus(USERNAME, false));
+                () -> service.changeActiveStatus(USERNAME, false));
 
         assertEquals("Trainer is already inactive", exception.getMessage());
         verify(trainerValidator).validateUsername(USERNAME);

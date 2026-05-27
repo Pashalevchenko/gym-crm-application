@@ -66,7 +66,6 @@ class AuthenticationServiceTest {
                 () -> authService.authenticate(USERNAME, PASSWORD));
 
         assertEquals("Invalid username or password", exception.getMessage());
-
         verify(repository).findByUsername(USERNAME);
         verify(passwordEncoder, never()).matches(anyString(), anyString());
     }
@@ -84,11 +83,8 @@ class AuthenticationServiceTest {
 
         when(repository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(rawPasswordInput, encodedPasswordInDb)).thenReturn(false);
-
         when(passwordEncoder.matches(rawPasswordInput, encodedPasswordInDb)).thenReturn(false);
-
         RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.authenticate(USERNAME, "wrong_password"));
-
         assertEquals("Invalid username or password", exception.getMessage());
     }
 }

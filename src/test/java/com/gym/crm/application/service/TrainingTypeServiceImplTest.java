@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -28,7 +29,7 @@ class TrainingTypeServiceImplTest {
     private TrainingTypeRepository repository;
 
     @InjectMocks
-    private TrainingTypeServiceImpl trainingTypeService;
+    private TrainingTypeServiceImpl service;
 
     @Test
     @DisplayName("Should return all training types")
@@ -45,7 +46,7 @@ class TrainingTypeServiceImplTest {
 
         when(repository.findAll()).thenReturn(expected);
 
-        List<TrainingType> actual = trainingTypeService.getAllTrainingsType();
+        List<TrainingType> actual = service.getAllTrainingsType();
 
         assertEquals(expected, actual);
         verify(repository).findAll();
@@ -61,7 +62,7 @@ class TrainingTypeServiceImplTest {
 
         when(repository.findByTrainingTypeName(TRAINING_TYPE_NAME)).thenReturn(Optional.of(expected));
 
-        TrainingType actual = trainingTypeService.getByName(TRAINING_TYPE_NAME);
+        TrainingType actual = service.getByName(TRAINING_TYPE_NAME);
 
         assertSame(expected, actual);
         verify(repository).findByTrainingTypeName(TRAINING_TYPE_NAME);
@@ -72,7 +73,7 @@ class TrainingTypeServiceImplTest {
     void getByName_whenTrainingTypeDoesNotExist_shouldThrowException() {
         when(repository.findByTrainingTypeName(TRAINING_TYPE_NAME)).thenReturn(Optional.empty());
 
-        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> trainingTypeService.getByName(TRAINING_TYPE_NAME));
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> service.getByName(TRAINING_TYPE_NAME));
 
         assertEquals("Training type Yoga not found", exception.getMessage());
         verify(repository).findByTrainingTypeName(TRAINING_TYPE_NAME);
