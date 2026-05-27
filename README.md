@@ -81,3 +81,19 @@ Check trainer health:
 ```bash
 http://localhost:8080/gym-crm-application/actuator/health/trainer
 ```
+
+Check Prometheus metrics:
+
+```bash
+http://localhost:8080/gym-crm-application/actuator/prometheus
+```
+
+Metric descriptions:
+
+```text
+gym_trainees_total     - total number of created trainees since application startup
+gym_trainers_total     - total number of created trainers since application startup
+gym_trainings_total    - total number of created trainings since application startup
+gym_trainees_active    - current number of active trainees
+gym_trainers_active    - current number of active trainers
+```

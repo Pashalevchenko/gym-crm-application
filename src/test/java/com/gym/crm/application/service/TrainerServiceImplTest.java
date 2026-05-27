@@ -3,6 +3,7 @@ package com.gym.crm.application.service;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.gym.crm.application.actuator.metrics.MetricsService;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.TrainingType;
 import com.gym.crm.application.entity.User;
@@ -58,6 +59,9 @@ class TrainerServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private MetricsService metrics;
+
     @InjectMocks
     private TrainerServiceImpl service;
 
@@ -110,6 +114,7 @@ class TrainerServiceImplTest {
         verify(profileService).createUsername(FIRST_NAME, LAST_NAME);
         verify(profileService).generatePassword();
         verify(repository).save(any(Trainer.class));
+        verify(metrics).incrementTrainerCreated();
 
     }
 
