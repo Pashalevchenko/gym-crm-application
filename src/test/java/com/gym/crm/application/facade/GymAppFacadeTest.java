@@ -335,7 +335,6 @@ class GymAppFacadeTest {
 
         assertEquals(1, actual.size());
         assertEquals("Morning Yoga", actual.get(0).getTrainingName());
-
         verify(traineeService).getTraineeTrainings(USERNAME, fromDate, toDate, trainerName, trainingTypeName);
         verify(traineeRestMapper).toTrainingResponses(List.of(training));
     }
@@ -398,7 +397,6 @@ class GymAppFacadeTest {
         TraineeAssignedTrainersUpdateResponse actual = facade.updateTraineeTrainersList(USERNAME, request);
 
         assertEquals(expected, actual);
-
         verify(trainerService).getTrainerByUsername(trainerUsername);
         verify(traineeService).updateTrainersList(USERNAME, trainers);
         verify(traineeRestMapper).toAssignedTrainerResponse(trainer);
@@ -608,7 +606,6 @@ class GymAppFacadeTest {
         TrainingResponseDTO actual = facade.getTrainingById(TRAINING_ID);
 
         assertEquals(expected, actual);
-
         verify(trainingService).getTrainingById(TRAINING_ID);
         verify(trainingMapper).entityToDto(training);
     }
