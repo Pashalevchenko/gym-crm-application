@@ -1,4 +1,4 @@
-#Gym CRM application
+# Gym CRM application
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Pashalevchenko_gym-crm-application&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Pashalevchenko_gym-crm-application)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Pashalevchenko_gym-crm-application&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Pashalevchenko_gym-crm-application)
@@ -31,3 +31,53 @@ mvn clean compile
 ### Run tests (requires Docker to be running)
 ```
 mvn test
+```
+
+4. ## Actuator endpoints
+
+The application exposes Spring Boot Actuator endpoints for health checks and Prometheus metrics.
+
+Base local URL:
+
+```text
+http://localhost:8080/gym-crm-application
+```
+
+Available actuator endpoints:
+
+```text
+GET /actuator/health
+GET /actuator/health/database
+GET /actuator/health/trainee
+GET /actuator/health/trainer
+GET /actuator/health/trainingType
+GET /actuator/health/userRepository
+GET /actuator/metrics
+GET /actuator/prometheus
+```
+
+### Examples
+
+Check application health:
+
+```bash
+http://localhost:8080/gym-crm-application/actuator/health
+```
+
+Check database health:
+
+```bash
+http://localhost:8080/gym-crm-application/actuator/health/database
+```
+
+Check trainee health:
+
+```bash
+http://localhost:8080/gym-crm-application/actuator/health/trainee
+```
+
+Check trainer health:
+
+```bash
+http://localhost:8080/gym-crm-application/actuator/health/trainer
+```

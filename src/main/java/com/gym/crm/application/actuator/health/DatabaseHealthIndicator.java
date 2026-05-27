@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DatabaseHealthIndicator implements HealthIndicator {
 
+    private static final String DATABASE_DETAIL = "database";
+
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -19,18 +21,18 @@ public class DatabaseHealthIndicator implements HealthIndicator {
 
             if (Integer.valueOf(1).equals(result)) {
                 return Health.up()
-                        .withDetail("database", "Available")
+                        .withDetail(DATABASE_DETAIL, "Available")
                         .withDetail("validationQuery", "SELECT 1")
                         .build();
             }
 
             return Health.down()
-                    .withDetail("database", "Unexpected validation result")
+                    .withDetail(DATABASE_DETAIL, "Unexpected validation result")
                     .withDetail("validationResult", result)
                     .build();
         } catch (Exception exception) {
             return Health.down(exception)
-                    .withDetail("database", "Unavailable")
+                    .withDetail(DATABASE_DETAIL, "Unavailable")
                     .build();
         }
     }

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TrainerHealthIndicator implements HealthIndicator {
 
+    private static final String REPOSITORY_DETAIL = "repository";
+
     private final TrainerRepository trainerRepository;
 
     @Override
@@ -18,12 +20,12 @@ public class TrainerHealthIndicator implements HealthIndicator {
             long trainersCount = trainerRepository.count();
 
             return Health.up()
-                    .withDetail("repository", "Available")
+                    .withDetail(REPOSITORY_DETAIL, "Available")
                     .withDetail("trainersCount", trainersCount)
                     .build();
         } catch (Exception exception) {
             return Health.down(exception)
-                    .withDetail("repository", "Unavailable")
+                    .withDetail(REPOSITORY_DETAIL, "Unavailable")
                     .build();
         }
     }
