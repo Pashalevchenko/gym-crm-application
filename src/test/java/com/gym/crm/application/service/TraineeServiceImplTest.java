@@ -1,15 +1,13 @@
 package com.gym.crm.application.service;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.gym.crm.application.dao.TraineeDao;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
-import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.User;
-import com.gym.crm.application.search.filter.TraineeTrainingSearchFilter;
+import com.gym.crm.application.repository.TraineeRepository;
+import com.gym.crm.application.repository.TrainerRepository;
 import com.gym.crm.application.service.impl.TraineeServiceImpl;
 import com.gym.crm.application.validation.TraineeValidator;
 import org.junit.jupiter.api.AfterEach;
@@ -25,21 +23,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +49,10 @@ class TraineeServiceImplTest {
     private final String PASSWORD = "randomPass123";
 
     @Mock
-    private TraineeDao traineeDao;
+    private TraineeRepository repository;
+
+    @Mock
+    private TrainerRepository trainerRepository;
 
     @Mock
     private ProfileService profileService;
@@ -66,7 +64,7 @@ class TraineeServiceImplTest {
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private TraineeServiceImpl traineeService;
+    private TraineeServiceImpl service;
 
     private ListAppender<ILoggingEvent> listAppender;
     private Logger logger;
@@ -103,10 +101,9 @@ class TraineeServiceImplTest {
         when(profileService.createUsername(FIRST_NAME, LAST_NAME)).thenReturn(USERNAME);
         when(profileService.generatePassword()).thenReturn(rawPassword);
         when(passwordEncoder.encode(rawPassword)).thenReturn(encodedHash);
+        when(repository.save(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        when(traineeDao.create(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        Trainee actual = traineeService.createTrainee(trainee);
+        Trainee actual = service.createTrainee(trainee);
 
         assertNotNull(actual);
         assertEquals(FIRST_NAME, actual.getUser().getFirstName());
@@ -119,7 +116,7 @@ class TraineeServiceImplTest {
         verify(profileService).createUsername(FIRST_NAME, LAST_NAME);
         verify(profileService).generatePassword();
         verify(passwordEncoder).encode(rawPassword);
-        verify(traineeDao).create(any(Trainee.class));
+        verify(repository).save(any(Trainee.class));
     }
 
     @Test
@@ -127,14 +124,14 @@ class TraineeServiceImplTest {
     void getTraineeById_whenFound_shouldReturnTrainee() {
         Trainee trainee = buildTrainee(true);
 
-        when(traineeDao.findById(TRAINEE_ID)).thenReturn(Optional.of(trainee));
+        when(repository.findById(TRAINEE_ID)).thenReturn(Optional.of(trainee));
 
-        Trainee actual = traineeService.getTraineeById(TRAINEE_ID);
+        Trainee actual = service.getTraineeById(TRAINEE_ID);
 
         assertEquals(TRAINEE_ID, actual.getId());
         assertEquals(FIRST_NAME, actual.getUser().getFirstName());
         assertEquals(USERNAME, actual.getUser().getUsername());
-        verify(traineeDao).findById(TRAINEE_ID);
+        verify(repository).findById(TRAINEE_ID);
     }
 
     @Test
@@ -142,11 +139,10 @@ class TraineeServiceImplTest {
     void getTraineeById_whenNotFound() {
         Long id = 99L;
 
-        when(traineeDao.findById(id)).thenReturn(Optional.empty());
+        when(repository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> traineeService.getTraineeById(id));
-
-        verify(traineeDao).findById(id);
+        assertThrows(NoSuchElementException.class, () -> service.getTraineeById(id));
+        verify(repository).findById(id);
     }
 
     @Test
@@ -165,10 +161,10 @@ class TraineeServiceImplTest {
                 .address("Lviv")
                 .build();
 
-        when(traineeDao.findByUsername(USERNAME)).thenReturn(Optional.of(existing));
-        when(traineeDao.update(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(existing));
+        when(repository.save(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Trainee actual = traineeService.updateTrainee(updateRequest);
+        Trainee actual = service.updateTrainee(updateRequest);
 
         assertEquals(TRAINEE_ID, actual.getId());
         assertEquals(USER_ID, actual.getUser().getId());
@@ -181,8 +177,8 @@ class TraineeServiceImplTest {
         assertEquals(LocalDate.of(1999, 5, 10), actual.getDateOfBirth());
         assertEquals("Lviv", actual.getAddress());
         verify(traineeValidator).validateForUpdate(updateRequest);
-        verify(traineeDao).findByUsername(USERNAME);
-        verify(traineeDao).update(any(Trainee.class));
+        verify(repository).findByUserUsername(USERNAME);
+        verify(repository).save(any(Trainee.class));
     }
 
     @Test
@@ -201,13 +197,13 @@ class TraineeServiceImplTest {
                 .address("Lviv")
                 .build();
 
-        when(traineeDao.findByUsername(USERNAME)).thenReturn(Optional.of(existing));
-        when(traineeDao.update(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(existing));
+        when(repository.save(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        traineeService.updateTrainee(updateRequest);
+        service.updateTrainee(updateRequest);
 
         ArgumentCaptor<Trainee> captor = ArgumentCaptor.forClass(Trainee.class);
-        verify(traineeDao).update(captor.capture());
+        verify(repository).save(captor.capture());
 
         Trainee passedToDao = captor.getValue();
 
@@ -241,26 +237,111 @@ class TraineeServiceImplTest {
                         .build()
         );
 
-        when(traineeDao.findAll()).thenReturn(trainees);
+        when(repository.findAll()).thenReturn(trainees);
 
-        List<Trainee> actual = traineeService.getAllTrainees();
+        List<Trainee> actual = service.getAllTrainees();
 
         assertEquals(2, actual.size());
         assertEquals(USERNAME, actual.get(0).getUser().getUsername());
         assertEquals("anna.smith", actual.get(1).getUser().getUsername());
-        verify(traineeDao).findAll();
+        verify(repository).findAll();
     }
 
     @Test
-    @DisplayName("Should delegate trainee deletion to DAO by ID")
-    void deleteTrainee_shouldCallDao() {
-        traineeService.deleteTrainee(TRAINEE_ID);
+    @DisplayName("Should delete trainee by username")
+    void deleteTraineeByUsername_shouldValidateUsernameAndDelete() {
+        String username = "test.user";
 
-        verify(traineeDao).delete(TRAINEE_ID);
+        service.deleteTraineeByUsername(username);
 
-        assertThat(listAppender.list)
-                .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
-                .contains(tuple("Trainee profile deleted with id: " + TRAINEE_ID, Level.INFO));
+        verify(traineeValidator).validateUsername(username);
+        verify(repository).deleteByUserUsername(username);
+    }
+
+    @Test
+    @DisplayName("Should get not assigned trainers")
+    void getNotAssignedTrainers_shouldValidateUsernameAndReturnTrainers() {
+        String username = "test.user";
+        Trainer trainer = Trainer.builder()
+                .id(1L)
+                .build();
+
+        when(repository.findNotAssignedTrainers(username)).thenReturn(List.of(trainer));
+
+        List<Trainer> actual = service.getNotAssignedTrainers(username);
+
+        assertEquals(1, actual.size());
+        assertEquals(trainer, actual.get(0));
+        verify(traineeValidator).validateUsername(username);
+        verify(repository).findNotAssignedTrainers(username);
+    }
+
+    @Test
+    @DisplayName("Should update trainee trainers list")
+    void updateTrainersList_shouldValidateAndUpdateTrainersList() {
+        String traineeUsername = "test.user";
+        String trainerUsername = "trainer.user";
+        User trainerUser = User.builder()
+                .username(trainerUsername)
+                .build();
+        User traineeUser = User.builder()
+                .username(trainerUsername)
+                .build();
+        Trainer inputTrainer = Trainer.builder()
+                .id(1L)
+                .user(trainerUser)
+                .build();
+        Trainer managedTrainer = Trainer.builder()
+                .id(1L)
+                .user(traineeUser)
+                .build();
+        Set<Trainer> inputTrainers = Set.of(inputTrainer);
+        Set<Trainer> managedTrainers = Set.of(managedTrainer);
+        User existingTraineeUser = User.builder()
+                .username(traineeUsername)
+                .build();
+        Trainee existingTrainee = Trainee.builder()
+                .id(1L)
+                .user(existingTraineeUser)
+                .trainers(new HashSet<>())
+                .build();
+        Trainee updatedTrainee = existingTrainee.toBuilder()
+                .trainers(managedTrainers)
+                .build();
+
+        when(repository.findByUserUsername(traineeUsername)).thenReturn(Optional.of(existingTrainee));
+        when(trainerRepository.findByUserUsername(trainerUsername)).thenReturn(Optional.of(managedTrainer));
+        when(repository.save(any(Trainee.class))).thenReturn(updatedTrainee);
+
+        Trainee actual = service.updateTrainersList(traineeUsername, inputTrainers);
+
+        assertEquals(updatedTrainee, actual);
+        verify(traineeValidator).validateTrainersList(inputTrainers);
+        verify(repository).findByUserUsername(traineeUsername);
+        verify(trainerRepository).findByUserUsername(trainerUsername);
+        verify(repository).save(argThat(trainee -> trainee.getId().equals(1L) && trainee.getTrainers().contains(managedTrainer)));
+    }
+
+    @Test
+    @DisplayName("Should activate inactive trainee")
+    void changeActiveStatus_shouldActivateInactiveTrainee() {
+        User user = User.builder()
+                .username(USERNAME)
+                .isActive(false)
+                .build();
+        Trainee trainee = Trainee.builder()
+                .id(TRAINEE_ID)
+                .user(user)
+                .build();
+
+        when(repository.findByUserUsername(USERNAME)).thenReturn(Optional.of(trainee));
+        when(repository.save(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Trainee actual = service.changeActiveStatus(USERNAME, true);
+
+        assertTrue(actual.getUser().isActive());
+        verify(repository).findByUserUsername(USERNAME);
+        verify(repository).save(argThat(updated -> updated.getUser().isActive() && updated.getUser().getUsername().equals(USERNAME)));
     }
 
     private Trainee buildTrainee(boolean active) {
@@ -279,110 +360,5 @@ class TraineeServiceImplTest {
                 .dateOfBirth(LocalDate.of(2000, 1, 1))
                 .address("Kyiv")
                 .build();
-    }
-
-    @Test
-    @DisplayName("Should delete trainee by username")
-    void deleteTraineeByUsername_shouldValidateUsernameAndDelete() {
-        String username = "test.user";
-
-        traineeService.deleteTraineeByUsername(username);
-
-        verify(traineeValidator).validateUsername(username);
-        verify(traineeDao).deleteByUsername(username);
-    }
-
-    @Test
-    @DisplayName("Should get trainee trainings by criteria")
-    void getTraineeTrainings_shouldBuildFilterAndReturnTrainings() {
-        String username = "test.user";
-        LocalDate fromDate = LocalDate.of(2026, 1, 1);
-        LocalDate toDate = LocalDate.of(2026, 1, 31);
-        String trainerName = "Ivan";
-        String trainingTypeName = "Yoga";
-        Training training = Training.builder()
-                .id(1L)
-                .trainingName("Morning Yoga")
-                .build();
-
-        when(traineeDao.findTrainingsByCriteria(any(TraineeTrainingSearchFilter.class)))
-                .thenReturn(List.of(training));
-
-        List<Training> actual = traineeService.getTraineeTrainings(username, fromDate, toDate, trainerName, trainingTypeName);
-
-        assertEquals(1, actual.size());
-        assertEquals(training, actual.get(0));
-
-        verify(traineeValidator).validateUsername(username);
-        verify(traineeDao).findTrainingsByCriteria(argThat(filter ->
-                filter.getUsername().equals(username)
-                        && filter.getFromDate().equals(fromDate)
-                        && filter.getToDate().equals(toDate)
-                        && filter.getTrainerName().equals(trainerName)
-                        && filter.getTrainingTypeName().equals(trainingTypeName)));
-    }
-
-    @Test
-    @DisplayName("Should get not assigned trainers")
-    void getNotAssignedTrainers_shouldValidateUsernameAndReturnTrainers() {
-        String username = "test.user";
-        Trainer trainer = Trainer.builder()
-                .id(1L)
-                .build();
-
-        when(traineeDao.findNotAssignedTrainers(username)).thenReturn(List.of(trainer));
-
-        List<Trainer> actual = traineeService.getNotAssignedTrainers(username);
-
-        assertEquals(1, actual.size());
-        assertEquals(trainer, actual.get(0));
-        verify(traineeValidator).validateUsername(username);
-        verify(traineeDao).findNotAssignedTrainers(username);
-    }
-
-    @Test
-    @DisplayName("Should update trainee trainers list")
-    void updateTrainersList_shouldValidateAndUpdateTrainersList() {
-        String username = "test.user";
-        Trainer trainer = Trainer.builder()
-                .id(1L)
-                .build();
-        Set<Trainer> trainers = Set.of(trainer);
-        Trainee updatedTrainee = Trainee.builder()
-                .id(1L)
-                .trainers(trainers)
-                .build();
-
-        when(traineeDao.updateTrainersList(username, trainers)).thenReturn(updatedTrainee);
-
-        Trainee actual = traineeService.updateTrainersList(username, trainers);
-
-        assertEquals(updatedTrainee, actual);
-        verify(traineeValidator).validateUsername(username);
-        verify(traineeValidator).validateTrainersList(trainers);
-        verify(traineeDao).updateTrainersList(username, trainers);
-    }
-
-    @Test
-    @DisplayName("Should activate inactive trainee")
-    void changeActiveStatus_shouldActivateInactiveTrainee() {
-        User user = User.builder()
-                .username(USERNAME)
-                .isActive(false)
-                .build();
-        Trainee trainee = Trainee.builder()
-                .id(TRAINEE_ID)
-                .user(user)
-                .build();
-
-        when(traineeDao.findByUsername(USERNAME)).thenReturn(Optional.of(trainee));
-        when(traineeDao.update(any(Trainee.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        Trainee actual = traineeService.changeActiveStatus(USERNAME, true);
-
-        assertTrue(actual.getUser().isActive());
-
-        verify(traineeDao).findByUsername(USERNAME);
-        verify(traineeDao).update(argThat(updated -> updated.getUser().isActive() && updated.getUser().getUsername().equals(USERNAME)));
     }
 }

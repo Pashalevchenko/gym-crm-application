@@ -1,9 +1,40 @@
-db:
-  driver: org.postgresql.Driver
-  url: jdbc:postgresql://localhost:5432/gym-crm-application
-  username: gym
-  password: gym
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/gym-crm-application
+    username: gym
+    password: gym
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+    enabled: true
 
 app:
   api:
     base-path: /api/v1
+
+server:
+  port: 8080
+  servlet:
+    context-path: /gym-crm-application
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    org.springframework.boot.web.embedded.tomcat: INFO
+    org.apache.catalina: INFO
+    org.apache.coyote: INFO

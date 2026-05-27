@@ -302,14 +302,6 @@ class GymAppFacadeTest {
     }
 
     @Test
-    @DisplayName("Should successfully delegate trainee deletion to the service layer using the provided ID")
-    void deleteTrainee_Test() {
-        facade.deleteTrainee(TRAINEE_ID);
-
-        verify(traineeService).deleteTrainee(TRAINEE_ID);
-    }
-
-    @Test
     @DisplayName("Should delete trainee by username")
     void deleteTraineeByUsername_Test() {
         facade.deleteTraineeByUsername(USERNAME);
@@ -343,7 +335,6 @@ class GymAppFacadeTest {
 
         assertEquals(1, actual.size());
         assertEquals("Morning Yoga", actual.get(0).getTrainingName());
-
         verify(traineeService).getTraineeTrainings(USERNAME, fromDate, toDate, trainerName, trainingTypeName);
         verify(traineeRestMapper).toTrainingResponses(List.of(training));
     }
@@ -406,7 +397,6 @@ class GymAppFacadeTest {
         TraineeAssignedTrainersUpdateResponse actual = facade.updateTraineeTrainersList(USERNAME, request);
 
         assertEquals(expected, actual);
-
         verify(trainerService).getTrainerByUsername(trainerUsername);
         verify(traineeService).updateTrainersList(USERNAME, trainers);
         verify(traineeRestMapper).toAssignedTrainerResponse(trainer);
@@ -616,7 +606,6 @@ class GymAppFacadeTest {
         TrainingResponseDTO actual = facade.getTrainingById(TRAINING_ID);
 
         assertEquals(expected, actual);
-
         verify(trainingService).getTrainingById(TRAINING_ID);
         verify(trainingMapper).entityToDto(training);
     }

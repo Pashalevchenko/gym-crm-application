@@ -1,10 +1,12 @@
 package com.gym.crm.application.service.impl;
 
-import com.gym.crm.application.dao.TrainingTypeDao;
 import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.repository.TrainingTypeRepository;
 import com.gym.crm.application.service.TrainingTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -12,16 +14,18 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class TrainingTypeServiceImpl implements TrainingTypeService {
 
-    private final TrainingTypeDao trainingTypeDao;
+    private final TrainingTypeRepository repository;
 
+    @Transactional(readOnly = true)
     @Override
     public List<TrainingType> getAllTrainingsType() {
-        return trainingTypeDao.findAll();
+        return repository.findAll();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public TrainingType getByName(String name) {
-        return trainingTypeDao.findByName(name)
+        return repository.findByTrainingTypeName(name)
                 .orElseThrow(() -> new NoSuchElementException(String.format("Training type %s not found", name)));
     }
 }

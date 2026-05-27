@@ -1,7 +1,7 @@
 package com.gym.crm.application.service;
 
-import com.gym.crm.application.dao.TrainingTypeDao;
 import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.repository.TrainingTypeRepository;
 import com.gym.crm.application.service.impl.TrainingTypeServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -25,10 +26,10 @@ class TrainingTypeServiceImplTest {
     private static final String TRAINING_TYPE_NAME = "Yoga";
 
     @Mock
-    private TrainingTypeDao trainingTypeDao;
+    private TrainingTypeRepository repository;
 
     @InjectMocks
-    private TrainingTypeServiceImpl trainingTypeService;
+    private TrainingTypeServiceImpl service;
 
     @Test
     @DisplayName("Should return all training types")
@@ -43,12 +44,12 @@ class TrainingTypeServiceImplTest {
                 .build();
         List<TrainingType> expected = List.of(yoga, cardio);
 
-        when(trainingTypeDao.findAll()).thenReturn(expected);
+        when(repository.findAll()).thenReturn(expected);
 
-        List<TrainingType> actual = trainingTypeService.getAllTrainingsType();
+        List<TrainingType> actual = service.getAllTrainingsType();
 
         assertEquals(expected, actual);
-        verify(trainingTypeDao).findAll();
+        verify(repository).findAll();
     }
 
     @Test
@@ -59,22 +60,22 @@ class TrainingTypeServiceImplTest {
                 .trainingTypeName(TRAINING_TYPE_NAME)
                 .build();
 
-        when(trainingTypeDao.findByName(TRAINING_TYPE_NAME)).thenReturn(Optional.of(expected));
+        when(repository.findByTrainingTypeName(TRAINING_TYPE_NAME)).thenReturn(Optional.of(expected));
 
-        TrainingType actual = trainingTypeService.getByName(TRAINING_TYPE_NAME);
+        TrainingType actual = service.getByName(TRAINING_TYPE_NAME);
 
         assertSame(expected, actual);
-        verify(trainingTypeDao).findByName(TRAINING_TYPE_NAME);
+        verify(repository).findByTrainingTypeName(TRAINING_TYPE_NAME);
     }
 
     @Test
     @DisplayName("Should throw exception when training type is not found")
     void getByName_whenTrainingTypeDoesNotExist_shouldThrowException() {
-        when(trainingTypeDao.findByName(TRAINING_TYPE_NAME)).thenReturn(Optional.empty());
+        when(repository.findByTrainingTypeName(TRAINING_TYPE_NAME)).thenReturn(Optional.empty());
 
-        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> trainingTypeService.getByName(TRAINING_TYPE_NAME));
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> service.getByName(TRAINING_TYPE_NAME));
 
         assertEquals("Training type Yoga not found", exception.getMessage());
-        verify(trainingTypeDao).findByName(TRAINING_TYPE_NAME);
+        verify(repository).findByTrainingTypeName(TRAINING_TYPE_NAME);
     }
 }

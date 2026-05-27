@@ -1,18 +1,22 @@
 package com.gym.crm.application.service.impl;
 
-import com.gym.crm.application.aspect.annotation.Transactional;
-import com.gym.crm.application.dao.TrainerDao;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.User;
+import com.gym.crm.application.repository.TrainerRepository;
+import com.gym.crm.application.repository.TrainingRepository;
+import com.gym.crm.application.repository.specification.TrainingSpecifications;
 import com.gym.crm.application.search.filter.TrainerTrainingSearchFilter;
 import com.gym.crm.application.service.ProfileService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.validation.TrainerValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,13 +26,14 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class TrainerServiceImpl implements TrainerService {
 
-    private final TrainerDao trainerDao;
+    private final TrainerRepository trainerRepository;
+    private final TrainingRepository trainingRepository;
     private final ProfileService profileService;
     private final TrainerValidator validator;
     private final PasswordEncoder passwordEncoder;
 
-    @Override
     @Transactional
+    @Override
     public Trainer createTrainer(Trainer trainer) {
         validator.validateForCreate(trainer);
 
@@ -44,7 +49,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .user(userWithCredentials)
                 .build();
 
-        Trainer created = trainerDao.create(trainerToCreate);
+        Trainer created = trainerRepository.save(trainerToCreate);
 
         User responseUser = created.getUser().toBuilder()
                 .password(password)
@@ -56,27 +61,29 @@ public class TrainerServiceImpl implements TrainerService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Trainer getTrainerById(Long id) {
-        return trainerDao.findById(id).orElseThrow(() -> new NoSuchElementException(String.format("Trainer with ID %d not found", id)));
+        return trainerRepository.findById(id).orElseThrow(() -> new NoSuchElementException(String.format("Trainer with ID %d not found", id)));
     }
 
+    @Transactional(readOnly = true)
     @Override
-    @Transactional
     public Trainer getTrainerByUsername(String username) {
         validator.validateUsername(username);
 
-        return trainerDao.findByUsername(username)
+        return trainerRepository.findByUserUsername(username)
                 .orElseThrow(() -> new NoSuchElementException(String.format("Trainer with username %s  not found", username)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Trainer> getAllTrainers() {
-        return trainerDao.findAll();
+        return trainerRepository.findAll();
     }
 
-    @Override
     @Transactional
+    @Override
     public Trainer updateTrainer(Trainer trainer) {
         validator.validateForUpdate(trainer);
 
@@ -89,12 +96,13 @@ public class TrainerServiceImpl implements TrainerService {
                 .specialization(trainer.getSpecialization())
                 .user(userToUpdate)
                 .build();
-        Trainer updated = trainerDao.update(trainerToUpdate);
+        Trainer updated = trainerRepository.save(trainerToUpdate);
 
         log.info("Trainer profile updated for username: {}", updated.getUser().getUsername());
         return updated;
     }
 
+    @Transactional
     @Override
     public Trainer changeActiveStatus(String username, boolean status) {
         Trainer trainer = getTrainerByUsername(username);
@@ -109,6 +117,7 @@ public class TrainerServiceImpl implements TrainerService {
         return updateActiveStatus(trainer, status);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Training> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
         validator.validateUsername(username);
@@ -119,8 +128,9 @@ public class TrainerServiceImpl implements TrainerService {
                 .toDate(toDate)
                 .traineeName(traineeName)
                 .build();
+        Specification<Training> specification = TrainingSpecifications.byTrainerCriteria(filter);
 
-        return trainerDao.findTrainingsByCriteria(filter);
+        return trainingRepository.findAll(specification);
     }
 
     private Trainer updateActiveStatus(Trainer trainer, boolean active) {
@@ -131,6 +141,6 @@ public class TrainerServiceImpl implements TrainerService {
                 .user(userToUpdate)
                 .build();
 
-        return trainerDao.update(trainerToUpdate);
+        return trainerRepository.save(trainerToUpdate);
     }
 }
