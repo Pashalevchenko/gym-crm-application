@@ -67,7 +67,7 @@ public class TrainerServiceImpl implements TrainerService {
         return trainerRepository.findById(id).orElseThrow(() -> new NoSuchElementException(String.format("Trainer with ID %d not found", id)));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     @Override
     public Trainer getTrainerByUsername(String username) {
         validator.validateUsername(username);

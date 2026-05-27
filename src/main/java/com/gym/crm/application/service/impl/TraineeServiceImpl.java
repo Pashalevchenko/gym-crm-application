@@ -76,7 +76,7 @@ public class TraineeServiceImpl implements TraineeService {
                 new NoSuchElementException(String.format("Trainee with ID %d not found", id)));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     @Override
     public Trainee getTraineeByUsername(String username) {
         validator.validateUsername(username);
