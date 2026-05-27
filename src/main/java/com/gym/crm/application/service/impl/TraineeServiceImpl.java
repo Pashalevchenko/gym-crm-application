@@ -76,7 +76,7 @@ public class TraineeServiceImpl implements TraineeService {
                 new NoSuchElementException(String.format("Trainee with ID %d not found", id)));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public Trainee getTraineeByUsername(String username) {
         validator.validateUsername(username);
@@ -133,6 +133,7 @@ public class TraineeServiceImpl implements TraineeService {
         traineeRepository.deleteByUserUsername(username);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Training> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingTypeName) {
         validator.validateUsername(username);
@@ -148,6 +149,7 @@ public class TraineeServiceImpl implements TraineeService {
         return trainingRepository.findAll(TrainingSpecifications.byTraineeCriteria(filter));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Trainer> getNotAssignedTrainers(String traineeUsername) {
         validator.validateUsername(traineeUsername);
@@ -155,6 +157,7 @@ public class TraineeServiceImpl implements TraineeService {
         return traineeRepository.findNotAssignedTrainers(traineeUsername);
     }
 
+    @Transactional
     @Override
     public Trainee updateTrainersList(String traineeUsername, Set<Trainer> trainers) {
         validator.validateUsername(traineeUsername);
