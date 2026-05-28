@@ -2,7 +2,7 @@ package com.gym.crm.application.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.gym.crm.application.config.JsonReadConfig;
+import com.gym.crm.application.testutils.JsonResourceReader;
 import com.gym.crm.application.facade.GymAppFacade;
 import com.gym.crm.application.openapi.ActivationStatusRequest;
 import com.gym.crm.application.openapi.AssignedTrainerResponse;
@@ -15,6 +15,8 @@ import com.gym.crm.application.openapi.TraineeGetResponse;
 import com.gym.crm.application.openapi.TraineeUpdateRequest;
 import com.gym.crm.application.openapi.TraineeUpdateResponse;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -53,8 +55,8 @@ class TraineeControllerTest {
 
     @Test
     void register_shouldReturnOk() throws Exception {
-        String request = JsonReadConfig.readResource("/json/trainee-create-request.json");
-        String expectedResponse = JsonReadConfig.readResource("/json/trainee-create-response.json");
+        String request = JsonResourceReader.readResource("/json/trainee-create-request.json");
+        String expectedResponse = JsonResourceReader.readResource("/json/trainee-create-response.json");
         TraineeCreateResponse response = new TraineeCreateResponse()
                 .username(USERNAME)
                 .password("password");
@@ -68,7 +70,10 @@ class TraineeControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        assertThat(mapper.readTree(actualResponse)).isEqualTo(mapper.readTree(expectedResponse));
+
+        JSONAssert.assertEquals(expectedResponse,
+                actualResponse,
+                JSONCompareMode.STRICT);
         verify(facade).createTrainee(any(TraineeCreateRequest.class));
     }
 
@@ -90,8 +95,8 @@ class TraineeControllerTest {
 
     @Test
     void updateTraineeProfile_shouldReturnOk() throws Exception {
-        String request = JsonReadConfig.readResource("/json/trainee-update-request.json");
-        String expectedResponse = JsonReadConfig.readResource("/json/trainee-update-response.json");
+        String request = JsonResourceReader.readResource("/json/trainee-update-request.json");
+        String expectedResponse = JsonResourceReader.readResource("/json/trainee-update-response.json");
         TraineeUpdateResponse response = new TraineeUpdateResponse()
                 .username(USERNAME)
                 .firstName(FIRST_NAME)

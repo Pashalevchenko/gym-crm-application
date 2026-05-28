@@ -1,4 +1,4 @@
-package com.gym.crm.application.config;
+package com.gym.crm.application.testutils;
 
 import lombok.experimental.UtilityClass;
 
@@ -7,10 +7,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 @UtilityClass
-public class JsonReadConfig {
+public class JsonResourceReader {
 
     public String readResource(String path) {
-        try (InputStream inputStream = JsonReadConfig.class.getResourceAsStream(path)) {
+        try (InputStream inputStream = JsonResourceReader.class.getResourceAsStream(path)) {
             if (inputStream == null) {
                 throw new IllegalArgumentException(String.format("Resource not found: %s", path));
             }
