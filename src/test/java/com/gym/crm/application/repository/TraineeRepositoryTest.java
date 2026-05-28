@@ -44,10 +44,30 @@ class TraineeRepositoryTest extends AbstractRepositoryTest<TraineeRepository> {
 
             assertThat(actual).isNotNull();
             assertThat(actual.getId()).isNotNull();
+            assertThat(actual.getDateOfBirth()).isEqualTo(LocalDate.of(2000, 1, 1));
+            assertThat(actual.getAddress()).isEqualTo("Kyiv");
             assertThat(actual.getUser()).isNotNull();
             assertThat(actual.getUser().getId()).isNotNull();
+            assertThat(actual.getUser().getFirstName()).isEqualTo("New");
+            assertThat(actual.getUser().getLastName()).isEqualTo("Trainee");
+            assertThat(actual.getUser().getUsername()).isEqualTo("new.trainee");
+            assertThat(actual.getUser().getPassword()).isEqualTo("12345");
+            assertThat(actual.getUser().isActive()).isTrue();
+
             Optional<Trainee> found = repository.findByUserUsername("new.trainee");
+
             assertThat(found).isPresent();
+            Trainee saved = found.get();
+            assertThat(saved.getId()).isEqualTo(actual.getId());
+            assertThat(saved.getDateOfBirth()).isEqualTo(LocalDate.of(2000, 1, 1));
+            assertThat(saved.getAddress()).isEqualTo("Kyiv");
+            assertThat(saved.getUser()).isNotNull();
+            assertThat(saved.getUser().getId()).isEqualTo(actual.getUser().getId());
+            assertThat(saved.getUser().getFirstName()).isEqualTo("New");
+            assertThat(saved.getUser().getLastName()).isEqualTo("Trainee");
+            assertThat(saved.getUser().getUsername()).isEqualTo("new.trainee");
+            assertThat(saved.getUser().getPassword()).isEqualTo("12345");
+            assertThat(saved.getUser().isActive()).isTrue();
         }
 
         @Test

@@ -11,20 +11,16 @@ import com.gym.crm.application.openapi.TrainerCreateResponse;
 import com.gym.crm.application.openapi.TrainerGetResponse;
 import com.gym.crm.application.openapi.TrainerUpdateRequest;
 import com.gym.crm.application.openapi.TrainerUpdateResponse;
-import org.hibernate.validator.HibernateValidator;
-import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.time.LocalDate;
 import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,7 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(TrainerController.class)
 class TrainerControllerTest {
 
     private static final String BASE_URL = "/api/v1/trainers";
@@ -45,25 +41,11 @@ class TrainerControllerTest {
 
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private GymAppFacade facade;
-
-    @BeforeEach
-    void setUp() {
-        TrainerController controller = new TrainerController(facade);
-
-        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
-        validator.setProviderClass(HibernateValidator.class);
-        validator.setMessageInterpolator(new ParameterMessageInterpolator());
-        validator.afterPropertiesSet();
-
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
-                .addPlaceholderValue("app.api.base-path", "/api/v1")
-                .setValidator(validator)
-                .build();
-    }
 
     @Test
     void register_shouldReturnOk() throws Exception {

@@ -4,21 +4,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gym.crm.application.facade.GymAppFacade;
 import com.gym.crm.application.openapi.LoginChangeRequest;
 import com.gym.crm.application.openapi.LoginRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(AuthController.class)
 class AuthControllerTest {
 
     private static final String USERNAME = "test.user";
@@ -28,18 +27,11 @@ class AuthControllerTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private GymAppFacade facade;
-
-    @BeforeEach
-    void setUp() {
-        AuthController controller = new AuthController(facade);
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
-                .addPlaceholderValue("app.api.base-path", "/api/v1")
-                .build();
-    }
 
     @Test
     void login_shouldReturnOk() throws Exception {

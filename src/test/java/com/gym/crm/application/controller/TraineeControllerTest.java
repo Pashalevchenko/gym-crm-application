@@ -2,6 +2,7 @@ package com.gym.crm.application.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.gym.crm.application.config.JsonReadConfig;
 import com.gym.crm.application.facade.GymAppFacade;
 import com.gym.crm.application.openapi.ActivationStatusRequest;
 import com.gym.crm.application.openapi.AssignedTrainerResponse;
@@ -13,19 +14,17 @@ import com.gym.crm.application.openapi.TraineeCreateResponse;
 import com.gym.crm.application.openapi.TraineeGetResponse;
 import com.gym.crm.application.openapi.TraineeUpdateRequest;
 import com.gym.crm.application.openapi.TraineeUpdateResponse;
-import org.hibernate.validator.HibernateValidator;
-import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+
 import java.time.LocalDate;
 import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,7 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(TraineeController.class)
 class TraineeControllerTest {
 
     private static final String BASE_URL = "/api/v1/trainees";
@@ -46,43 +45,30 @@ class TraineeControllerTest {
 
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private GymAppFacade facade;
-
-    @BeforeEach
-    void setUp() {
-        TraineeController controller = new TraineeController(facade);
-
-        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
-        validator.setProviderClass(HibernateValidator.class);
-        validator.setMessageInterpolator(new ParameterMessageInterpolator());
-        validator.afterPropertiesSet();
-
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
-                .setValidator(validator)
-                .addPlaceholderValue("app.api.base-path", "/api/v1")
-                .build();
-    }
 
     @Test
     void register_shouldReturnOk() throws Exception {
-        TraineeCreateRequest request = new TraineeCreateRequest()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .dateOfBirth(LocalDate.of(2000, 1, 1))
-                .address("Kyiv");
+        String request = JsonReadConfig.readResource("/json/trainee-create-request.json");
+        String expectedResponse = JsonReadConfig.readResource("/json/trainee-create-response.json");
         TraineeCreateResponse response = new TraineeCreateResponse()
                 .username(USERNAME)
                 .password("password");
 
         when(facade.createTrainee(any(TraineeCreateRequest.class))).thenReturn(response);
 
-        mockMvc.perform(post(BASE_URL + "/register")
+        String actualResponse = mockMvc.perform(post(BASE_URL + "/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                        .content(request))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertThat(mapper.readTree(actualResponse)).isEqualTo(mapper.readTree(expectedResponse));
         verify(facade).createTrainee(any(TraineeCreateRequest.class));
     }
 
@@ -104,12 +90,8 @@ class TraineeControllerTest {
 
     @Test
     void updateTraineeProfile_shouldReturnOk() throws Exception {
-        TraineeUpdateRequest request = new TraineeUpdateRequest()
-                .firstName(FIRST_NAME)
-                .lastName(LAST_NAME)
-                .dateOfBirth(LocalDate.of(2000, 1, 1))
-                .address("Lviv")
-                .isActive(false);
+        String request = JsonReadConfig.readResource("/json/trainee-update-request.json");
+        String expectedResponse = JsonReadConfig.readResource("/json/trainee-update-response.json");
         TraineeUpdateResponse response = new TraineeUpdateResponse()
                 .username(USERNAME)
                 .firstName(FIRST_NAME)
@@ -118,13 +100,16 @@ class TraineeControllerTest {
                 .address("Lviv")
                 .isActive(false);
 
-        when(facade.updateTrainee(any(TraineeUpdateRequest.class), any(String.class)))
-                .thenReturn(response);
+        when(facade.updateTrainee(any(TraineeUpdateRequest.class), any(String.class))).thenReturn(response);
 
-        mockMvc.perform(put(BASE_URL + "/" + USERNAME)
+        String actualResponse = mockMvc.perform(put(BASE_URL + "/" + USERNAME)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                        .content(request))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertThat(mapper.readTree(actualResponse)).isEqualTo(mapper.readTree(expectedResponse));
         verify(facade).updateTrainee(any(TraineeUpdateRequest.class), any(String.class));
     }
 
@@ -158,10 +143,10 @@ class TraineeControllerTest {
                 .trainerName("trainer.user");
 
         when(facade.getTraineeTrainings(any(String.class),
-                                        any(LocalDate.class),
-                                        any(LocalDate.class),
-                                        any(String.class),
-                                        any(String.class)))
+                any(LocalDate.class),
+                any(LocalDate.class),
+                any(String.class),
+                any(String.class)))
                 .thenReturn(List.of(training));
 
         mockMvc.perform(get(BASE_URL + "/" + USERNAME + "/trainings")

@@ -4,33 +4,74 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Pashalevchenko_gym-crm-application&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Pashalevchenko_gym-crm-application)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Pashalevchenko_gym-crm-application&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Pashalevchenko_gym-crm-application)
 
-1. ## Database Setup (Postgresql)
-Before the first run, make sure to create a database and user with proper privileges:
+## 1. Prerequisites
+
+Before running the application, make sure the following tools are installed:
+
+```text
+Java 21
+Maven
+PostgreSQL
 ```
+
+## 2. Clone the project
+
+```bash
+git clone https://github.com/Pashalevchenko/gym-crm-application.git
+cd gym-crm-application
+```
+
+## 3. Database Setup PostgreSQL
+
+Before the first run, create a database and user with proper privileges:
+
+```sql
 CREATE DATABASE gym_db;
 CREATE USER gym WITH PASSWORD 'gym';
 GRANT ALL PRIVILEGES ON DATABASE gym_db TO gym;
 ```
 
-2. ## Environment Variables
-Create a .env file in the root directory of the project with the following configuration:
+## 4. Environment Variables
 
-# Database Configuration
+Create a `.env` file in the root directory of the project with the following configuration:
+
+```text
 DB_USERNAME=gym
 DB_PASSWORD=gym
 DB_URL=jdbc:postgresql://localhost:5432/gym_db
-
-
-3. ## Run the Application
-
-### Build the project
 ```
+
+## 5. Build the project
+
+```bash
 mvn clean compile
 ```
 
-### Run tests (requires Docker to be running)
-```
+## 6. Run tests
+
+Docker must be running before executing tests.
+
+```bash
 mvn test
+```
+
+## 7. Run the application from console
+
+```bash
+mvn spring-boot:run
+```
+
+If you want to run with a specific Spring profile, use:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+After startup, the application will be available at:
+
+```text
+http://localhost:8080/gym-crm-application
+```
 ```
 
 4. ## Actuator endpoints
