@@ -1,6 +1,5 @@
 package com.gym.crm.application.mapper;
 
-import com.gym.crm.application.dto.mapper.TrainerMapper;
 import com.gym.crm.application.dto.request.TrainerRequestDTO;
 import com.gym.crm.application.dto.request.TrainerUpdateDTO;
 import com.gym.crm.application.dto.response.TrainerResponseDTO;
