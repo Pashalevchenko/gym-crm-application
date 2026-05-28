@@ -1,5 +1,6 @@
 package com.gym.crm.application.service.impl;
 
+import com.gym.crm.application.actuator.metrics.MetricsService;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.User;
@@ -29,6 +30,7 @@ public class TrainerServiceImpl implements TrainerService {
     private final TrainerRepository trainerRepository;
     private final TrainingRepository trainingRepository;
     private final ProfileService profileService;
+    private final MetricsService metrics;
     private final TrainerValidator validator;
     private final PasswordEncoder passwordEncoder;
 
@@ -55,6 +57,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .password(password)
                 .build();
 
+        metrics.incrementTrainerCreated();
         log.info("Trainer profile created with username: {}", username);
         return created.toBuilder()
                 .user(responseUser)

@@ -27,4 +27,6 @@ public interface TraineeRepository extends JpaRepository<Trainee, Long> {
             )
             """)
     List<Trainer> findNotAssignedTrainers(String traineeUsername);
+
+    long countByUserIsActiveTrue();
 }

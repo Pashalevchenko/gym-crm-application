@@ -1,5 +1,6 @@
 package com.gym.crm.application.service.impl;
 
+import com.gym.crm.application.actuator.metrics.MetricsService;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.repository.TrainingRepository;
 import com.gym.crm.application.service.TrainingService;
@@ -19,6 +20,7 @@ public class TrainingServiceImpl implements TrainingService {
 
     private final TrainingRepository repository;
     private final TrainingValidator validator;
+    private final MetricsService metrics;
 
     @Transactional
     @Override
@@ -27,6 +29,7 @@ public class TrainingServiceImpl implements TrainingService {
 
         Training created = repository.save(training);
 
+        metrics.incrementTrainingCreated();
         log.info("Training created with id: {}", created.getId());
         return created;
     }

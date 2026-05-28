@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.gym.crm.application.actuator.metrics.MetricsService;
 import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
@@ -44,6 +45,9 @@ class TrainingServiceImplTest {
 
     @Mock
     private TrainingValidator trainingValidator;
+
+    @Mock
+    private MetricsService metrics;
 
     @InjectMocks
     private TrainingServiceImpl service;
@@ -87,6 +91,7 @@ class TrainingServiceImplTest {
         assertEquals("Morning Yoga", actual.getTrainingName());
         verify(trainingValidator).validateForCreate(training);
         verify(repository).save(training);
+        verify(metrics).incrementTrainingCreated();
         assertThat(listAppender.list)
                 .extracting(ILoggingEvent::getFormattedMessage, ILoggingEvent::getLevel)
                 .contains(tuple("Training created with id: " + TRAINING_ID, Level.INFO));
