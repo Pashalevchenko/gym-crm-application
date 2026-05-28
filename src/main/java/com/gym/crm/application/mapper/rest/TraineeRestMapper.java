@@ -1,4 +1,4 @@
-package com.gym.crm.application.dto.mapper.rest;
+package com.gym.crm.application.mapper.rest;
 
 import com.gym.crm.application.dto.request.TraineeUpdateDTO;
 import com.gym.crm.application.entity.Trainee;

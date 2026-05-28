@@ -2,12 +2,12 @@ package com.gym.crm.application.facade;
 
 import com.gym.crm.application.aspect.annotation.Authenticated;
 import com.gym.crm.application.context.SecurityContextHolder;
-import com.gym.crm.application.dto.mapper.TraineeMapper;
-import com.gym.crm.application.dto.mapper.TrainerMapper;
-import com.gym.crm.application.dto.mapper.TrainingMapper;
-import com.gym.crm.application.dto.mapper.rest.TraineeRestMapper;
-import com.gym.crm.application.dto.mapper.rest.TrainerRestMapper;
-import com.gym.crm.application.dto.mapper.rest.TrainingRestMapper;
+import com.gym.crm.application.mapper.TraineeMapper;
+import com.gym.crm.application.mapper.TrainerMapper;
+import com.gym.crm.application.mapper.TrainingMapper;
+import com.gym.crm.application.mapper.rest.TraineeRestMapper;
+import com.gym.crm.application.mapper.rest.TrainerRestMapper;
+import com.gym.crm.application.mapper.rest.TrainingRestMapper;
 import com.gym.crm.application.dto.request.TraineeUpdateDTO;
 import com.gym.crm.application.dto.request.TrainerUpdateDTO;
 import com.gym.crm.application.dto.response.TraineeResponseDTO;
