@@ -173,14 +173,12 @@ class TraineeControllerTest {
                 new TraineeAssignedTrainersUpdateResponse()
                         .trainers(List.of(trainerResponse));
 
-        when(facade.updateTraineeTrainersList(any(String.class), any(TraineeAssignedTrainersUpdateRequest.class)))
-                .thenReturn(response);
+        when(facade.updateTraineeTrainersList(any(String.class), any(TraineeAssignedTrainersUpdateRequest.class))).thenReturn(response);
 
         mockMvc.perform(put(BASE_URL + "/" + USERNAME + "/trainers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
-
         verify(facade).updateTraineeTrainersList(any(String.class), any(TraineeAssignedTrainersUpdateRequest.class));
     }
 
