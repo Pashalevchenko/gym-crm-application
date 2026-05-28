@@ -41,15 +41,27 @@ class TrainerRepositoryTest extends AbstractRepositoryTest<TrainerRepository> {
             assertThat(actual.getId()).isNotNull();
             assertThat(actual.getUser()).isNotNull();
             assertThat(actual.getUser().getId()).isNotNull();
+            assertThat(actual.getUser().getFirstName()).isEqualTo("New");
+            assertThat(actual.getUser().getLastName()).isEqualTo("Trainer");
+            assertThat(actual.getUser().getUsername()).isEqualTo("new.trainer");
+            assertThat(actual.getUser().getPassword()).isEqualTo("12345");
+            assertThat(actual.getUser().isActive()).isTrue();
+            assertThat(actual.getSpecialization()).isNotNull();
+            assertThat(actual.getSpecialization().getId()).isEqualTo(SPECIALIZATION_ID);
 
             Optional<Trainer> found = repository.findByUserUsername("new.trainer");
+
             assertThat(found).isPresent();
             Trainer saved = found.get();
+            assertThat(saved.getId()).isEqualTo(actual.getId());
+            assertThat(saved.getUser()).isNotNull();
+            assertThat(saved.getUser().getId()).isEqualTo(actual.getUser().getId());
             assertThat(saved.getUser().getFirstName()).isEqualTo("New");
             assertThat(saved.getUser().getLastName()).isEqualTo("Trainer");
             assertThat(saved.getUser().getUsername()).isEqualTo("new.trainer");
             assertThat(saved.getUser().getPassword()).isEqualTo("12345");
             assertThat(saved.getUser().isActive()).isTrue();
+            assertThat(saved.getSpecialization()).isNotNull();
             assertThat(saved.getSpecialization().getId()).isEqualTo(SPECIALIZATION_ID);
         }
 
