@@ -1,4 +1,4 @@
-package com.gym.crm.application.testutils;
+package com.gym.crm.application.utils;
 
 import lombok.experimental.UtilityClass;
 
