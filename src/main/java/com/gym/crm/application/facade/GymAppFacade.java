@@ -2,6 +2,7 @@ package com.gym.crm.application.facade;
 
 import com.gym.crm.application.aspect.annotation.Authenticated;
 import com.gym.crm.application.context.SecurityContextHolder;
+import com.gym.crm.application.openapi.LoginResponse;
 import com.gym.crm.application.mapper.TraineeMapper;
 import com.gym.crm.application.mapper.TrainerMapper;
 import com.gym.crm.application.mapper.TrainingMapper;
@@ -69,9 +70,11 @@ public class GymAppFacade {
     private final TrainingRestMapper trainingRestMapper;
 
     @Transactional
-    public void login(String username, String password) {
-        authService.authenticate(username, password);
-        SecurityContextHolder.setContext(username);
+    public LoginResponse login(String username, String password) {
+        String token = authService.authenticate(username, password);
+
+        return new LoginResponse()
+                .token(token);
     }
 
     public void logout() {
@@ -90,7 +93,6 @@ public class GymAppFacade {
         return traineeMapper.entityToDto(traineeService.getTraineeById(id));
     }
 
-    @Authenticated
     @Transactional
     public TraineeGetResponse getTraineeByUsername(String username) {
         Trainee trainee = traineeService.getTraineeByUsername(username);

@@ -1,5 +1,6 @@
 package com.gym.crm.application.facade;
 
+import com.gym.crm.application.openapi.LoginResponse;
 import com.gym.crm.application.mapper.TraineeMapper;
 import com.gym.crm.application.mapper.TrainerMapper;
 import com.gym.crm.application.mapper.TrainingMapper;
@@ -65,7 +66,6 @@ class GymAppFacadeTest {
     private static final String FIRST_NAME = "Ivan";
     private static final String LAST_NAME = "Ivanov";
     private static final String USERNAME = FIRST_NAME + "." + LAST_NAME;
-    private static final String NEW_PASSWORD = "new12345";
     private static final Long TRAINEE_ID = 1L;
     private static final Long TRAINER_ID = 2L;
     private static final Long TRAINING_ID = 3L;
@@ -118,11 +118,14 @@ class GymAppFacadeTest {
     void loginShouldAuthenticateUserAndSetSecurityContext() {
         String username = "test.user";
         String password = "12345";
+        String token = "jwt-token";
 
-        facade.login(username, password);
+        when(authService.authenticate(username, password)).thenReturn(token);
 
+        LoginResponse actual = facade.login(username, password);
+
+        assertThat(actual.getToken()).isEqualTo(token);
         verify(authService).authenticate(username, password);
-        assertThat(SecurityContextHolder.getContext()).isEqualTo(username);
     }
 
     @Test

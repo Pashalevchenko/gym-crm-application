@@ -11,6 +11,8 @@ import com.gym.crm.application.openapi.TrainerCreateResponse;
 import com.gym.crm.application.openapi.TrainerGetResponse;
 import com.gym.crm.application.openapi.TrainerUpdateRequest;
 import com.gym.crm.application.openapi.TrainerUpdateResponse;
+import com.gym.crm.application.security.GymUserDetailsService;
+import com.gym.crm.application.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,6 +50,12 @@ class TrainerControllerTest {
 
     @MockitoBean
     private GymAppFacade facade;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private GymUserDetailsService gymUserDetailsService;
 
     @Test
     void register_shouldReturnOk() throws Exception {

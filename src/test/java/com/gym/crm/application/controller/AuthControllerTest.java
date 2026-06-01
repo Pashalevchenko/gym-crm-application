@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gym.crm.application.facade.GymAppFacade;
 import com.gym.crm.application.openapi.LoginChangeRequest;
 import com.gym.crm.application.openapi.LoginRequest;
+import com.gym.crm.application.security.GymUserDetailsService;
+import com.gym.crm.application.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -34,6 +36,12 @@ class AuthControllerTest {
 
     @MockitoBean
     private GymAppFacade facade;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private GymUserDetailsService gymUserDetailsService;
 
     @Test
     void login_shouldReturnOk() throws Exception {
