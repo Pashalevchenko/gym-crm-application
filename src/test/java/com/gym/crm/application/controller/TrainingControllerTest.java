@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gym.crm.application.facade.GymAppFacade;
 import com.gym.crm.application.openapi.TrainingCreateRequest;
 import com.gym.crm.application.openapi.TrainingTypeResponse;
+import com.gym.crm.application.security.GymUserDetailsService;
+import com.gym.crm.application.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,6 +40,12 @@ class TrainingControllerTest {
 
     @MockitoBean
     private GymAppFacade facade;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private GymUserDetailsService gymUserDetailsService;
 
     @Test
     void register_shouldReturnOk() throws Exception {

@@ -1,5 +1,6 @@
 package com.gym.crm.application.controller;
 
+import com.gym.crm.application.openapi.LoginResponse;
 import com.gym.crm.application.facade.GymAppFacade;
 import com.gym.crm.application.openapi.ErrorResponse;
 import com.gym.crm.application.openapi.LoginChangeRequest;
@@ -9,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,12 +35,10 @@ public class AuthController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest request, HttpSession session) {
-        facade.login(request.getUsername(), request.getPassword());
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
+        LoginResponse response = facade.login(request.getUsername(), request.getPassword());
 
-        session.setAttribute("username", request.getUsername());
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Change login password", description = "Changes the password for a given user")

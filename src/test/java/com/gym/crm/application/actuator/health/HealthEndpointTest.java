@@ -4,6 +4,8 @@ import com.gym.crm.application.repository.TraineeRepository;
 import com.gym.crm.application.repository.TrainerRepository;
 import com.gym.crm.application.repository.TrainingTypeRepository;
 import com.gym.crm.application.repository.UserRepository;
+import com.gym.crm.application.security.GymUserDetailsService;
+import com.gym.crm.application.security.JwtService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,12 @@ class HealthEndpointTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private GymUserDetailsService gymUserDetailsService;
 
     @Test
     @DisplayName("Should return trainee health details")
