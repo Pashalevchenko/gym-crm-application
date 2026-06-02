@@ -1,7 +1,8 @@
-package com.gym.crm.application.service.common;
+package com.gym.crm.application.service;
 
 import com.gym.crm.application.exception.AuthenticationFailedException;
 import com.gym.crm.application.security.TokenBlacklistService;
+import com.gym.crm.application.service.common.LogoutService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
