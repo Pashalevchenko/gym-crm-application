@@ -23,6 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final GymUserDetailsService userDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -36,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authorizationHeader.substring(BEARER_PREFIX.length());
 
-        if (jwtService.isTokenValid(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (jwtService.isTokenValid(token) && SecurityContextHolder.getContext().getAuthentication() == null && !tokenBlacklistService.isBlacklisted(token)) {
             authenticateRequest(token, request);
         }
 

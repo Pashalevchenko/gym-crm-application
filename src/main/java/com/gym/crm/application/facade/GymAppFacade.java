@@ -1,6 +1,5 @@
 package com.gym.crm.application.facade;
 
-import com.gym.crm.application.context.SecurityContextHolder;
 import com.gym.crm.application.openapi.LoginResponse;
 import com.gym.crm.application.mapper.TraineeMapper;
 import com.gym.crm.application.mapper.TrainerMapper;
@@ -35,12 +34,14 @@ import com.gym.crm.application.openapi.TrainerUpdateRequest;
 import com.gym.crm.application.openapi.TrainerUpdateResponse;
 import com.gym.crm.application.openapi.TrainingCreateRequest;
 import com.gym.crm.application.openapi.TrainingTypeResponse;
+import com.gym.crm.application.security.TokenBlacklistService;
 import com.gym.crm.application.service.TrainingTypeService;
 import com.gym.crm.application.service.UserService;
 import com.gym.crm.application.service.common.AuthenticationService;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
+import com.gym.crm.application.service.common.LogoutService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -64,6 +65,7 @@ public class GymAppFacade {
     private final TrainerMapper trainerMapper;
     private final TrainingMapper trainingMapper;
     private final AuthenticationService authService;
+    private final LogoutService logoutService;
     private final TraineeRestMapper traineeRestMapper;
     private final TrainerRestMapper trainerRestMapper;
     private final TrainingRestMapper trainingRestMapper;
@@ -76,8 +78,8 @@ public class GymAppFacade {
                 .token(token);
     }
 
-    public void logout() {
-        SecurityContextHolder.clear();
+    public void logout(String authorizationHeader) {
+        logoutService.logout(authorizationHeader);
     }
 
     public TraineeCreateResponse createTrainee(TraineeCreateRequest request) {

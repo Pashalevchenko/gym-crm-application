@@ -35,12 +35,14 @@ import com.gym.crm.application.openapi.TrainerUpdateRequest;
 import com.gym.crm.application.openapi.TrainerUpdateResponse;
 import com.gym.crm.application.openapi.TrainingCreateRequest;
 import com.gym.crm.application.openapi.TrainingTypeResponse;
+import com.gym.crm.application.security.TokenBlacklistService;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
 import com.gym.crm.application.service.TrainingTypeService;
 import com.gym.crm.application.service.UserService;
 import com.gym.crm.application.service.common.AuthenticationService;
+import com.gym.crm.application.service.common.LogoutService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -104,6 +106,9 @@ class GymAppFacadeTest {
     private AuthenticationService authService;
 
     @Mock
+    private LogoutService logoutService;
+
+    @Mock
     private UserService userService;
 
     @InjectMocks
@@ -147,11 +152,12 @@ class GymAppFacadeTest {
 
     @Test
     void logoutShouldClearSecurityContext() {
-        SecurityContextHolder.setContext("test.user");
+        String token = "jwt-token";
+        String authorizationHeader = "Bearer " + token;
 
-        facade.logout();
+        facade.logout(authorizationHeader);
 
-        assertThat(SecurityContextHolder.getContext()).isNull();
+        verify(logoutService).logout(authorizationHeader);
     }
 
     @Test

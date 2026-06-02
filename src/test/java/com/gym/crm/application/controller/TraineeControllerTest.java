@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gym.crm.application.security.GymUserDetailsService;
 import com.gym.crm.application.security.JwtService;
+import com.gym.crm.application.security.TokenBlacklistService;
 import com.gym.crm.application.utils.JsonResourceReader;
 import com.gym.crm.application.facade.GymAppFacade;
 import com.gym.crm.application.openapi.ActivationStatusRequest;
@@ -62,6 +63,9 @@ class TraineeControllerTest {
 
     @MockitoBean
     private GymUserDetailsService gymUserDetailsService;
+
+    @MockitoBean
+    private TokenBlacklistService tokenBlacklistService;
 
     @Test
     void register_shouldReturnOk() throws Exception {

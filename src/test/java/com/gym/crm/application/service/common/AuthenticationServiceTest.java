@@ -1,10 +1,9 @@
-package com.gym.crm.application.service;
+package com.gym.crm.application.service.common;
 
 import com.gym.crm.application.entity.User;
 import com.gym.crm.application.exception.AuthenticationFailedException;
 import com.gym.crm.application.repository.UserRepository;
 import com.gym.crm.application.security.JwtService;
-import com.gym.crm.application.service.common.AuthenticationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
