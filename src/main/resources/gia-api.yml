@@ -303,7 +303,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         default:
           description: Unexpected error
-
   /trainers/{username}:
     get:
       tags:
@@ -572,7 +571,23 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         default:
           description: Unexpected error
-
+  /auth/logout:
+    post:
+      tags:
+        - User Profile
+      summary: Logout user
+      operationId: logout
+      responses:
+        '200':
+          description: User successfully logged out
+        '401':
+          description: User is not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        default:
+          description: Unexpected error
   /auth/password:
     put:
       tags:
