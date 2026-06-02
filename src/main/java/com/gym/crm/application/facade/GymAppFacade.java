@@ -1,6 +1,5 @@
 package com.gym.crm.application.facade;
 
-import com.gym.crm.application.aspect.annotation.Authenticated;
 import com.gym.crm.application.context.SecurityContextHolder;
 import com.gym.crm.application.openapi.LoginResponse;
 import com.gym.crm.application.mapper.TraineeMapper;
@@ -88,7 +87,6 @@ public class GymAppFacade {
         return traineeRestMapper.toCreateResponse(created);
     }
 
-    @Authenticated
     public TraineeResponseDTO getTraineeById(Long id) {
         return traineeMapper.entityToDto(traineeService.getTraineeById(id));
     }
@@ -100,14 +98,13 @@ public class GymAppFacade {
         return traineeRestMapper.toGetResponse(trainee);
     }
 
-    @Authenticated
     public List<TraineeResponseDTO> getAllTrainees() {
         return traineeService.getAllTrainees().stream()
                 .map(traineeMapper::entityToDto)
                 .toList();
     }
 
-    @Authenticated
+    @Transactional
     public TraineeUpdateResponse updateTrainee(TraineeUpdateRequest request, String username) {
         TraineeUpdateDTO dto = traineeRestMapper.toUpdateDto(username, request);
         Trainee trainee = traineeMapper.dtoToEntity(dto);
@@ -116,32 +113,26 @@ public class GymAppFacade {
         return traineeRestMapper.toUpdateResponse(updated);
     }
 
-    @Authenticated
     public void changeActiveStatus(String username, ActivationStatusRequest request) {
         traineeService.changeActiveStatus(username, request.getIsActive());
     }
 
-    @Authenticated
     public void deleteTraineeByUsername(String username) {
         traineeService.deleteTraineeByUsername(username);
     }
 
-    @Authenticated
     public List<GetTraineeTrainingResponse> getTraineeTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingTypeName) {
         List<Training> trainings = traineeService.getTraineeTrainings(username, fromDate, toDate, trainerName, trainingTypeName);
 
         return traineeRestMapper.toTrainingResponses(trainings);
     }
 
-    @Authenticated
     public List<AssignedTrainerResponse> getNotAssignedTrainers(String traineeUsername) {
         List<Trainer> trainers = traineeService.getNotAssignedTrainers(traineeUsername);
 
         return traineeRestMapper.toAssignedTrainerResponses(trainers);
     }
 
-    @Authenticated
-    @Transactional
     public TraineeAssignedTrainersUpdateResponse updateTraineeTrainersList(String traineeUsername, TraineeAssignedTrainersUpdateRequest request) {
         Set<Trainer> trainers = request.getTrainerUsernames().stream()
                 .map(trainerService::getTrainerByUsername)
@@ -164,14 +155,14 @@ public class GymAppFacade {
         return trainerRestMapper.toCreateResponse(created);
     }
 
-    @Authenticated
+    @Transactional
     public TrainerGetResponse getTrainerByUsername(String username) {
         Trainer trainer = trainerService.getTrainerByUsername(username);
 
         return trainerRestMapper.toGetResponse(trainer);
     }
 
-    @Authenticated
+    @Transactional
     public TrainerUpdateResponse updateTrainer(TrainerUpdateRequest request, String username) {
         TrainerUpdateDTO dto = trainerRestMapper.toUpdateDto(username, request);
         Trainer trainer = trainerMapper.dtoToEntity(dto);
@@ -180,19 +171,16 @@ public class GymAppFacade {
         return trainerRestMapper.toUpdateResponse(updated);
     }
 
-    @Authenticated
     public List<GetTrainerTrainingResponse> getTrainerTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
         List<Training> trainings = trainerService.getTrainerTrainings(username, fromDate, toDate, traineeName);
 
         return trainerRestMapper.toTrainingResponses(trainings);
     }
 
-    @Authenticated
     public void changeTrainerActiveStatus(String username, ActivationStatusRequest request) {
         trainerService.changeActiveStatus(username, request.getIsActive());
     }
 
-    @Authenticated
     public void createTraining(@Valid TrainingCreateRequest request) {
         Trainee trainee = traineeService.getTraineeByUsername(request.getTraineeUsername());
         Trainer trainer = trainerService.getTrainerByUsername(request.getTrainerUsername());
@@ -206,17 +194,14 @@ public class GymAppFacade {
         trainingService.createTraining(training);
     }
 
-    @Authenticated
     public TrainingResponseDTO getTrainingById(Long id) {
         return trainingMapper.entityToDto(trainingService.getTrainingById(id));
     }
 
-    @Authenticated
     public List<TrainingTypeResponse> getAllTrainingsType() {
         return trainingRestMapper.toTrainingTypeResponses(trainingTypeService.getAllTrainingsType());
     }
 
-    @Authenticated
     public void changePassword(LoginChangeRequest request){
         userService.changePassword(request);
     }
