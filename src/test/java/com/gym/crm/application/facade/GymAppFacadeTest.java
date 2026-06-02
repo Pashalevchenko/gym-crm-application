@@ -35,7 +35,6 @@ import com.gym.crm.application.openapi.TrainerUpdateRequest;
 import com.gym.crm.application.openapi.TrainerUpdateResponse;
 import com.gym.crm.application.openapi.TrainingCreateRequest;
 import com.gym.crm.application.openapi.TrainingTypeResponse;
-import com.gym.crm.application.security.TokenBlacklistService;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
