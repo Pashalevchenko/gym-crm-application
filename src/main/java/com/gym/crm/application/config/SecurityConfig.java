@@ -22,6 +22,11 @@ public class SecurityConfig {
     private static final String TRAINEE_REGISTER_ENDPOINT = "/api/v1/trainees/register";
     private static final String TRAINER_REGISTER_ENDPOINT = "/api/v1/trainers/register";
     private static final String LOGINUSER = "/api/v1/auth/login";
+    private static final String[] SWAGGER_ENDPOINTS = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-ui.html"
+    };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -31,6 +36,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 TRAINEE_REGISTER_ENDPOINT,
                                 TRAINER_REGISTER_ENDPOINT,

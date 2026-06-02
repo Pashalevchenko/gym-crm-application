@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -42,11 +41,11 @@ class AuthenticationServiceTest {
     private JwtService jwtService;
 
     @Test
-    @DisplayName("Should authenticate successfully when credentials are valid")
+    @DisplayName("Should return token when credentials are valid")
     void authenticate_success() {
         String rawPasswordInput = "rawPassword123";
         String encodedPasswordInDb = "hashedPassword789";
-
+        String token = "jwt-token";
         User user = User.builder()
                 .username(USERNAME)
                 .password(encodedPasswordInDb)
@@ -54,11 +53,14 @@ class AuthenticationServiceTest {
 
         when(repository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(rawPasswordInput, encodedPasswordInDb)).thenReturn(true);
+        when(jwtService.generateToken(USERNAME)).thenReturn(token);
 
-        assertDoesNotThrow(() -> authService.authenticate(USERNAME, rawPasswordInput));
+        String actual = authService.authenticate(USERNAME, rawPasswordInput);
 
+        assertEquals(token, actual);
         verify(repository).findByUsername(USERNAME);
         verify(passwordEncoder).matches(rawPasswordInput, encodedPasswordInDb);
+        verify(jwtService).generateToken(USERNAME);
     }
 
     @Test
