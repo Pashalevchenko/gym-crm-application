@@ -41,9 +41,7 @@ class TokenBlacklistServiceTest {
 
     @Test
     void blacklist_shouldMarkTokenAsBlacklisted_WhenTokenIsActive() {
-        Date futureExpiration = new Date(System.currentTimeMillis() + 600000);
-
-        when(jwtService.extractExpiration(TOKEN)).thenReturn(futureExpiration);
+        when(jwtService.extractExpiration(TOKEN)).thenReturn(new Date(System.currentTimeMillis() + 600000));
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         service.blacklist(TOKEN);
