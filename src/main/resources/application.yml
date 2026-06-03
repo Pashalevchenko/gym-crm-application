@@ -7,10 +7,14 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
   liquibase:
     change-log: classpath:db/changelog-master.xml
     enabled: true
+  data:
+    redis:
+      host: baseball-line-foot-48024.db.redis.io
+      port: 12943
+      password: ${REDIS_PASSWORD:}
 
 app:
   api:

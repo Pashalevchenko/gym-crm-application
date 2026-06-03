@@ -134,14 +134,13 @@ class JwtAuthenticationFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN);
 
-        when(jwtService.isTokenValid(TOKEN)).thenReturn(true);
         when(tokenBlacklistService.isBlacklisted(TOKEN)).thenReturn(true);
 
         filter.doFilter(request, response, filterChain);
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-        verify(jwtService).isTokenValid(TOKEN);
         verify(tokenBlacklistService).isBlacklisted(TOKEN);
+        verify(jwtService, never()).isTokenValid(any());
         verify(jwtService, never()).extractUsername(any());
         verify(userDetailsService, never()).loadUserByUsername(any());
         verify(filterChain).doFilter(request, response);

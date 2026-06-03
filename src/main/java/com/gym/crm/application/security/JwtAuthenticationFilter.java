@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authorizationHeader.substring(BEARER_PREFIX.length());
 
-        if (jwtService.isTokenValid(token) && SecurityContextHolder.getContext().getAuthentication() == null && !tokenBlacklistService.isBlacklisted(token)) {
+        if (shouldAuthenticate(token)) {
             authenticateRequest(token, request);
         }
 
@@ -51,6 +51,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken authentication = buildAuthentication(userDetails, request);
 
         org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    private boolean shouldAuthenticate(String token) {
+        boolean isNotAuthenticatedYet = SecurityContextHolder.getContext().getAuthentication() == null;
+
+        return isNotAuthenticatedYet && !tokenBlacklistService.isBlacklisted(token) && jwtService.isTokenValid(token);
     }
 
     private UsernamePasswordAuthenticationToken buildAuthentication(UserDetails userDetails, HttpServletRequest request) {
