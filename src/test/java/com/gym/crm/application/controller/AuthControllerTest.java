@@ -6,10 +6,12 @@ import com.gym.crm.application.openapi.LoginChangeRequest;
 import com.gym.crm.application.openapi.LoginRequest;
 import com.gym.crm.application.security.GymUserDetailsService;
 import com.gym.crm.application.security.JwtService;
+import com.gym.crm.application.security.TokenBlacklistService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,6 +45,9 @@ class AuthControllerTest {
     @MockitoBean
     private GymUserDetailsService gymUserDetailsService;
 
+    @MockitoBean
+    private TokenBlacklistService tokenBlacklistService;
+
     @Test
     void login_shouldReturnOk() throws Exception {
         LoginRequest request = new LoginRequest()
@@ -54,6 +59,17 @@ class AuthControllerTest {
                         .content(mapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
         verify(facade).login(USERNAME, PASSWORD);
+    }
+
+    @Test
+    void logout_shouldReturnOk() throws Exception {
+        String authorizationHeader = "Bearer jwt-token";
+
+        mockMvc.perform(post(BASE_URL + "/logout")
+                        .header(HttpHeaders.AUTHORIZATION, authorizationHeader))
+                .andExpect(status().isOk());
+
+        verify(facade).logout(authorizationHeader);
     }
 
     @Test

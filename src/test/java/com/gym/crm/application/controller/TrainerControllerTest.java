@@ -13,6 +13,7 @@ import com.gym.crm.application.openapi.TrainerUpdateRequest;
 import com.gym.crm.application.openapi.TrainerUpdateResponse;
 import com.gym.crm.application.security.GymUserDetailsService;
 import com.gym.crm.application.security.JwtService;
+import com.gym.crm.application.security.TokenBlacklistService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -56,6 +57,9 @@ class TrainerControllerTest {
 
     @MockitoBean
     private GymUserDetailsService gymUserDetailsService;
+
+    @MockitoBean
+    private TokenBlacklistService tokenBlacklistService;
 
     @Test
     void register_shouldReturnOk() throws Exception {

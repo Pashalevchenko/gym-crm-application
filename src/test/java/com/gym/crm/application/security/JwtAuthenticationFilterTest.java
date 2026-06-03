@@ -36,6 +36,9 @@ class JwtAuthenticationFilterTest {
     private GymUserDetailsService userDetailsService;
 
     @Mock
+    private TokenBlacklistService tokenBlacklistService;
+
+    @Mock
     private FilterChain filterChain;
 
     @AfterEach
@@ -46,7 +49,7 @@ class JwtAuthenticationFilterTest {
     @Test
     @DisplayName("Should set authentication when bearer token is valid")
     void doFilter_validBearerToken_shouldSetAuthentication() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService, tokenBlacklistService);
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
@@ -59,6 +62,7 @@ class JwtAuthenticationFilterTest {
         when(jwtService.isTokenValid(TOKEN)).thenReturn(true);
         when(jwtService.extractUsername(TOKEN)).thenReturn(USERNAME);
         when(userDetailsService.loadUserByUsername(USERNAME)).thenReturn(userDetails);
+        when(tokenBlacklistService.isBlacklisted(TOKEN)).thenReturn(false);
 
         filter.doFilter(request, response, filterChain);
 
@@ -75,7 +79,7 @@ class JwtAuthenticationFilterTest {
     @Test
     @DisplayName("Should continue filter chain when authorization header is missing")
     void doFilter_missingAuthorizationHeader_shouldContinueFilterChain() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService, tokenBlacklistService);
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -90,7 +94,7 @@ class JwtAuthenticationFilterTest {
     @Test
     @DisplayName("Should continue filter chain when authorization header is not bearer")
     void doFilter_notBearerAuthorizationHeader_shouldContinueFilterChain() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService, tokenBlacklistService);
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.addHeader(HttpHeaders.AUTHORIZATION, "Basic abc123");
@@ -106,7 +110,7 @@ class JwtAuthenticationFilterTest {
     @Test
     @DisplayName("Should not set authentication when token is invalid")
     void doFilter_invalidToken_shouldNotSetAuthentication() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService, tokenBlacklistService);
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN);
@@ -117,6 +121,26 @@ class JwtAuthenticationFilterTest {
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         verify(jwtService).isTokenValid(TOKEN);
+        verify(jwtService, never()).extractUsername(any());
+        verify(userDetailsService, never()).loadUserByUsername(any());
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    @DisplayName("Should not set authentication when token is blacklisted")
+    void doFilter_blacklistedToken_shouldNotSetAuthentication() throws Exception {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService, tokenBlacklistService);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN);
+
+        when(tokenBlacklistService.isBlacklisted(TOKEN)).thenReturn(true);
+
+        filter.doFilter(request, response, filterChain);
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        verify(tokenBlacklistService).isBlacklisted(TOKEN);
+        verify(jwtService, never()).isTokenValid(any());
         verify(jwtService, never()).extractUsername(any());
         verify(userDetailsService, never()).loadUserByUsername(any());
         verify(filterChain).doFilter(request, response);

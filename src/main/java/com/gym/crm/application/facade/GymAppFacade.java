@@ -1,13 +1,5 @@
 package com.gym.crm.application.facade;
 
-import com.gym.crm.application.context.SecurityContextHolder;
-import com.gym.crm.application.openapi.LoginResponse;
-import com.gym.crm.application.mapper.TraineeMapper;
-import com.gym.crm.application.mapper.TrainerMapper;
-import com.gym.crm.application.mapper.TrainingMapper;
-import com.gym.crm.application.mapper.rest.TraineeRestMapper;
-import com.gym.crm.application.mapper.rest.TrainerRestMapper;
-import com.gym.crm.application.mapper.rest.TrainingRestMapper;
 import com.gym.crm.application.dto.request.TraineeUpdateDTO;
 import com.gym.crm.application.dto.request.TrainerUpdateDTO;
 import com.gym.crm.application.dto.response.TraineeResponseDTO;
@@ -16,11 +8,18 @@ import com.gym.crm.application.entity.Trainee;
 import com.gym.crm.application.entity.Trainer;
 import com.gym.crm.application.entity.Training;
 import com.gym.crm.application.entity.TrainingType;
+import com.gym.crm.application.mapper.TraineeMapper;
+import com.gym.crm.application.mapper.TrainerMapper;
+import com.gym.crm.application.mapper.TrainingMapper;
+import com.gym.crm.application.mapper.rest.TraineeRestMapper;
+import com.gym.crm.application.mapper.rest.TrainerRestMapper;
+import com.gym.crm.application.mapper.rest.TrainingRestMapper;
 import com.gym.crm.application.openapi.ActivationStatusRequest;
 import com.gym.crm.application.openapi.AssignedTrainerResponse;
 import com.gym.crm.application.openapi.GetTraineeTrainingResponse;
 import com.gym.crm.application.openapi.GetTrainerTrainingResponse;
 import com.gym.crm.application.openapi.LoginChangeRequest;
+import com.gym.crm.application.openapi.LoginResponse;
 import com.gym.crm.application.openapi.TraineeAssignedTrainersUpdateRequest;
 import com.gym.crm.application.openapi.TraineeAssignedTrainersUpdateResponse;
 import com.gym.crm.application.openapi.TraineeCreateRequest;
@@ -35,12 +34,13 @@ import com.gym.crm.application.openapi.TrainerUpdateRequest;
 import com.gym.crm.application.openapi.TrainerUpdateResponse;
 import com.gym.crm.application.openapi.TrainingCreateRequest;
 import com.gym.crm.application.openapi.TrainingTypeResponse;
-import com.gym.crm.application.service.TrainingTypeService;
-import com.gym.crm.application.service.UserService;
-import com.gym.crm.application.service.common.AuthenticationService;
 import com.gym.crm.application.service.TraineeService;
 import com.gym.crm.application.service.TrainerService;
 import com.gym.crm.application.service.TrainingService;
+import com.gym.crm.application.service.TrainingTypeService;
+import com.gym.crm.application.service.UserService;
+import com.gym.crm.application.service.common.AuthenticationService;
+import com.gym.crm.application.service.common.LogoutService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -64,6 +64,7 @@ public class GymAppFacade {
     private final TrainerMapper trainerMapper;
     private final TrainingMapper trainingMapper;
     private final AuthenticationService authService;
+    private final LogoutService logoutService;
     private final TraineeRestMapper traineeRestMapper;
     private final TrainerRestMapper trainerRestMapper;
     private final TrainingRestMapper trainingRestMapper;
@@ -76,8 +77,8 @@ public class GymAppFacade {
                 .token(token);
     }
 
-    public void logout() {
-        SecurityContextHolder.clear();
+    public void logout(String authorizationHeader) {
+        logoutService.logout(authorizationHeader);
     }
 
     public TraineeCreateResponse createTrainee(TraineeCreateRequest request) {
