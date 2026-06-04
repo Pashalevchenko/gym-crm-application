@@ -104,7 +104,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationFailedException exception) {
         log.warn("Authentication fail: {}", exception.getMessage(), exception);
 
-        return buildResponse(AUTHENTICATION_ERROR, AUTHENTICATION_ERROR.getMessage());
+        return buildResponse(AUTHENTICATION_ERROR, exception.getMessage());
     }
 
     private String buildMessage(ApiErrorCode apiErrorCode, String exceptionMessage) {
