@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -145,5 +146,33 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response.getBody());
         assertEquals(2760, response.getBody().getErrorCode());
         assertEquals("Validation error: firstName must not be empty, lastName must not be empty", response.getBody().getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("Should handle user blocked exception")
+    void handleUserBlocked_shouldReturnUserBlockedError() {
+        UserBlockedException exception = new UserBlockedException("User is temporarily blocked");
+
+        ResponseEntity<ErrorResponse> response = handler.handleUserBlockedException(exception);
+
+        assertEquals(423, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(2807, response.getBody().getErrorCode());
+        assertEquals("User is temporarily blocked", response.getBody().getErrorMessage());
+    }
+
+    @Test
+    @DisplayName("Should handle handler method validation exception as validation error")
+    void handleHandlerMethodValidation_shouldReturnValidationError() {
+        HandlerMethodValidationException exception = mock(HandlerMethodValidationException.class);
+
+        when(exception.getMessage()).thenReturn("Validation failed for argument");
+
+        ResponseEntity<ErrorResponse> response = handler.handleHandlerMethodValidation(exception);
+
+        assertEquals(400, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(2760, response.getBody().getErrorCode());
+        assertEquals("Validation error: Validation failed for argument", response.getBody().getErrorMessage());
     }
 }

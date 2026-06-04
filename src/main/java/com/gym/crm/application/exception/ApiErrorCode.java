@@ -11,7 +11,8 @@ public enum ApiErrorCode {
     AUTHORIZATION_ERROR(2806, HttpStatus.UNAUTHORIZED, "User is not authorized for request operation"),
     NOT_FOUND_ERROR(2835, HttpStatus.NOT_FOUND, "Requested data was not found"),
     SERVICE_ERROR(3200, HttpStatus.INTERNAL_SERVER_ERROR, "Internal processing error"),
-    DATABASE_ERROR(3358, HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected database access failure");
+    DATABASE_ERROR(3358, HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected database access failure"),
+    USER_BLOCKED_ERROR(2807,HttpStatus.LOCKED, "User is temporarily blocked");
 
     private final int code;
     private final HttpStatus status;

@@ -19,6 +19,7 @@ import static com.gym.crm.application.exception.ApiErrorCode.AUTHORIZATION_ERROR
 import static com.gym.crm.application.exception.ApiErrorCode.DATABASE_ERROR;
 import static com.gym.crm.application.exception.ApiErrorCode.NOT_FOUND_ERROR;
 import static com.gym.crm.application.exception.ApiErrorCode.SERVICE_ERROR;
+import static com.gym.crm.application.exception.ApiErrorCode.USER_BLOCKED_ERROR;
 import static com.gym.crm.application.exception.ApiErrorCode.VALIDATION_ERROR;
 
 @Slf4j
@@ -105,6 +106,13 @@ public class GlobalExceptionHandler {
         log.warn("Authentication fail: {}", exception.getMessage(), exception);
 
         return buildResponse(AUTHENTICATION_ERROR, AUTHENTICATION_ERROR.getMessage());
+    }
+
+    @ExceptionHandler(UserBlockedException.class)
+    public ResponseEntity<ErrorResponse> handleUserBlockedException(UserBlockedException exception) {
+        log.warn("User blocked: {}", exception.getMessage(), exception);
+
+        return buildResponse(USER_BLOCKED_ERROR, exception.getMessage());
     }
 
     private String buildMessage(ApiErrorCode apiErrorCode, String exceptionMessage) {
