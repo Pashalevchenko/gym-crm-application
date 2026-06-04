@@ -21,7 +21,7 @@ public class LoginAttemptService {
     private final StringRedisTemplate redisTemplate;
 
     public void checkBlocked(String username) {
-        if (redisTemplate.hasKey(BLOCKED_PREFIX + username)) {
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(BLOCKED_PREFIX + username))) {
             throw new UserBlockedException(USER_BLOCKED_MESSAGE);
         }
     }
