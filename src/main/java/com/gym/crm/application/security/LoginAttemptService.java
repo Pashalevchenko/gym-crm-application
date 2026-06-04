@@ -1,6 +1,6 @@
 package com.gym.crm.application.security;
 
-import com.gym.crm.application.exception.AuthenticationFailedException;
+import com.gym.crm.application.exception.UserBlockedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class LoginAttemptService {
 
     public void checkBlocked(String username) {
         if (redisTemplate.hasKey(BLOCKED_PREFIX + username)) {
-            throw new AuthenticationFailedException(USER_BLOCKED_MESSAGE);
+            throw new UserBlockedException(USER_BLOCKED_MESSAGE);
         }
     }
 

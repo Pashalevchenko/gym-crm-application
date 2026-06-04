@@ -1,6 +1,6 @@
 package com.gym.crm.application.security;
 
-import com.gym.crm.application.exception.AuthenticationFailedException;
+import com.gym.crm.application.exception.UserBlockedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +52,7 @@ class LoginAttemptServiceTest {
         when(redisTemplate.hasKey(BLOCKED_KEY)).thenReturn(true);
 
         assertThatThrownBy(() -> service.checkBlocked(USERNAME))
-                .isInstanceOf(AuthenticationFailedException.class)
+                .isInstanceOf(UserBlockedException.class)
                 .hasMessage("User is temporarily blocked");
         verify(redisTemplate).hasKey(BLOCKED_KEY);
     }
