@@ -808,7 +808,6 @@ components:
       required:
         - username
         - password
-        - token
       properties:
         username:
           type: string
