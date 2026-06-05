@@ -808,6 +808,7 @@ components:
       required:
         - username
         - password
+        - token
       properties:
         username:
           type: string
@@ -817,6 +818,10 @@ components:
           type: string
           description: Generated secure password
           example: secure-password
+        token:
+          type: string
+          description: JWT token
+          example: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LnVzZXIiLCJpYXQiOjE3ODAzMDkzNzMsImV4cCI6MTc4MDMxMjk3M30.iTjiJhivhnIy-nLUGvC7-J-iP4sV1Me9JaZjgp-zak8
     TraineeGetResponse:
       allOf:
         - $ref: '#/components/schemas/Trainee'
@@ -1031,6 +1036,10 @@ components:
           type: string
           description: Generated secure password
           example: secure-password
+        token:
+          type: string
+          description: JWT token
+          example: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LnVzZXIiLCJpYXQiOjE3ODAzMDkzNzMsImV4cCI6MTc4MDMxMjk3M30.iTjiJhivhnIy-nLUGvC7-J-iP4sV1Me9JaZjgp-zak8
     TrainerGetResponse:
       allOf:
         - $ref: '#/components/schemas/Trainer'
