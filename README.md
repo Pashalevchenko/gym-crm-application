@@ -41,9 +41,6 @@ DB_USERNAME=gym
 DB_PASSWORD=gym
 DB_URL=jdbc:postgresql://localhost:5432/gym_db
 
-REDIS_HOST=your-redis-host
-REDIS_PASSWORD=your-redis-password
-
 JWT_SECRET=your-256-bit-secret-key-your-256-bit-secret-key
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
 ```
