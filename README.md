@@ -12,6 +12,7 @@ Before running the application, make sure the following tools are installed:
 Java 21
 Maven
 PostgreSQL
+Redis
 ```
 
 ## 2. Clone the project
@@ -31,7 +32,23 @@ CREATE USER gym WITH PASSWORD 'gym';
 GRANT ALL PRIVILEGES ON DATABASE gym_db TO gym;
 ```
 
-## 4. Environment Variables
+
+
+## 4. Redis Setup
+
+Redis is used for JWT token blacklist and brute-force login protection.
+
+The application requires Redis to be available before startup. Redis can be run locally or provided by a cloud Redis service.
+
+Required Redis environment variables:
+
+```text
+REDIS_HOST=your-redis-host
+REDIS_PASSWORD=your-redis-password
+```
+For Redis Cloud, use the host and password from your Redis Cloud database configuration and provide them as environment variables before starting the application.
+
+## 5. Environment Variables
 
 Create a `.env` file in the root directory of the project with the following configuration:
 
@@ -39,15 +56,22 @@ Create a `.env` file in the root directory of the project with the following con
 DB_USERNAME=gym
 DB_PASSWORD=gym
 DB_URL=jdbc:postgresql://localhost:5432/gym_db
-```
 
-## 5. Build the project
+REDIS_HOST=your-redis-host
+REDIS_PASSWORD=your-redis-password
+
+JWT_SECRET=your-256-bit-secret-key-your-256-bit-secret-key
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+```
+`CORS_ALLOWED_ORIGINS` defines frontend origins that are allowed to access the API from a browser.
+
+## 6. Build the project
 
 ```bash
 mvn clean compile
 ```
 
-## 6. Run tests
+## 7. Run tests
 
 Docker must be running before executing tests.
 
@@ -55,7 +79,7 @@ Docker must be running before executing tests.
 mvn test
 ```
 
-## 7. Run the application from console
+## 8. Run the application from console
 
 ```bash
 mvn spring-boot:run
