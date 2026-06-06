@@ -32,24 +32,7 @@ CREATE USER gym WITH PASSWORD 'gym';
 GRANT ALL PRIVILEGES ON DATABASE gym_db TO gym;
 ```
 
-
-
-## 4. Redis Setup
-
-Redis is used for JWT token blacklist and brute-force login protection.
-
-The application requires Redis to be available before startup. Redis can be run locally or provided by a cloud Redis service.
-
-Required Redis environment variables:
-
-```text
-REDIS_HOST=your-redis-host
-REDIS_PASSWORD=your-redis-password
-```
-For Redis Cloud, use the host and password from your Redis Cloud database configuration and provide them as environment variables before starting the application.
-Do not commit real Redis credentials to the repository.
-
-## 5. Environment Variables
+## 4. Environment Variables
 
 Create a `.env` file in the root directory of the project with the following configuration:
 
@@ -66,13 +49,13 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
 ```
 `CORS_ALLOWED_ORIGINS` defines frontend origins that are allowed to access the API from a browser.
 
-## 6. Build the project
+## 5. Build the project
 
 ```bash
 mvn clean compile
 ```
 
-## 7. Run tests
+## 6. Run tests
 
 Docker must be running before executing tests.
 
@@ -80,7 +63,7 @@ Docker must be running before executing tests.
 mvn test
 ```
 
-## 8. Run the application from console
+## 7. Run the application from console
 
 ```bash
 mvn spring-boot:run
@@ -99,7 +82,7 @@ http://localhost:8080/gym-crm-application
 ```
 
 
-## 9.  Actuator endpoints
+## 8.  Actuator endpoints
 
 The application exposes Spring Boot Actuator endpoints for health checks and Prometheus metrics.
 
