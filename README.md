@@ -47,6 +47,7 @@ REDIS_HOST=your-redis-host
 REDIS_PASSWORD=your-redis-password
 ```
 For Redis Cloud, use the host and password from your Redis Cloud database configuration and provide them as environment variables before starting the application.
+Do not commit real Redis credentials to the repository.
 
 ## 5. Environment Variables
 
@@ -96,9 +97,9 @@ After startup, the application will be available at:
 ```text
 http://localhost:8080/gym-crm-application
 ```
-```
 
-4. ## Actuator endpoints
+
+## 9.  Actuator endpoints
 
 The application exposes Spring Boot Actuator endpoints for health checks and Prometheus metrics.
 
