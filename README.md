@@ -12,6 +12,7 @@ Before running the application, make sure the following tools are installed:
 Java 21
 Maven
 PostgreSQL
+Redis
 ```
 
 ## 2. Clone the project
@@ -31,23 +32,13 @@ CREATE USER gym WITH PASSWORD 'gym';
 GRANT ALL PRIVILEGES ON DATABASE gym_db TO gym;
 ```
 
-## 4. Environment Variables
-
-Create a `.env` file in the root directory of the project with the following configuration:
-
-```text
-DB_USERNAME=gym
-DB_PASSWORD=gym
-DB_URL=jdbc:postgresql://localhost:5432/gym_db
-```
-
-## 5. Build the project
+## 4. Build the project
 
 ```bash
 mvn clean compile
 ```
 
-## 6. Run tests
+## 5. Run tests
 
 Docker must be running before executing tests.
 
@@ -55,7 +46,7 @@ Docker must be running before executing tests.
 mvn test
 ```
 
-## 7. Run the application from console
+## 6. Run the application from console
 
 ```bash
 mvn spring-boot:run
@@ -72,9 +63,9 @@ After startup, the application will be available at:
 ```text
 http://localhost:8080/gym-crm-application
 ```
-```
 
-4. ## Actuator endpoints
+
+## 7.  Actuator endpoints
 
 The application exposes Spring Boot Actuator endpoints for health checks and Prometheus metrics.
 

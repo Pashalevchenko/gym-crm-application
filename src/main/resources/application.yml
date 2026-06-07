@@ -13,8 +13,7 @@ spring:
   data:
     redis:
       host: ${REDIS_HOST}
-      port: 12943
-      password: ${REDIS_PASSWORD:}
+      port: 6379
 
 app:
   api:
