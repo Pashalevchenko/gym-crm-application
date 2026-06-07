@@ -11,6 +11,14 @@ spring:
   jpa:
     show-sql: true
 
+app:
+  cors:
+    allowed-origins: http://localhost:3000
+
+jwt:
+  secret: local-dev-secret-key-local-dev-secret-key
+  expiration-ms: 3600000
+
 logging:
   level:
     root: INFO

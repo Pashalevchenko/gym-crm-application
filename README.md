@@ -32,34 +32,13 @@ CREATE USER gym WITH PASSWORD 'gym';
 GRANT ALL PRIVILEGES ON DATABASE gym_db TO gym;
 ```
 
-## 4. Environment Variables
-
-For local development, Redis environment variables are not required.
-The local Spring profile uses local Redis configuration:
-
-```text
-Redis host: localhost
-Redis port: 6379
-```
-Create a `.env` file in the root directory of the project with the following configuration:
-
-```text
-DB_USERNAME=gym
-DB_PASSWORD=gym
-DB_URL=jdbc:postgresql://localhost:5432/gym_db
-
-JWT_SECRET=your-256-bit-secret-key-your-256-bit-secret-key
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
-```
-`CORS_ALLOWED_ORIGINS` defines frontend origins that are allowed to access the API from a browser.
-
-## 5. Build the project
+## 4. Build the project
 
 ```bash
 mvn clean compile
 ```
 
-## 6. Run tests
+## 5. Run tests
 
 Docker must be running before executing tests.
 
@@ -67,7 +46,7 @@ Docker must be running before executing tests.
 mvn test
 ```
 
-## 7. Run the application from console
+## 6. Run the application from console
 
 ```bash
 mvn spring-boot:run
@@ -86,7 +65,7 @@ http://localhost:8080/gym-crm-application
 ```
 
 
-## 8.  Actuator endpoints
+## 7.  Actuator endpoints
 
 The application exposes Spring Boot Actuator endpoints for health checks and Prometheus metrics.
 
