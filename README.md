@@ -34,6 +34,13 @@ GRANT ALL PRIVILEGES ON DATABASE gym_db TO gym;
 
 ## 4. Environment Variables
 
+For local development, Redis environment variables are not required.
+The local Spring profile uses local Redis configuration:
+
+```text
+Redis host: localhost
+Redis port: 6379
+```
 Create a `.env` file in the root directory of the project with the following configuration:
 
 ```text
