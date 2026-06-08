@@ -60,7 +60,6 @@ public class SecurityConfig {
                                 TRAINER_REGISTER_ENDPOINT,
                                 LOGINUSER).permitAll()
                         .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
