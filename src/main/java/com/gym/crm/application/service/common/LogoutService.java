@@ -25,6 +25,12 @@ public class LogoutService {
             throw new AuthenticationFailedException(INVALID_AUTHORIZATION_HEADER_MESSAGE);
         }
 
-        return authorizationHeader.substring(BEARER_PREFIX.length());
+        String token = authorizationHeader.substring(BEARER_PREFIX.length()).trim();
+
+        if (token.isEmpty()) {
+            throw new AuthenticationFailedException(INVALID_AUTHORIZATION_HEADER_MESSAGE);
+        }
+
+        return token;
     }
 }
