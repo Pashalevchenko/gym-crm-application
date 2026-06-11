@@ -73,7 +73,8 @@ class TraineeControllerTest {
         String expectedResponse = JsonResourceReader.readResource("/json/trainee-create-response.json");
         TraineeCreateResponse response = new TraineeCreateResponse()
                 .username(USERNAME)
-                .password("password");
+                .password("password")
+                .token("jwt-token");
 
         when(facade.createTrainee(any(TraineeCreateRequest.class))).thenReturn(response);
 
